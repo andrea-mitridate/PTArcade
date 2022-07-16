@@ -1,4 +1,4 @@
-# Search for Non Black Holes Binary signal in NANOGrav data 
+# Search for Non Black Holes Binary signals in NANOGrav data 
 
 The code provides a simple interface to the ENTERPRISE analysis suite, and allows for an easy implementation of new-physics searches in NANOGrav data. 
 
