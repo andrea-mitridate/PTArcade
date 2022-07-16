@@ -1,5 +1,15 @@
-chains
-pta_data
-debugging.ipynb
 __pycache__
 .DS_store
+
+# chains 
+chains
+
+# jupyter notebooks 
+debugging.ipynb
+
+# batch sripts folder
+batch_scripts
+
+# ignore the pta files but keep the folder 
+inputs/pta/pta_data/*
+!inputs/pta/pta_data/.gitkeep 

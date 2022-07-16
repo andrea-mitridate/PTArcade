@@ -53,7 +53,7 @@ print('--- Initializing PTA ... ---\n')
 
 pta = {}
 
-if inputs["numerics"].mod_sel:
+if inputs["model"].mod_sel:
     pta[0] = signals.builder(model=inputs["model"], psrs=psrs, noise_params=noise_params,
                 N_f_red=inputs["numerics"].N_f_red, N_f_gwb=inputs["numerics"].N_f_gwb)
 
@@ -74,7 +74,7 @@ out_dir = f'{inputs["numerics"].out_dir}/{inputs["model"].name}/chain_' + input_
 
 super_model = hypermodel.HyperModel(pta)
 
-sampler = super_model.setup_sampler(resume=False, outdir=out_dir, sample_nmodel=inputs["numerics"].mod_sel,
+sampler = super_model.setup_sampler(resume=False, outdir=out_dir, sample_nmodel=inputs["model"].mod_sel,
     empirical_distr=pta_importer.pta_dat_dir + inputs["pta_params"].emp_dist)
 
 x0 = super_model.initial_sample()

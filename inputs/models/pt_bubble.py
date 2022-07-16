@@ -1,6 +1,5 @@
 import enterprise.signals.parameter as parameter
 import src.models_aux as aux
-from src.models_aux import omega2cross
 
 name = 'pt_bubble' # name of the model
 
@@ -27,7 +26,7 @@ def S(x, a, b, c):
     return (a + b)**c / (b * x**(-a/c) + a * x**(b/c))**c
 
 
-@omega2cross
+@aux.omega2cross
 def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
     """
     | Returns the GW energy density as a fraction of the 
