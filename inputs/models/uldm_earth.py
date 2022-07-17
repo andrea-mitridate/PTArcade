@@ -2,7 +2,7 @@ from enterprise.signals.parameter import function
 import enterprise.signals.parameter as parameter
 import scipy.constants as scon
 import numpy as np
-import src.models_aux as aux
+import src.models_utils as aux
 
 name = 'uldm_earth' # name of the model
 

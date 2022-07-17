@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import enterprise.signals.parameter as parameter
-import src.models_aux as aux
+import src.models_utils as aux
 
 name = 'string_meta_l' # name of the model 
 

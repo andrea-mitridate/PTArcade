@@ -1,5 +1,5 @@
 import enterprise.signals.parameter as parameter
-import src.models_aux as aux
+import src.models_utils as aux
 
 name = 'pt_bubble' # name of the model
 

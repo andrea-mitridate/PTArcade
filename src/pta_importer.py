@@ -4,7 +4,7 @@ import glob, json
 from enterprise.pulsar import Pulsar
 
 cwd = os.getcwd()
-pta_dat_dir = cwd + 'inputs/pta/pta_data/'
+pta_dat_dir = cwd + '/inputs/pta/pta_data/'
 
 def get_pulsars(pta_data, ephemeris, filter=None):
 

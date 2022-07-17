@@ -5,7 +5,7 @@ __pycache__
 chains
 
 # jupyter notebooks 
-debugging.ipynb
+*.ipynb
 
 # batch sripts folder
 batch_scripts

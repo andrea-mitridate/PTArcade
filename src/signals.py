@@ -87,7 +87,7 @@ def builder(model, psrs, noise_params, N_f_red, N_f_gwb, base_mod=True):
             orf = utils.hd_orf()
             np_gwb = gp_signals.FourierBasisCommonGP(spectrum=cpl_np, orf=orf, components=N_f_gwb, name=model.name, Tspan=Tspan)
         else:
-            np_gwb = gp_signals.FourierBasisGP(spectrum=cpl, components=N_f_gwb, Tspan=Tspan, name=model.name)
+            np_gwb = gp_signals.FourierBasisGP(spectrum=cpl_np, components=N_f_gwb, Tspan=Tspan, name=model.name)
 
         s += np_gwb
 
