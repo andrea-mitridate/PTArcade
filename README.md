@@ -9,7 +9,7 @@ The user can specify a new physics signal (either deterministic or stochastic), 
 1) Install `(mini)conda`, an environment management system for python, from [here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html])
 2)  
 
-    > conda create --name <env> --file requirements.txt
+    > conda env create -f environment.yml
     > conda activate <env>
 
 # Input 

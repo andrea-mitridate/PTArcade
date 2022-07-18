@@ -1,7 +1,0 @@
-# This file may be used to create an environment using:
-# $ conda create --name <env> --file <this file>
-
-enterprise==0.4.2
-enterprise_extensions==2.4.0
-numpy==1.22.0
-scipy==1.7.3
