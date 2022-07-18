@@ -1,6 +1,10 @@
 __pycache__
 .DS_store
 
+outputs/*
+
+test.sh
+
 # chains 
 chains
 

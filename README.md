@@ -65,7 +65,7 @@ All the files specified in the PTA info file need to be stored in `inputs/pta/pt
 
 # How to use
 
-> python sampler.py -m (model info file) -n (numeri info file) -p (PTA info file) - c (chain number)
+    > python sampler.py -m (model info file) -n (numeri info file) -p (PTA info file) - c (chain number)
 
 
 # Output
