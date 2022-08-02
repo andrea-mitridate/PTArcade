@@ -90,23 +90,30 @@ def omega2cross(omega_hh):
     return cross
 
 
-def prep_data(data):
+def prep_data(path):
     """
     Shapes tabulated data in a form that can be handled by interpn.
     """
 
-    n_col = len(data.T)
+    par_names = np.loadtxt(path, max_rows=1, dtype='str')
+    data = np.loadtxt(path, skiprows=1)
 
-    grids = [[]] * n_col
-    grid_size = []
-    for idx, row in enumerate(data.T):
-        grids[idx] = np.unique(row)
-        grid_size.append(len(np.unique(row)))
+    spec_col = np.where(par_names=='spectrum')
+    omega_grid = data.T[spec_col][0]
 
+    data = np.delete(data, spec_col, axis=1)
+    par_names = np.delete(par_names, spec_col)
+
+    grids = [np.unique(row) for row in data.T]
     
-    grids[-1] = np.reshape(data.T[-1], tuple(grid_size[:-1]))
+    for idx, par in enumerate(par_names):
+        omega_grid = omega_grid[data[:, -idx -1].argsort(kind="mergesort")]
+        data = data[data[:, -idx -1].argsort(kind="mergesort")]
 
-    return grids
+    grid_size = [len(x) for x in grids]
+    omega_grid = omega_grid.reshape(tuple(grid_size))
+
+    return grids, omega_grid, par_names 
 
 
 def spec_importer(path):
@@ -114,46 +121,20 @@ def spec_importer(path):
     Interpolate the GWB power spectrum from tabulated data. 
     """
 
-    f = open(path)
-    par_names = f.readline().strip().split('\t')
-    f.close()
-
-    data = np.loadtxt(path, skiprows=1)
-    data = prep_data(data)
+    grids, omega_grid, par_names = prep_data(path)
 
     def spectrum(f, **kwargs):
-        points = np.reshape(f, (len(f),-1))
 
-        for name in par_names:
-            if name != 'f' and name != 'spectrum':
-                x = [[kwargs[name]]] * len(f)
-                points = np.hstack((points, x))
+        points = np.zeros((len(f), len(kwargs) + 1))
 
-        return interpolate.interpn((data[:-1]), data[-1], points)
+        for idx, par in enumerate(par_names):
+            if par == 'f':
+                points.T[idx] = f
 
-    return spectrum
+            else:
+                points.T[idx] = kwargs[par] * np.ones(len(f))
 
-def spec_importer_2(path):
-    """
-    Interpolate the GWB power spectrum from tabulated data. 
-    """
-
-    f = open(path)
-    par_names = f.readline().strip().split('\t')
-    f.close()
-
-    data = np.loadtxt(path, skiprows=1)
-    data = prep_data(data)
-
-    def spectrum(f, **kwargs):
-        points = np.reshape(f, (len(f),-1))
-
-        for name in par_names:
-            if name != 'f' and name != 'spectrum':
-                x = [[kwargs[name]]] * len(f)
-                points = np.hstack((points, x))
-
-        return interpolate.interpn((data[:-1]), data[-1], points)
+        return interpolate.interpn((grids), omega_grid, points)
 
     return spectrum
 

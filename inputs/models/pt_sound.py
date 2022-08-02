@@ -1,5 +1,6 @@
 import enterprise.signals.parameter as parameter
 import src.models_utils as aux
+import numpy as np
 
 name = 'pt_bubble' # name of the model
 
@@ -11,10 +12,10 @@ corr = False # set to True if you want to include spatial correlations in the an
 parameters = {
     'log10_alpha':parameter.Uniform(-2,1)('log10_alpha'),
     'log10_T':parameter.Uniform(-4,4)('log10_T'), 
-    'log10_H_R':parameter.Uniform(-3,0.5)('log10_H_R'), 
-    'a':parameter.Uniform(0,5)('a'),
-    'b':parameter.Uniform(0,5)('b'),
-    'c':parameter.Uniform(0,5)('c')
+    'log10_H_R':parameter.Uniform(-3,0.5)('log10_H_R'),
+    'a':parameter.Constant(3)('a'),
+    'b':parameter.Constant(4)('b'),
+    'c':parameter.Constant(7/2)('c')
     }
 
 group = []
@@ -25,7 +26,6 @@ def S(x, a, b, c):
     """
     return (a + b)**c / (b * x**(-a/c) + a * x**(b/c))**c
 
-
 @aux.omega2cross
 def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
     """
@@ -35,7 +35,7 @@ def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
     |   - f/Hz
     |   - log10(alpha)
     |   - log10(T_star/Gev)
-    |   - log10(H*R)
+    |   - log10(H * R)
     |   - spectral shape parameters a,b,c
     """
     
@@ -44,15 +44,18 @@ def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
     H_R = 10**log10_H_R
     
     ### mechanism dependent ###
-    delta = 0.48 / 11.3
-    f_peak = 0.35 / (1+ 0.69 +0.069)
+    delta = 0.513
+    f_peak = 0.35 / (1+ 0.69 +0.07)
     p = 2
-    q = 2
-    kappa = 1
-    ######
+    q = 1
+    kappa = alpha / (0.73 + 0.083 * alpha**(1/2) + alpha)
+    ###
 
-    dilution = 7.75 * 10**-5 * aux.g_rho(T_star)/ aux.g_s(T_star)**(4/3)
-    f_0 = 7.66 * 10**-8 * f_peak * T_star * aux.g_s(T_star)**(1/6) / H_R
+    ups = 1 - (1 + 4 * (8 * np.pi)**1/3 * H_R * (1 + alpha)**1/2 / (3 * kappa * alpha)**1/2)**-(1/2)
 
-    return dilution * S(f/f_0, a, b, c) * delta * H_R**q * (kappa * alpha)**p / (1 + alpha)**p
+    dilution = 7.69 * 10**-5 * aux.g_rho(T_star)/ aux.g_s(T_star)**(4/3)
+    f_0 = 1.13 * 10**-7 * f_peak * T_star * aux.g_s(T_star)**(1/6) / H_R
+
+    return dilution * ups * S(f/f_0, a, b, c) * delta * H_R**q * (kappa * alpha)**p / (1 + alpha)**p
+
 
