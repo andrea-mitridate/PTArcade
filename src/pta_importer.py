@@ -4,19 +4,21 @@ import glob, json
 from enterprise.pulsar import Pulsar
 
 cwd = os.getcwd()
-pta_dat_dir = cwd + '/inputs/pta/pta_data/'
+pta_dat_dir = os.path.join(cwd, 'inputs/pta/pta_data/')
 
 def get_pulsars(pta_data, ephemeris, filter=None):
 
-    if os.path.isfile(pta_dat_dir + pta_data):
-        with open(pta_dat_dir + pta_data, 'rb') as handle:
+    pta_data = os.path.join(pta_dat_dir, pta_data)
+
+    if os.path.isfile(pta_data):
+        with open(pta_data, 'rb') as handle:
             psrs = pickle.load(handle)
-        
+
         return psrs
 
-    elif os.path.isdir(pta_dat_dir + pta_dat_dir):
-        parfiles = sorted(glob.glob(pta_dat_dir + pta_dat_dir + '/par/*.par'))
-        timfiles = sorted(glob.glob(pta_dat_dir + pta_dat_dir + '/tim/*.tim'))
+    elif os.path.isdir(pta_data):
+        parfiles = sorted(glob.glob(os.path.join(pta_data, '*.par')))
+        timfiles = sorted(glob.glob(os.path.join(pta_data, '*.tim')))
 
         # filter
         if filter is not None:
@@ -33,7 +35,6 @@ def get_pulsars(pta_data, ephemeris, filter=None):
             psr = Pulsar(p, t, ephem=ephemeris)
             psrs.append(psr)
     
-
         return psrs
 
 

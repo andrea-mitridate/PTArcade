@@ -29,8 +29,8 @@ Additional pulsar data can be used by the code (as previously, if used they need
 These input files allow the user to specify the new-physics signal, the PTA data to use in the analysis, and the numerical parameters of the run. These files are just python files, so any modifications to these can call other python modules/libraries, or create arrays of values algorithmically.
 
 
-### Model info: `inputs/models/(model_info_file_name)`
-Specifies the new-physics signal, and they need to be stored in `/inputs/models`. For deterministic signals, they must include a `signal(toas, ...)` function, which specifies the signal shape as a function of the time of arrivals, `toas`, and any other model parameter. For stochastic signals, the model file must include a `spectrum(f,...)` function that specifies the cross-power spectral density of the gravitational background. 
+### Model info: `inputs/models/(model_info_file_name).py`
+Specifies the new-physics signal, and it needs to be stored in `/inputs/models`. For deterministic signals, they must include a `signal(toas, ...)` function, which specifies the signal shape as a function of the time of arrivals, `toas`, and any other model parameter. For stochastic signals, the model file must include a `spectrum(f,...)` function that specifies the cross-power spectral density of the gravitational background. 
 
 In addition to this, for both deterministic and stochastic signals, the model file needs to include the prior of the model parameters. 
 
@@ -43,7 +43,7 @@ In the model file it is also possible to specify:
 - Groups of parameters that should be sampled together by adding their name to the list `group`
 
 
-### Numerics info: `inputs/numerics/(numerics_info_file_name)`
+### Numerics info: `inputs/numerics/(numerics_info_file_name).py`
 
 The numerics info file specifies the parameters of the Monte Carlo run:
 
@@ -53,19 +53,19 @@ The numerics info file specifies the parameters of the Monte Carlo run:
 - `N_f_gwb` number of frequency components for all the stochastic common processes 
 
 
-### PTA info: `inputs/pta/(pta_info_file_name)`
+### PTA info: `inputs/pta/(pta_info_file_name).py`
 
-Specifies which pta data in the `inputs/pta/pta_data` folder to use for the analysis. 
+Specifies which pta data in the `inputs/pta/pta_data` folder need to be used for the analysis. 
 
-- `psr_data` name of the folder or pickle file containing the `.tim` and `.par` files
-- `noise_data` name of the folder of `.json` file containing the white noise parameters (optional)
-- `emp_dist` name of the empirical distribution file (optional)
+- `psr_data` name of the pickle file containing the pulsar objects, or name of the folder containing the `.tim` and `.par` files
+- `noise_data` name of the folder or `.json` file containing the white noise parameters (optional, if the user does not want to use pre-derived white noise parameter this parameter can be set to an empty string. In this case the code will assume flat priors for the white noise parameters and sample them in the mcmc run.)
+- `emp_dist` name of the empirical distribution file (required if the pulsar objects are specified with `.tim` and `.par` files)
 
 All the files specified in the PTA info file need to be stored in `inputs/pta/pta_data`.
 
 # How to use
 
-    > python sampler.py -m (model info file) -n (numeri info file) -p (PTA info file) - c (chain number)
+    > python sampler.py -m (model info file).py -n (numeri info file).py -p (PTA info file).py - c (chain number)
 
 
 # Output

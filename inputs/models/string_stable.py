@@ -20,5 +20,5 @@ cwd = os.getcwd()
 log_spectrum = aux.spec_importer(cwd +'/inputs/models/models_data/stable.dat')
 
 @aux.omega2cross
-def spectrum(f, log10_mu, log10_k):
-    return 10**log_spectrum(np.log10(f), log10_mu=log10_mu, log10_k=log10_k)
+def spectrum(f, log10_mu):
+    return 10**log_spectrum(np.log10(f), log10_mu=log10_mu)

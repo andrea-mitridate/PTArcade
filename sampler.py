@@ -23,8 +23,8 @@ if not cmd_input_okay:
     print('ERROR:')
     print("\t- Models info file\n"+
     "\t- Numerics info file\n"+
-    "\t- PTA input file\n\n"+
-    "must be present. These are added with the -m, -n, -c input flags. Add -h (--help) flags for more help.")
+    "\t- PTA info file\n\n"+
+    "must be present. These are added with the -m, -n, -p input flags. Add -h (--help) flags for more help.")
 
     sys.exit()
 
@@ -70,17 +70,20 @@ print('--- Done initializing PTA. ---\n\n')
 # define sampler and sample
 ###############################################################################
 
-out_dir = f'{inputs["numerics"].out_dir}/{inputs["model"].name}/chain_' + input_options['c']
+out_dir = os.path.join(inputs["numerics"].out_dir, inputs["model"].name, f'chain_{input_options["c"]}')
+
+if inputs["pta_params"].emp_dist:
+    emp_dist = os.path.join(pta_importer.pta_dat_dir, inputs["pta_params"].emp_dist)
+else:
+    emp_dist = False
 
 super_model = hypermodel.HyperModel(pta)
-
 sampler = super_model.setup_sampler(resume=False, outdir=out_dir, sample_nmodel=inputs["model"].mod_sel,
-    empirical_distr=pta_importer.pta_dat_dir + inputs["pta_params"].emp_dist)
+    empirical_distr=emp_dist)
 
 x0 = super_model.initial_sample()
 
 if inputs["model"].group:
-    # load the list of parameters name
     pars = np.loadtxt(out_dir + '/pars.txt', dtype=np.unicode_)
 
     idx_params = [list(pars).index(pp) for pp in pars if pp in inputs["model"].group]
@@ -88,7 +91,7 @@ if inputs["model"].group:
     groups = sampler.groups
 
     sampler = super_model.setup_sampler(resume=False, outdir=out_dir, sample_nmodel=inputs["model"].mod_sel, 
-    groups=groups, empirical_distr=pta_importer.pta_dat_dir + inputs["pta_params"].emp_dist)
+    groups=groups, empirical_distr=emp_dist)
 
 print('--- Starting to sample... ---\n')
 
