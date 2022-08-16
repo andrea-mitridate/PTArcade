@@ -11,3 +11,4 @@ dependencies:
     - acor==1.1.1
     - docopt==0.6.2
     - enterprise-extensions==2.4.0
+    - NatPy==0.1.1

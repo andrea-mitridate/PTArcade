@@ -4,15 +4,24 @@ import enterprise.signals.parameter as parameter
 from scipy import interpolate
 import scipy.stats as ss
 import numpy as np
+import natpy as nat 
 
 cwd = os.getcwd()
 
 # -----------------------------------------------------------
 # Physical constants and useful cosmological functions
+# all the constants are expressed in GeV
+# unless differently stated, the values are taken from the PDG
 # -----------------------------------------------------------
+nat.set_active_units("HEP")
 
-# Hubble rate today / h (100 km/s/Mpc)
-h0 = 3.24078E-18 # Hz
+G = 6.67430 * 10**-11 * nat.convert(nat.m**3 * nat.kg**-1 * nat.s**-2, nat.GeV**-2) # Newton constant (GeV**-2)
+M_pl = (8 * np.pi *G)**(-1/2) # reduced plank mass (GeV)
+T_0 = 2.7255 * nat.convert(nat.K, nat.GeV) # present day temperature of the Universe (GeV)
+z_eq = 3402 # redshift of  matter-radiation equality 
+T_eq = T_0 * (1 + z_eq) # temperature of matter-radiation equality (GeV)
+h = 0.674 # scaling factor for Hubble expansion rate 
+H_0 = h * 100 * nat.convert(nat.km * nat.s**-1 * nat.Mpc**-1, nat.GeV) # Hubble constant (GeV)
 
 # tabulated values for the number of relativistic degrees of 
 # freedom from reference 1803.01038
@@ -80,7 +89,7 @@ def omega2cross(omega_hh):
         h2_omega = omega_hh(f, **kwargs)
 
         # characteristic strain spectrum h_c(f)
-        hcf = np.sqrt(3 * h2_omega / 2) * h0 / (np.pi * f)
+        hcf = H_0 / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f) * nat.convert(nat.GeV, nat.Hz)
 
         # cross-power spectral density S(f) (s^3)s
         sf = (hcf**2 / (12 * np.pi**2 * f**3)) * np.repeat(df, components)
