@@ -1,3 +1,4 @@
+import sys
 from enterprise.signals import utils
 from enterprise.signals import signal_base
 from enterprise.signals import white_signals
@@ -10,24 +11,63 @@ import numpy as np
 
 def builder(model, psrs, noise_params, N_f_red, N_f_gwb, base_mod=True):
 
+    tmin = [p.toas.min() for p in psrs]
+    tmax = [p.toas.max() for p in psrs]
+    Tspan = np.max(tmax) - np.min(tmin)
+
     # timing model
     tm = gp_signals.TimingModel(use_svd=True)
 
     s = tm
 
+    # disperion measure 
+    dm = [hasattr(psr, 'dmx') for psr in psrs]
+    if any(dm):
+        pass
+    elif not any(dm):
+        dm_log10_A = parameter.Uniform(-20, -11)
+        dm_gamma = parameter.Uniform(0, 7)
+        dm_pl = utils.powerlaw(log10_A=dm_log10_A, gamma=dm_gamma)
+        dm_basis = utils.createfourierdesignmatrix_dm(nmodes=30, Tspan=Tspan)
+
+        dmgp = gp_signals.BasisGP(dm_pl, dm_basis, name='dm_gp')
+
+        s += dmgp
+    else:
+        sys.exit('The convention for the DM variations is not consistent across the PTA data.')
+
+
     # white noise parameters
+    t2 = False
+    tm = False
+
+    for x in noise_params:
+        if 't2equad' in x:
+            t2 = True
+        elif 'equad' in x:
+            tm = True
+
+    if t2 and tm:
+        sys.exit('The convention for equad is not consistent across the PTA data.')
+
     if noise_params:
         # define selection by observing backend
-        selection = selections.Selection(selections.by_backend)
+        bkend = selections.Selection(selections.by_backend)
+        bkend_ng = selections.Selection(selections.nanograv_backends)
 
         efac = parameter.Constant() 
         equad = parameter.Constant() 
         ecorr = parameter.Constant()
 
-        ms = white_signals.MeasurementNoise(efac=efac, log10_t2equad=equad, selection=selection)
-        ec = white_signals.EcorrKernelNoise(log10_ecorr=ecorr, selection=selection)
+        ec = white_signals.EcorrKernelNoise(log10_ecorr=ecorr, selection=bkend_ng)
 
-        s += ms + ec
+        if t2:
+            ms = white_signals.MeasurementNoise(efac=efac, log10_t2equad=equad, selection=bkend)
+            s += ms
+        elif tm:
+            ef = white_signals.MeasurementNoise(efac=efac, selection=bkend)
+            eq = white_signals.TNEquadNoise(log10_tnequad=equad, selection=bkend)
+            s += ef + eq
 
     else:
         efac = parameter.Uniform(0.01, 10.0)
@@ -39,10 +79,6 @@ def builder(model, psrs, noise_params, N_f_red, N_f_gwb, base_mod=True):
 
 
     # red noise parameters
-    tmin = [p.toas.min() for p in psrs]
-    tmax = [p.toas.max() for p in psrs]
-    Tspan = np.max(tmax) - np.min(tmin)
-
     log10_A_red = parameter.Uniform(-20, -11)
     gamma_red = parameter.Uniform(0, 7)
 
@@ -91,11 +127,15 @@ def builder(model, psrs, noise_params, N_f_red, N_f_gwb, base_mod=True):
 
         s += np_gwb
 
+    s_ng = s + ec
 
     # intialize PTA
     mods = []
     for psr in psrs:    
-        mods.append(s(psr)) 
+        if 'NANOGrav' in psr.flags['pta']:
+            mods.append(s_ng(psr))
+        else:
+            mods.append(s(psr)) 
     
     pta = signal_base.PTA(mods)
 

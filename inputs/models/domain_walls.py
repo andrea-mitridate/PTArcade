@@ -35,7 +35,6 @@ def spectrum(f, log10_alpha, log10_T_star, a, b, c):
     |   - f/Hz
     |   - log10(alpha)
     |   - log10(T_star/Gev)
-    |   - log10(H*R)
     |   - spectral shape parameters a,b,c
     """
     
