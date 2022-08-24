@@ -36,7 +36,8 @@ inputs = input_handler.load_inputs(input_options)
 print('--- Loading Pulsars and noise data ... ---\n')
         
 # import pulsars in ENTERPRISE
-psrs = pta_importer.get_pulsars(inputs["pta_params"].psr_data, ephemeris=inputs["pta_params"].ephem)
+psrs = pta_importer.get_pulsars(
+    inputs["pta_params"].psr_data, ephemeris=inputs["pta_params"].ephem)
 
 # import noise parameters
 if inputs["pta_params"].noise_data:
@@ -53,16 +54,31 @@ print('--- Initializing PTA ... ---\n')
 
 pta = {}
 
-if inputs["model"].mod_sel:
-    pta[0] = signals.builder(model=inputs["model"], psrs=psrs, noise_params=noise_params,
-                N_f_red=inputs["numerics"].N_f_red, N_f_gwb=inputs["numerics"].N_f_gwb)
+pta[0] = signals.builder(
+    psrs=psrs, 
+    model=inputs['model'], 
+    noisedict=noise_params,
+    gamma_bhb=inputs['numerics'].gamma_bhb,
+    A_bhb_logmin=inputs['numerics'].A_bhb_logmin,
+    A_bhb_logmax=inputs['numerics'].A_bhb_logmax,
+    corr=inputs['numerics'].corr,
+    red_components=inputs["numerics"].red_components, 
+    gwb_components=inputs["numerics"].gwb_components)
 
-    pta[1] = signals.builder(model=inputs["model"], psrs=psrs, noise_params=noise_params,
-            N_f_red=inputs["numerics"].N_f_red, N_f_gwb=inputs["numerics"].N_f_gwb, base_mod=False)
+if inputs["numerics"].mod_sel:
+    pta[1] = pta[0]
 
-else:
-    pta[0] = signals.builder(model=inputs["model"], psrs=psrs, noise_params=noise_params,
-            N_f_red=inputs["numerics"].N_f_red, N_f_gwb=inputs["numerics"].N_f_gwb, base_mod=False)
+    pta[0] = signals.builder(
+        psrs=psrs, 
+        model=None, 
+        noisedict=noise_params,
+        gamma_bhb=inputs['numerics'].gamma_bhb,
+        A_bhb_logmin=inputs['numerics'].A_bhb_logmin,
+        A_bhb_logmax=inputs['numerics'].A_bhb_logmax,
+        corr=inputs['numerics'].corr,
+        red_components=inputs["numerics"].red_components, 
+        gwb_components=inputs["numerics"].gwb_components)
+
 
 print('--- Done initializing PTA. ---\n\n')
 
@@ -70,7 +86,8 @@ print('--- Done initializing PTA. ---\n\n')
 # define sampler and sample
 ###############################################################################
 
-out_dir = os.path.join(inputs["numerics"].out_dir, inputs["model"].name, f'chain_{input_options["c"]}')
+out_dir = os.path.join(
+    inputs["numerics"].out_dir, inputs["model"].name, f'chain_{input_options["c"]}')
 
 if inputs["pta_params"].emp_dist:
     emp_dist = os.path.join(pta_importer.pta_dat_dir, inputs["pta_params"].emp_dist)
@@ -78,7 +95,10 @@ else:
     emp_dist = False
 
 super_model = hypermodel.HyperModel(pta)
-sampler = super_model.setup_sampler(resume=False, outdir=out_dir, sample_nmodel=inputs["model"].mod_sel,
+sampler = super_model.setup_sampler(
+    resume=False,
+    outdir=out_dir,
+    sample_nmodel=inputs["numerics"].mod_sel,
     empirical_distr=emp_dist)
 
 x0 = super_model.initial_sample()
@@ -87,14 +107,19 @@ if inputs["model"].group:
     pars = np.loadtxt(out_dir + '/pars.txt', dtype=np.unicode_)
 
     idx_params = [list(pars).index(pp) for pp in pars if pp in inputs["model"].group]
-    [sampler.groups.append(idx_params) for _ in range(5)] # chosen 5 here so that this group is visited alot
+    #[sampler.groups.append(idx_params) for _ in range(5)]
     groups = sampler.groups
 
-    sampler = super_model.setup_sampler(resume=False, outdir=out_dir, sample_nmodel=inputs["model"].mod_sel, 
-    groups=groups, empirical_distr=emp_dist)
+    sampler = super_model.setup_sampler(
+        resume=False,
+        outdir=out_dir,
+        sample_nmodel=inputs["numerics"].mod_sel, 
+        groups=groups, 
+        empirical_distr=emp_dist)
 
 print('--- Starting to sample... ---\n')
 
-sampler.sample(x0, inputs["numerics"].N_samples, SCAMweight=30, AMweight=15, DEweight=50)
+sampler.sample(
+    x0, inputs["numerics"].N_samples, SCAMweight=30, AMweight=15, DEweight=50)
 
 print('--- Done sampling. ---\n\n')

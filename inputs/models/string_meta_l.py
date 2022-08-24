@@ -5,10 +5,7 @@ import src.models_utils as aux
 
 name = 'string_meta_l' # name of the model 
 
-mod_sel = True # set to True if you want to compare the model to the SMBHB signal
-
 smbhb = True # set to True if you want to overlay the new-physics signal to the SMBHB signal
-corr = False # set to True if you want to include spatial correlations in the analysis 
 
 parameters = {
     'log10_mu' : parameter.Uniform(-14, -3)('log10_mu'),

@@ -4,10 +4,7 @@ import numpy as np
 
 name = 'domain_walls' # name of the model
 
-mod_sel = True # set to True if you want to compare the model to the SMBHB signal
-
 smbhb = True # set to True if you want to overlay the new-physics signal to the SMBHB signal
-corr = False # set to True if you want to include spatial correlations in the analysis 
 
 parameters = {
     'log10_alpha':parameter.Uniform(-2,1)('log10_alpha'),

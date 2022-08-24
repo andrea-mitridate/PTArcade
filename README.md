@@ -37,7 +37,6 @@ In addition to this, for both deterministic and stochastic signals, the model fi
 In the model file it is also possible to specify:
 
 - The name of the model through the variable `name`
-- Whether or not the model should be compared with the SMBHB signal, by setting the variable `mod_sel` to `True` or `False`
 - Whether or not the SMBHB signal should be added to the new physics signal by setting the variable `smbhb` to `True` or `False`
 - Whether or not spatial correlation should be used in the analysis by setting the variable `corr` to `True` or `False`
 - Groups of parameters that should be sampled together by adding their name to the list `group`
@@ -45,12 +44,16 @@ In the model file it is also possible to specify:
 
 ### Numerics info: `inputs/numerics/(numerics_info_file_name).py`
 
-The numerics info file specifies the parameters of the Monte Carlo run:
+The numerics info allow to specify enterprise parameters for the run:
 
+- `mod_sel` boolean variable that specifies whether or not the model should be compared with the SMBHB signal
 - `out_dir` name of the directory where to save the output files
 - `N_samples` number of Monte Carlo trials 
-- `N_f_red` number of frequency components for the pulsar intrinsic red noise 
-- `N_f_gwb` number of frequency components for all the stochastic common processes 
+- `red_components` number of frequency components for the pulsar intrinsic red noise 
+- `gwb_components` number of frequency components for all the stochastic common processes 
+- `A_bhb_logmin` lower limit for the prior of the bhb signal amplitude. If set to None -18 is used
+- `A_bhb_logmin` upper limit for the prior of the bhb signal amplitude. If set to None -14 is used
+- `gamma_bhb` spectral index for the bhb singal. If set to None it's varied between [0, 7].
 
 
 ### PTA info: `inputs/pta/(pta_info_file_name).py`

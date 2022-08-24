@@ -1,5 +1,18 @@
+mod_sel = True # set to True if you want to compare the new-physics signal to the SMBHB signal
+
+# mcmc parameteres
 out_dir = './chains/'
 N_samples = int(5e6) # number of sample points for the mcmc
+scam_weight = 30
+am_weight = 15
+de_weight = 50
 
-N_f_red = 30 # number of frequency components for the intrinsic red noise
-N_f_gwb = 13 # number of frequency components for common process
+# intrinsic red noises parameters
+red_components = 30 # number of frequency components for the intrinsic red noise
+
+# bhbh signal parameters
+corr = False # set to True if you want to include HD spatial correlations in the analysis 
+gwb_components = 13 # number of frequency components for common process
+A_bhb_logmin = None # lower limit for the prior of the bhb signal amplitude. If set to None -18 is used
+A_bhb_logmax = None # upper limit for the prior of the bhb signal amplitude. If set to None -14 is used
+gamma_bhb = 4.33 # spectral index for the bhb singal. If set to None it's varied between [0, 7].
