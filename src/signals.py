@@ -154,11 +154,12 @@ def builder(
     # add white-noise, and act on psr objects 
     models = []
  
-    if noisedict:
+    if noisedict is None:
+        white_vary = True
+        tnequad = False
+    else:
         white_vary = False
         tnequad = tnequad_conv(noisedict)
-    else:
-        white_vary = True    
 
     for p in psrs:
         if 'NANOGrav' in p.flags['pta']:
@@ -190,7 +191,7 @@ def builder(
 
 
     # set white noise parameters
-    if noisedict:
+    if noisedict is not None:
         pta.set_default_params(noisedict)
 
     return pta
