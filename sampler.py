@@ -96,7 +96,7 @@ if inputs["model"].group:
     pars = np.loadtxt(out_dir + '/pars.txt', dtype=np.unicode_)
 
     idx_params = [list(pars).index(pp) for pp in pars if pp in inputs["model"].group]
-    #[sampler.groups.append(idx_params) for _ in range(5)]
+    [sampler.groups.append(idx_params) for _ in range(5)]
     groups = sampler.groups
 
     sampler = super_model.setup_sampler(
