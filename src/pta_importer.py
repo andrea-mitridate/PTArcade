@@ -92,14 +92,17 @@ def pta_data_importer(pta_data):
     if pta_data == 'NG15':
         psrs = get_pulsars(ng15_dic['psrs_data'])
         params = get_wn(ng15_dic['noise_data'])
-        emp_dist = os.path.join(pta_dat_dir, ng15_dic['emp_dist'])
+        emp_dist = ng15_dic['emp_dist']
     elif pta_data == 'NG12':
         psrs = get_pulsars(ng12_dic['psrs_data'])
         params = get_wn(ng12_dic['noise_data'])
-        emp_dist = os.path.join(pta_dat_dir, ng12_dic['emp_dist'])
+        emp_dist = ng12_dic['emp_dist']
     else:
         psrs = get_pulsars(pta_data['psrs_data'])
         params = get_wn(pta_data['noise_data'])
-        emp_dist = os.path.join(pta_dat_dir, pta_data['emp_dist'])
+        emp_dist = pta_data['emp_dist']
+
+    if emp_dist is not None:
+        emp_dist = os.path.join(pta_dat_dir, ng15_dic['emp_dist'])
 
     return psrs, params, emp_dist
