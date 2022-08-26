@@ -14,6 +14,5 @@ chains
 # batch sripts folder
 batch_scripts
 
-# ignore the pta files but keep the folder 
-inputs/pta/pta_data/*
-!inputs/pta/pta_data/.gitkeep 
+# ignore the unzipped pta files but keep the folder 
+inputs/pta_data/*

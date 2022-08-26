@@ -5,7 +5,7 @@ import src.models_utils as aux
 
 name = 'string_stable' # name of the model 
 
-smbhb = True # set to True if you want to overlay the new-physics signal to the SMBHB signal
+smbhb = False # set to True if you want to overlay the new-physics signal to the SMBHB signal
 
 parameters = {
     'log10_mu' : parameter.Uniform(-14, -3)('log10_mu'),

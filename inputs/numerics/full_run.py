@@ -1,8 +1,16 @@
+pta_data = 'NG15' # PTA dataset to use in the analysis, available options are NG15, NG12, IPTA2
+
+# alterntively the pta_data can be specified creating a dictionary pta_data with the following structure
+#pta_data = {
+#'psrs_data': 'ng15_psrs_v1p1.pkl',
+#'noise_data': None, # set to None if you do not want to use prederive noise parameters
+#'emp_dist': None} # set to None if you do not want to use empirical distributions
+
 mod_sel = True # set to True if you want to compare the new-physics signal to the SMBHB signal
 
 # mcmc parameteres
 out_dir = './chains/'
-N_samples = int(5e6) # number of sample points for the mcmc
+N_samples = int(5e5) # number of sample points for the mcmc
 scam_weight = 30
 am_weight = 15
 de_weight = 50

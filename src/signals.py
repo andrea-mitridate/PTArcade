@@ -139,8 +139,8 @@ def builder(
                     spectrum=cpl_np, 
                     orf=orf, 
                     components=gwb_components, 
-                    name=model.name, 
-                    Tspan=Tspan)
+                    Tspan=Tspan,
+                    name=model.name)
             else:
                 np_gwb = gp_signals.FourierBasisGP(
                     spectrum=cpl_np, 
@@ -195,3 +195,4 @@ def builder(
         pta.set_default_params(noisedict)
 
     return pta
+    

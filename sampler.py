@@ -34,16 +34,10 @@ inputs = input_handler.load_inputs(input_options)
 # load pulsars and noise parameters
 ###############################################################################
 print('--- Loading Pulsars and noise data ... ---\n')
-        
-# import pulsars in ENTERPRISE
-psrs = pta_importer.get_pulsars(
-    inputs["pta_params"].psr_data, ephemeris=inputs["pta_params"].ephem)
 
-# import noise parameters
-if inputs["pta_params"].noise_data:
-    noise_params = pta_importer.get_wn(inputs["pta_params"].noise_data)
-else:
-    noise_params = False
+
+# import pta data
+psrs, noise_params, emp_dist = pta_importer.pta_data_importer(inputs['numerics'].pta_data)
 
 print('--- Done loading Pulsars and noise data. ---\n\n')
 
@@ -89,11 +83,6 @@ print('--- Done initializing PTA. ---\n\n')
 out_dir = os.path.join(
     inputs["numerics"].out_dir, inputs["model"].name, f'chain_{input_options["c"]}')
 
-if inputs["pta_params"].emp_dist:
-    emp_dist = os.path.join(pta_importer.pta_dat_dir, inputs["pta_params"].emp_dist)
-else:
-    emp_dist = False
-
 super_model = hypermodel.HyperModel(pta)
 sampler = super_model.setup_sampler(
     resume=False,
@@ -120,6 +109,10 @@ if inputs["model"].group:
 print('--- Starting to sample... ---\n')
 
 sampler.sample(
-    x0, inputs["numerics"].N_samples, SCAMweight=30, AMweight=15, DEweight=50)
+    x0, 
+    inputs["numerics"].N_samples,
+    SCAMweight=inputs['numerics'].scam_weight,
+    AMweight=inputs['numerics'].am_weight,
+    DEweight=inputs['numerics'].de_weight)
 
 print('--- Done sampling. ---\n\n')
