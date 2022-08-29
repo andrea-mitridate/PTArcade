@@ -1,5 +1,6 @@
 import enterprise.signals.parameter as parameter
 import src.models_utils as aux
+from scipy.special import gamma
 import natpy as nat
 import numpy as np
 
@@ -24,6 +25,7 @@ def S(x, a, b, c):
     | Spectral shape as a functino of x=f/f_peak
     """
     return (a + b)**c / (b * x**(-a/c) + a * x**(b/c))**c
+    
 
 
 @aux.omega2cross
@@ -55,6 +57,15 @@ def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
     g_s_star = aux.g_s(T_star) # number of entropic relativistic dof at time of emission
     g_star = aux.g_rho(T_star) # number of relativistic dof at time of emission
 
+    # normalization factor
+    n = (a+b)/c
+    norm = (
+            (b/a)**(a/n)
+            * (n * c / b)**c
+            * gamma(a/n) * gamma(b/n)
+            / (n * gamma(c))
+    )
+
     # dilution factor 
     dil = (
             np.pi**2 / 90
@@ -72,7 +83,8 @@ def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
             )
 
     return (
-            aux.h**2 * dil
+            norm
+            * aux.h**2 * dil
             * delta
             * (H_beta)**q
             * (kappa * alpha / (1 + alpha)) ** p
