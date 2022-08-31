@@ -13,7 +13,7 @@ ng15_dic = {
 
 ng12_dic = {
     'psrs_data': 'ng12_psrs_v4.pkl',
-    'noise_data': 'ng12_psrs_v4.json',
+    'noise_data': 'ng12_wn_v4.json',
     'emp_dist': None}
 
 

@@ -11,7 +11,7 @@ parameters = {
     'log10_mu' : parameter.Uniform(-14, -3)('log10_mu'),
     }
 
-group = []   
+group = ['log10_mu']
 
 cwd = os.getcwd()
 log_spectrum = aux.spec_importer(cwd +'/inputs/models/models_data/stable.dat')

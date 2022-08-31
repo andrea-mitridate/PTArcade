@@ -23,8 +23,7 @@ if not cmd_input_okay:
     print('ERROR:')
     print("\t- Models info file\n"+
     "\t- Numerics info file\n"+
-    "\t- PTA info file\n\n"+
-    "must be present. These are added with the -m, -n, -p input flags. Add -h (--help) flags for more help.")
+    "must be present. These are added with the -m, -n input flags. Add -h (--help) flags for more help.")
 
     sys.exit()
 

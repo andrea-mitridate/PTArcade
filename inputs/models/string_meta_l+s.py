@@ -12,7 +12,7 @@ parameters = {
     'log10_k' : parameter.Uniform(7.0, 9.5)('log10_k')
     }
 
-group = []   
+group = ['log10_mu', 'log10_k']
 
 cwd = os.getcwd()
 log_spectrum = aux.spec_importer(cwd +'/inputs/models/models_data/meta_l+s.dat')
