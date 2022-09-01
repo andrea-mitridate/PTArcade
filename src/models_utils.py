@@ -5,6 +5,7 @@ import enterprise.signals.parameter as parameter
 from scipy import interpolate
 import scipy.stats as ss
 import numpy as np
+import numpy.typing as npt
 import natpy as nat 
 
 cwd = os.getcwd()
@@ -203,7 +204,7 @@ def freq_at_temp(T: float) -> float:
 
     return prefactor * sqr_term
 
-def temp_at_freq(f: float) -> float:
+def temp_at_freq(f: npt.NDArray) -> npt.NDArray:
     "Get the temperature [GeV] of the universe when a gravitational wave of a certain frequency entered the Hubble horizon."
 
-    return np.interp(f, gs[:,-1], gs[:,0])[0]
+    return np.interp(f, gs[:,-1], gs[:,0])

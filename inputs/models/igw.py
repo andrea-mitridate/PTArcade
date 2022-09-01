@@ -3,6 +3,7 @@ import src.models_utils as aux
 import numpy as np
 import scipy.constants as scon
 import natpy as nat
+import numpy.typing as npt
 
 name = 'igw' # name of the model
 
@@ -32,7 +33,7 @@ def power_spec(f: float, n_t: float, r: float) -> float:
 
 
 @aux.omega2cross
-def spectrum(f: float, n_t: float, log10_r: float, log10_T_rh: float) -> float:
+def spectrum(f: npt.NDArray, n_t: float, log10_r: float, log10_T_rh: float) -> npt.NDArray:
     """Calculate GW energy density.
 
     Returns the GW energy density as a fraction of the closure density as a
@@ -50,16 +51,24 @@ def spectrum(f: float, n_t: float, log10_r: float, log10_T_rh: float) -> float:
     T_rh = 10**log10_T_rh
     f_rh = aux.freq_at_temp(T_rh)
 
-    if f <= f_rh:
-        prefactor = (
-            ( aux.omega_r / 24 ) * ( aux.g_rho(aux.temp_at_freq(f))[0] / aux.g_rho_0 ) *
-            ( aux.g_s_0 / aux.g_s(aux.temp_at_freq(f))[0] )**4/3
-            )
 
-    else:
-         prefactor = (
-            ( aux.omega_r / 24 ) * ( aux.g_rho(aux.temp_at_freq(f_rh))[0] / aux.g_rho_0 ) *
-            ( aux.g_s_0 / aux.g_s(aux.temp_at_freq(f_rh))[0] )**4/3
-            )
+    idx = f <= f_rh # this creates an array of booleans
+    # use this if f<=f_rh
+    prefactor_lt = (
+        ( aux.omega_r / 24 ) * ( aux.g_rho(aux.temp_at_freq(f)) / aux.g_rho_0 ) *
+        ( aux.g_s_0 / aux.g_s(aux.temp_at_freq(f)) )**4/3
+        )
+
+    # use this if f>f_rh
+    prefactor_gt = (
+        ( aux.omega_r / 24 ) * ( aux.g_rho(aux.temp_at_freq(f_rh)) / aux.g_rho_0 ) *
+        ( aux.g_s_0 / aux.g_s(aux.temp_at_freq(f_rh)) )**4/3
+        )
+
+    # Now, f is actually an array so we need an array of prefactors that differ
+    # based on if f<=f_rh or f > f_rh
+    prefactor = np.ones_like(f)
+    prefactor[idx] = prefactor_lt
+    prefactor[~idx] = prefactor_gt
 
     return aux.h**2 * prefactor * power_spec(f, n_t, r) * transfer_func(f, f_rh)
