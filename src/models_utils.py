@@ -1,3 +1,4 @@
+from functools import cache
 import os
 from enterprise.signals.parameter import function
 import enterprise.signals.parameter as parameter
@@ -22,8 +23,13 @@ z_eq = 3402 # redshift of  matter-radiation equality
 T_eq = T_0 * (1 + z_eq) # temperature of matter-radiation equality (GeV)
 h = 0.674 # scaling factor for Hubble expansion rate 
 H_0 = h * 100 * nat.convert(nat.km * nat.s**-1 * nat.Mpc**-1, nat.GeV) # Hubble constant (GeV)
+omega_v = 0.6847 # DE density today Planck 2018
+omega_m = 0.3153 # matter density today Planck 2018
+omega_r = 9.2188e-5 # radiation density today Planck 2018
+A_s = np.exp(3.044)*10**-10 # Planck 2018 amplitude of primordial scalar power spectrum
+f_cmb = 7.7314e-17 # CMB pivot scale (Hz)
 
-# tabulated values for the number of relativistic degrees of 
+# tabulated values for the number of relativistic degrees of
 # freedom from reference 1803.01038
 gs = np.loadtxt(cwd + '/inputs/models/models_data/g_star.dat')
 
@@ -65,6 +71,19 @@ def g_s(x, is_freq=False):
 
     return dof
 
+# We cache the following functions so that they only run once and then cache the result
+# They are never called with a different argument, so they only have to be computed once
+@cache
+def __g_s_0(T_0):
+    return g_s(T_0)
+
+@cache
+def __g_rho_0(T_0):
+    return g_rho(T_0)
+
+
+g_rho_0 = __g_rho_0(T_0) # relativistic degrees of freedom today
+g_s_0 = __g_s_0(T_0) # entropic relativistic degrees of freedom today
 
 # -----------------------------------------------------------
 # Additional priors not included in the standard 
@@ -170,4 +189,21 @@ def spec_importer(path):
 
     return spectrum
 
+def freq_at_temp(T: float) -> float:
+    """Calculate GW frequency as function of temperature [GeV]."""
 
+    f_0 = H_0 * nat.convert(nat.GeV, nat.s**-1) / ( 2 * np.pi )
+
+    T_ratio = T_0 / T
+    g_ratio = g_rho_0 / g_rho(T)
+    gs_ratio = g_s_0 / g_s(T)
+
+    prefactor = f_0 * (g_ratio)**(1/3) * T_ratio
+    sqr_term = np.sqrt(omega_v + ( g_ratio**-1 * T_ratio**-3 * omega_m ) + ( gs_ratio**-1 * T_ratio**-4 * omega_r)  )
+
+    return prefactor * sqr_term
+
+def temp_at_freq(f: float) -> float:
+    "Get the temperature [GeV] of the universe when a gravitational wave of a certain frequency entered the Hubble horizon."
+
+    return np.interp(f, gs[:,-1], gs[:,0])[0]
