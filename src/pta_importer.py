@@ -16,6 +16,11 @@ ng12_dic = {
     'noise_data': 'ng12_wn_v4.json',
     'emp_dist': None}
 
+ipta2_dic = {
+    'psrs_data': 'ipta2_psrs_de438.pkl',
+    'noise_data': 'ipta2_wn_de438j.json',
+    'emp_dist': None}
+
 
 def get_ephem_conv(par_file):
     """
@@ -97,6 +102,10 @@ def pta_data_importer(pta_data):
         psrs = get_pulsars(ng12_dic['psrs_data'])
         params = get_wn(ng12_dic['noise_data'])
         emp_dist = ng12_dic['emp_dist']
+    elif pta_data == 'IPTA2':
+        psrs = get_pulsars(ipta2_dic['psrs_data'])
+        params = get_wn(ipta2_dic['noise_data'])
+        emp_dist = ipta2_dic['emp_dist']
     else:
         psrs = get_pulsars(pta_data['psrs_data'])
         params = get_wn(pta_data['noise_data'])

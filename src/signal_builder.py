@@ -1,21 +1,17 @@
 import sys
 from enterprise.signals import utils
 from enterprise.signals import signal_base
-from enterprise.signals import white_signals
 from enterprise.signals import gp_signals
-import enterprise.signals.parameter as parameter
-from enterprise.signals import selections
 from enterprise.signals import deterministic_signals
 from enterprise_extensions import model_utils
 from enterprise import constants as const
 from enterprise_extensions import chromatic as chrom
 
-from enterprise_extensions.blocks import (chromatic_noise_block,
+from enterprise_extensions.blocks import (
                                           common_red_noise_block,
                                           dm_noise_block, red_noise_block,
                                           white_noise_block)
 
-import numpy as np
 
 def tnequad_conv(noisedict):
     """
@@ -55,7 +51,7 @@ def builder(
         [default = None]
     :param noisedict: Dictionary of pulsar noise properties.
         [default = None]
-    :gamma_bhb: fixed common bhb process spectral index value. If set to
+    :param gamma_bhb: fixed common bhb process spectral index value. If set to
         None we vary the spectral index over the range [0, 7].
         [default = None]
     :param A_bhb_logmin: specifies lower prior on the log amplitude of the bhb
@@ -65,6 +61,8 @@ def builder(
         common process. If set to None, -14 is used if gamma_bhb = 13/3, -11 is
         used otherwise.
         [default = None]
+    :param corr: if set to True HD correlations are assumed for GWBs
+        [default = False]
     :red_components: number of frequency components for the intrinsic
         red noise. 
         [default = 30]

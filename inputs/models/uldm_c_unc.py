@@ -10,7 +10,7 @@ smbhb = True # set to True if you want to overlay the new-physics signal to the 
 
 parameters ={
     "log10_A_dm" : parameter.Uniform(-9, -4)('log10_A_dm'),
-    "log10_f_dm" : parameter.Uniform(-10, -5)('log10_f_dm'),
+    "log10_f_dm" : parameter.Uniform(-10, -5.5)('log10_f_dm'),
     "gamma_p" : parameter.Uniform(0, 2 * np.pi),
     "gamma_e" : parameter.Uniform(0, 2 * np.pi)('gamma_e'),
     "phi_hat_sq_p" : aux.Gamma(1,0,1),
