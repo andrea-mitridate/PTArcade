@@ -1,13 +1,14 @@
-from functools import cache
 import os
-from enterprise.signals.parameter import function
-import enterprise.signals.parameter as parameter
-from scipy import interpolate
-import scipy.stats as ss
-import numpy as np
-from numpy.typing import NDArray
+from functools import cache
 from typing import Union
-import natpy as nat 
+
+import enterprise.signals.parameter as parameter
+import natpy as nat
+import numpy as np
+import scipy.stats as ss
+from enterprise.signals.parameter import function
+from numpy.typing import NDArray
+from scipy import interpolate
 
 cwd = os.getcwd()
 
