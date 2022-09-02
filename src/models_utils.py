@@ -5,7 +5,8 @@ import enterprise.signals.parameter as parameter
 from scipy import interpolate
 import scipy.stats as ss
 import numpy as np
-import numpy.typing as npt
+from numpy.typing import NDArray
+from typing import Union
 import natpy as nat 
 
 cwd = os.getcwd()
@@ -76,10 +77,27 @@ def g_s(x, is_freq=False):
 # They are never called with a different argument, so they only have to be computed once
 @cache
 def __g_s_0(T_0):
+    """Calculate the entropic relativistic degrees of freedom today.
+
+    This function is cached because it only needs to be ran once. It is a function instead of a constant so that if
+    the g_star.dat file changes, this value will update as well.
+
+    :param float T_0: The universe's temperature today [GeV].
+    :return: The entropic relativistic degrees of greedom today.
+    :rtype: float."""
     return g_s(T_0)
 
 @cache
 def __g_rho_0(T_0):
+    """Calculate the relativistic degrees of freedom today.
+
+    This function is cached because it only needs to be ran once. It is a function instead of a constant so that if
+    the g_star.dat file changes, this value will update as well.
+
+    :param float T_0: The universe's temperature today [GeV].
+    :return: The relativistic degrees of greedom today.
+    :rtype: float."""
+
     return g_rho(T_0)
 
 
@@ -190,8 +208,13 @@ def spec_importer(path):
 
     return spectrum
 
-def freq_at_temp(T: float) -> float:
-    """Calculate GW frequency as function of temperature [GeV]."""
+def freq_at_temp(T: Union[NDArray, float]) -> Union[NDArray, float]:
+    """Calculate GW frequency [Hz] as function of universe temperature [GeV] at time of emission.
+
+    :param Union[NDArray, float] T: Universe temperature at time of GW emission [GeV]
+    :return: GW emitted at frequency f [Hz] when universe was at temperature `T` [GeV]
+    :rtype: Union[NDArray, float]
+    """
 
     f_0 = H_0 * nat.convert(nat.GeV, nat.s**-1) / ( 2 * np.pi )
 
@@ -199,12 +222,17 @@ def freq_at_temp(T: float) -> float:
     g_ratio = g_rho_0 / g_rho(T)
     gs_ratio = g_s_0 / g_s(T)
 
-    prefactor = f_0 * (g_ratio)**(1/3) * T_ratio
-    sqr_term = np.sqrt(omega_v + ( g_ratio**-1 * T_ratio**-3 * omega_m ) + ( gs_ratio**-1 * T_ratio**-4 * omega_r)  )
+    prefactor = f_0 * (gs_ratio)**(1/3) * T_ratio
+    sqr_term = np.sqrt(omega_v + ( gs_ratio**-1 * T_ratio**-3 * omega_m ) + ( g_ratio**-1 * T_ratio**-4 * omega_r)  )
 
     return prefactor * sqr_term
 
-def temp_at_freq(f: npt.NDArray) -> npt.NDArray:
-    "Get the temperature [GeV] of the universe when a gravitational wave of a certain frequency entered the Hubble horizon."
+def temp_at_freq(f: Union[NDArray,float]) -> Union[NDArray,float]:
+    """Get the temperature [GeV] of the universe when a gravitational wave of a certain frequency [Hz] was emitted.
+
+    :param Union[NDArray, float] f: Frequency in Hz
+    :return: Temperature [GeV] when GW at frequency `f` [Hz] was emitted
+    :rtype: Union[NDArray, float]
+    """
 
     return np.interp(f, gs[:,-1], gs[:,0])
