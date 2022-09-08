@@ -105,7 +105,7 @@ def builder(
 
 
     # add DM variations 
-    dm_var = [hasattr(psr, 'dmx') for psr in psrs]
+    dm_var = [hasattr(psr, 'dmx') for psr in psrs] # check is dmx parameters are present in pulsars objects
 
     if any(dm_var):
         pass
@@ -164,10 +164,11 @@ def builder(
             s2 = s + white_noise_block(
                 vary=white_vary, inc_ecorr=True, tnequad=tnequad, select='backend')
             if '1713' in p.name and dm_var:
-                tmin = p.toas.min() / const.day
-                tmax = p.toas.max() / const.day
                 s3 = s2 + chrom.dm_exponential_dip(
-                    tmin=tmin, tmax=tmax, idx=2, sign=False, name='dmexp')
+                    tmin=54500, tmax=55000, idx=2, sign=False, name='dmexp_1')
+                if p.toas.max() / const.day > 57850:
+                    s3 += chrom.dm_exponential_dip(
+                        tmin=57300, tmax=57850, idx=2, sign=False, name='dmexp_2')
                 models.append(s3(p))
             else:
                 models.append(s2(p))
@@ -175,18 +176,17 @@ def builder(
             s4 = s + white_noise_block(
                 vary=white_vary, inc_ecorr=False, tnequad=tnequad, select='backend')
             if '1713' in p.name and dm_var:
-                tmin = p.toas.min() / const.day
-                tmax = p.toas.max() / const.day
                 s5 = s4 + chrom.dm_exponential_dip(
-                    tmin=tmin, tmax=tmax, idx=2, sign=False, name='dmexp')
+                    tmin=54500, tmax=55000, idx=2, sign=False, name='dmexp_1')
+                if p.toas.max() / const.day > 57850:
+                    s5 += chrom.dm_exponential_dip(
+                        tmin=57300, tmax=57850, idx=2, sign=False, name='dmexp_2')
                 models.append(s5(p))
             else:
                 models.append(s4(p))
 
-
     # set up PTA
     pta = signal_base.PTA(models)
-
 
     # set white noise parameters
     if noisedict is not None:

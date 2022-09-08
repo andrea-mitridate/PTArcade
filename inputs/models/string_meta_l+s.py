@@ -9,14 +9,14 @@ smbhb = False # set to True if you want to overlay the new-physics signal to the
 
 parameters = {
     'log10_mu' : parameter.Uniform(-14, -3)('log10_mu'),
-    'log10_k' : parameter.Uniform(7.0, 9.5)('log10_k')
+    'kappa' : parameter.Uniform(7.0, 9.5)('kappa')
     }
 
-group = ['log10_mu', 'log10_k']
+group = ['log10_mu', 'kappa']
 
 cwd = os.getcwd()
 log_spectrum = aux.spec_importer(cwd +'/inputs/models/models_data/meta_l+s.dat')
 
 @aux.omega2cross
-def spectrum(f, log10_mu, log10_k):
-    return 10**log_spectrum(np.log10(f), log10_mu=log10_mu, log10_k=log10_k)
+def spectrum(f, log10_mu, kappa):
+    return 10**log_spectrum(np.log10(f), log10_mu=log10_mu, kappa=kappa)
