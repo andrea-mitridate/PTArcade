@@ -22,7 +22,7 @@ nat.set_active_units("HEP")
 G = 6.67430 * 10**-11 * nat.convert(nat.m**3 * nat.kg**-1 * nat.s**-2, nat.GeV**-2) # Newton constant (GeV**-2)
 M_pl = (8 * np.pi *G)**(-1/2) # reduced plank mass (GeV)
 T_0 = 2.7255 * nat.convert(nat.K, nat.GeV) # present day temperature of the Universe (GeV)
-z_eq = 3402 # redshift of  matter-radiation equality 
+z_eq = 3402 # redshift of  matter-radiation equality
 T_eq = T_0 * (1 + z_eq) # temperature of matter-radiation equality (GeV)
 h = 0.674 # scaling factor for Hubble expansion rate 
 H_0 = h * 100 * nat.convert(nat.km * nat.s**-1 * nat.Mpc**-1, nat.GeV) # Hubble constant (GeV)
@@ -74,6 +74,7 @@ def g_s(x, is_freq=False):
 
     return dof
 
+
 # We cache the following functions so that they only run once and then cache the result
 # They are never called with a different argument, so they only have to be computed once
 @cache
@@ -87,6 +88,7 @@ def __g_s_0(T_0):
     :return: The entropic relativistic degrees of greedom today.
     :rtype: float."""
     return g_s(T_0)
+
 
 @cache
 def __g_rho_0(T_0):
@@ -102,13 +104,14 @@ def __g_rho_0(T_0):
     return g_rho(T_0)
 
 
-g_rho_0 = __g_rho_0(T_0) # relativistic degrees of freedom today
-g_s_0 = __g_s_0(T_0) # entropic relativistic degrees of freedom today
+g_rho_0 = __g_rho_0(T_0)  # relativistic degrees of freedom today
+g_s_0 = __g_s_0(T_0)  # entropic relativistic degrees of freedom today
 
 # -----------------------------------------------------------
 # Additional priors not included in the standard 
 # enterprise package. 
 # -----------------------------------------------------------
+
 
 def GammaPrior(value, a, loc, scale):
     """Prior function for Uniform parameters."""
@@ -209,6 +212,7 @@ def spec_importer(path):
 
     return spectrum
 
+
 def freq_at_temp(T: Union[NDArray, float]) -> Union[NDArray, float]:
     """Calculate GW frequency [Hz] as function of universe temperature [GeV] at time of emission.
 
@@ -217,18 +221,23 @@ def freq_at_temp(T: Union[NDArray, float]) -> Union[NDArray, float]:
     :rtype: Union[NDArray, float]
     """
 
-    f_0 = H_0 * nat.convert(nat.GeV, nat.s**-1) / ( 2 * np.pi )
+    f_0 = H_0 * nat.convert(nat.GeV, nat.Hz) / (2 * np.pi)
 
     T_ratio = T_0 / T
     g_ratio = g_rho_0 / g_rho(T)
     gs_ratio = g_s_0 / g_s(T)
 
-    prefactor = f_0 * (gs_ratio)**(1/3) * T_ratio
-    sqr_term = np.sqrt(omega_v + ( gs_ratio**-1 * T_ratio**-3 * omega_m ) + ( g_ratio**-1 * T_ratio**-4 * omega_r)  )
+    prefactor = f_0 * (gs_ratio) ** (1 / 3) * T_ratio
+    sqr_term = np.sqrt(
+        omega_v
+        + (gs_ratio**-1 * T_ratio**-3 * omega_m)
+        + (g_ratio**-1 * T_ratio**-4 * omega_r)
+    )
 
     return prefactor * sqr_term
 
-def temp_at_freq(f: Union[NDArray,float]) -> Union[NDArray,float]:
+
+def temp_at_freq(f: Union[NDArray, float]) -> Union[NDArray, float]:
     """Get the temperature [GeV] of the universe when a gravitational wave of a certain frequency [Hz] was emitted.
 
     :param Union[NDArray, float] f: Frequency in Hz
@@ -236,4 +245,4 @@ def temp_at_freq(f: Union[NDArray,float]) -> Union[NDArray,float]:
     :rtype: Union[NDArray, float]
     """
 
-    return np.interp(f, gs[:,-1], gs[:,0])
+    return np.interp(f, gs[:, -1], gs[:, 0], left=np.nan, right=np.nan)
