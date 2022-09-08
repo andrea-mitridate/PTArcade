@@ -4,20 +4,20 @@ import numpy as np
 from numpy.typing import NDArray
 from typing import Union
 
-name = 'igw' # name of the model
+name = 'igw'  # name of the model
 
-smbhb = True # set to True if you want to overlay the new-physics signal to the SMBHB signal
+smbhb = True  # set to True if you want to overlay the new-physics signal to the SMBHB signal
 
 parameters = {
-    'n_t':parameter.Uniform(-2,2)('n_t'),
-    'log10_r':parameter.Uniform(-7,0)('log10_r'),
-    'log10_T_rh':parameter.Uniform(-6,16)('log10_T_rh') # this in GeV
+    'n_t':parameter.Uniform(0,5)('n_t'),
+    'log10_r':parameter.Uniform(-10,0)('log10_r'),
+    'log10_T_rh':parameter.Uniform(-3,3)('log10_T_rh')  # this in GeV
     }
 
 group = []
 
 
-def transfer_func(f: Union[NDArray,float], f_rh: Union[NDArray,float]) -> Union[NDArray,float]:
+def transfer_func(f: Union[NDArray, float], f_rh: Union[NDArray, float]) -> Union[NDArray, float]:
     """Calculate the transfer function as a function of GW frequency.
 
     :param Union[NDArray, float] f: Frequency of GW in Hz
@@ -26,12 +26,12 @@ def transfer_func(f: Union[NDArray,float], f_rh: Union[NDArray,float]) -> Union[
     :rtype: Union[NDArray, float]
     """
 
-
     f_ratio = f / f_rh
 
-    return (1 - 0.22 * f_ratio**1.5 + 0.65**f_ratio**2)**-1
+    return (1 - 0.22 * f_ratio**1.5 + 0.65*f_ratio**2)**-1
 
-def power_spec(f: Union[NDArray,float], n_t: float, r: float) -> Union[NDArray,float]:
+
+def power_spec(f: Union[NDArray, float], n_t: float, r: float) -> Union[NDArray, float]:
     """Calculate primordial tensor power spectrum.
 
     :param Union[NDArray, float] f: Frequency [Hz] of GW
@@ -44,7 +44,7 @@ def power_spec(f: Union[NDArray,float], n_t: float, r: float) -> Union[NDArray,f
 
 
 @aux.omega2cross
-def spectrum(f: Union[NDArray,float], n_t: float, log10_r: float, log10_T_rh: float) -> Union[NDArray,float]:
+def spectrum(f: Union[NDArray, float], n_t: float, log10_r: float, log10_T_rh: float) -> Union[NDArray, float]:
     """Calculate GW energy density.
 
     Returns the GW energy density as a fraction of the closure density as a
@@ -79,7 +79,15 @@ def spectrum(f: Union[NDArray,float], n_t: float, log10_r: float, log10_T_rh: fl
     # Now, f is actually an array so we need an array of prefactors that differ
     # based on if f<=f_rh or f > f_rh
     prefactor = np.ones_like(f)
-    prefactor[idx] = prefactor_lt
-    prefactor[~idx] = prefactor_gt
+
+    # Check if idx has at least one True element. If it does, then assign the prefactor
+    # Sometimes idx can be all False.
+    if any(idx):
+        prefactor[idx] = prefactor_lt[idx]
+
+    # check if idx has at least one False element. If it does, then assign the prefactor
+    # Sometimes idx can be all True.
+    if not any(idx):
+        prefactor[~idx] = prefactor_gt
 
     return aux.h**2 * prefactor * power_spec(f, n_t, r) * transfer_func(f, f_rh)
