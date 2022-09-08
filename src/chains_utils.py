@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from cycler import cycler
 
+from enterprise_extensions import model_utils
+
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 from matplotlib.ticker import FormatStrFormatter
@@ -64,6 +66,21 @@ def import_chains(chains_dir, burn_frac=1/4):
     mrgd_chain = mrgd_chain.to_numpy()
 
     return params, mrgd_chain
+
+
+def compute_bf(chain, params):
+    """
+    Computes the Bayes factor for model 0 vs model 1
+    :param chain: numpy array containing the chain to be plotted
+    :param params: list with the names of the parameters appearing in the chain
+    """
+
+    # define the filter for the model to plot 
+    nmodel_idx = list(params).index('nmodel')
+
+    bf, unc = model_utils.odds_ratio(chain[:, nmodel_idx], models=[0,1])
+
+    return bf, unc
 
 
 def plot_chains(chain, params, params_name=None, save=False, model_name=None):
