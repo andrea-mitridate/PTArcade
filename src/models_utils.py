@@ -46,10 +46,10 @@ def g_rho(x, is_freq=False):
     """
 
     if is_freq:
-        dof = np.interp(x, gs[:, -1], gs[:, 1])
+        dof = np.interp(x, gs[:, 1], gs[:, 3])
 
     else:
-        dof = np.interp(x, gs[:, 0], gs[:, 1])
+        dof = np.interp(x, gs[:, 0], gs[:, 3])
 
     return dof
 
@@ -65,10 +65,10 @@ def g_s(x, is_freq=False):
     """
 
     if is_freq:
-        dof = np.interp(x, gs[:, -1], gs[:, 3])
+        dof = np.interp(x, gs[:, 1], gs[:, 2])
 
     else:
-        dof = np.interp(x, gs[:, 0], gs[:, 3])
+        dof = np.interp(x, gs[:, 0], gs[:, 2])
 
     return dof
 
