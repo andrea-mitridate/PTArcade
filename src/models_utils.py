@@ -1,13 +1,11 @@
 import os
 from functools import cache
-from typing import Union
 
 import enterprise.signals.parameter as parameter
 import natpy as nat
 import numpy as np
 import scipy.stats as ss
 from enterprise.signals.parameter import function
-from numpy.typing import NDArray
 from scipy import interpolate
 
 cwd = os.getcwd()
@@ -213,7 +211,7 @@ def spec_importer(path):
     return spectrum
 
 
-def freq_at_temp(T: Union[NDArray, float]) -> Union[NDArray, float]:
+def freq_at_temp(T):
     """Calculate GW frequency [Hz] as function of universe temperature [GeV] at time of emission.
 
     :param Union[NDArray, float] T: Universe temperature at time of GW emission [GeV]
@@ -237,7 +235,7 @@ def freq_at_temp(T: Union[NDArray, float]) -> Union[NDArray, float]:
     return prefactor * sqr_term
 
 
-def temp_at_freq(f: Union[NDArray, float]) -> Union[NDArray, float]:
+def temp_at_freq(f):
     """Get the temperature [GeV] of the universe when a gravitational wave of a certain frequency [Hz] was emitted.
 
     :param Union[NDArray, float] f: Frequency in Hz
