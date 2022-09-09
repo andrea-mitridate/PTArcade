@@ -63,14 +63,14 @@ def spectrum(f, n_t, log10_r, log10_T_rh):
     idx = f <= f_rh  # this creates an array of booleans
     # use this if f<=f_rh
     prefactor_lt = (
-        (aux.omega_r / 24) * (aux.g_rho(aux.temp_at_freq(f)) / aux.g_rho_0) *
-        (aux.g_s_0 / aux.g_s(aux.temp_at_freq(f)))**4/3
+        (aux.omega_r / 24) * (aux.g_rho(f, is_freq=True) / aux.g_rho_0) *
+        (aux.g_s_0 / aux.g_s(f, is_freq=True))**4/3
         )
 
     # use this if f>f_rh
     prefactor_gt = (
-        (aux.omega_r / 24) * (aux.g_rho(aux.temp_at_freq(f_rh)) / aux.g_rho_0) *
-        (aux.g_s_0 / aux.g_s(aux.temp_at_freq(f_rh)))**4/3
+        (aux.omega_r / 24) * (aux.g_rho(f_rh, is_freq=True) / aux.g_rho_0) *
+        (aux.g_s_0 / aux.g_s(f_rh, is_freq=True))**4/3
         )
 
     # Now, f is actually an array so we need an array of prefactors that differ
