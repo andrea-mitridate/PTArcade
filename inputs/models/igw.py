@@ -18,9 +18,9 @@ group = []
 def transfer_func(f, f_rh):
     """Calculate the transfer function as a function of GW frequency.
 
-    :param Union[NDArray, float] f: Frequency of GW in Hz
-    :param Union[NDArray, float] f_rh: Frequency of GW emitted at temp of reheating T_rh
-    :return: Transfer function of a GW with frequency f
+    :param Union[NDArray, float] f: Frequency of GW [Hz] today
+    :param Union[NDArray, float] f_rh: Frequency of GW that was of horizon size at reheating
+    :return: Transfer function of a GW with frequency f [Hz]
     :rtype: Union[NDArray, float]
     """
 
@@ -36,7 +36,8 @@ def power_spec(f, n_t, r):
     :param float n_t: Tensor spectral index
     :param float r: Tensor to scalar ratio
     :return: Primordial tensor power spectrum
-    :rtype: Union[NDArray, float]"""
+    :rtype: Union[NDArray, float]
+    """
 
     return r * aux.A_s * (f / aux.f_cmb)**n_t
 
@@ -48,7 +49,7 @@ def spectrum(f, n_t, log10_r, log10_T_rh):
     Returns the GW energy density as a fraction of the closure density as a
     function of the parameters of the model:
 
-    :param Union[NDArray, float] f: Frequency of GW in Hz
+    :param Union[NDArray, float] f: Frequency [Hz] of GW today
     :param float n_t: Tensor spectral index
     :param float log10_r: Tensor to scalar ratio in log10 space
     :param float log10_T_rh: Temperature [GeV] at reheating in log10 space

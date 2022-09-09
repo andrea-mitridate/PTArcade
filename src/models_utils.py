@@ -212,10 +212,11 @@ def spec_importer(path):
 
 
 def freq_at_temp(T):
-    """Calculate GW frequency [Hz] as function of universe temperature [GeV] at time of emission.
+    """Calculate GW frequency [Hz] today as function of universe temperature [GeV]
+    when the GW was of horizon size.
 
-    :param Union[NDArray, float] T: Universe temperature at time of GW emission [GeV]
-    :return: GW emitted at frequency f [Hz] when universe was at temperature `T` [GeV]
+    :param Union[NDArray, float] T: Universe temperature [GeV] at time when GW was of horizon size
+    :return: GW of frequency f [Hz] today that was of horizon size when universe was at temperature `T` [GeV]
     :rtype: Union[NDArray, float]
     """
 
@@ -236,10 +237,11 @@ def freq_at_temp(T):
 
 
 def temp_at_freq(f):
-    """Get the temperature [GeV] of the universe when a gravitational wave of a certain frequency [Hz] was emitted.
+    """Get the temperature [GeV] of the universe when a gravitational wave of a
+    certain frequency [Hz] today was of horizon size.
 
-    :param Union[NDArray, float] f: Frequency in Hz
-    :return: Temperature [GeV] when GW at frequency `f` [Hz] was emitted
+    :param Union[NDArray, float] f: Frequency in Hz today
+    :return: Temperature [GeV] when GW at frequency `f` [Hz] was of horizon size
     :rtype: Union[NDArray, float]
     """
 
