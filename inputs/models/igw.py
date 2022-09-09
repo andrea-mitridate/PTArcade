@@ -60,31 +60,12 @@ def spectrum(f, n_t, log10_r, log10_T_rh):
     T_rh = 10**log10_T_rh
     f_rh = aux.freq_at_temp(T_rh)
 
-    idx = f <= f_rh  # this creates an array of booleans
-    # use this if f<=f_rh
-    prefactor_lt = (
-        (aux.omega_r / 24) * (aux.g_rho(f, is_freq=True) / aux.g_rho_0) *
-        (aux.g_s_0 / aux.g_s(f, is_freq=True))**4/3
+    # Create a a copy of f. Replace each value where f > f_rh with f_rh
+    f_constr = np.where(f <= f_rh, f, f_rh)
+
+    prefactor = (
+        (aux.omega_r / 24) * (aux.g_rho(f_constr, is_freq=True) / aux.g_rho_0) *
+        (aux.g_s_0 / aux.g_s(f_constr, is_freq=True))**4/3
         )
-
-    # use this if f>f_rh
-    prefactor_gt = (
-        (aux.omega_r / 24) * (aux.g_rho(f_rh, is_freq=True) / aux.g_rho_0) *
-        (aux.g_s_0 / aux.g_s(f_rh, is_freq=True))**4/3
-        )
-
-    # Now, f is actually an array so we need an array of prefactors that differ
-    # based on if f<=f_rh or f > f_rh
-    prefactor = np.ones_like(f)
-
-    # Check if idx has at least one True element. If it does, then assign the prefactor
-    # Sometimes idx can be all False.
-    if any(idx):
-        prefactor[idx] = prefactor_lt[idx]
-
-    # check if idx has at least one False element. If it does, then assign the prefactor
-    # Sometimes idx can be all True.
-    if not any(idx):
-        prefactor[~idx] = prefactor_gt
 
     return aux.h**2 * prefactor * power_spec(f, n_t, r) * transfer_func(f, f_rh)
