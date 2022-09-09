@@ -1,23 +1,21 @@
 import enterprise.signals.parameter as parameter
 import src.models_utils as aux
 import numpy as np
-from numpy.typing import NDArray
-from typing import Union
 
 name = 'igw'  # name of the model
 
 smbhb = True  # set to True if you want to overlay the new-physics signal to the SMBHB signal
 
 parameters = {
-    'n_t':parameter.Uniform(0,5)('n_t'),
-    'log10_r':parameter.Uniform(-10,0)('log10_r'),
-    'log10_T_rh':parameter.Uniform(-3,3)('log10_T_rh')  # this in GeV
+    'n_t': parameter.Uniform(0, 5)('n_t'),
+    'log10_r': parameter.Uniform(-10, 0)('log10_r'),
+    'log10_T_rh': parameter.Uniform(-3, 3)('log10_T_rh')  # this in GeV
     }
 
 group = []
 
 
-def transfer_func(f: Union[NDArray, float], f_rh: Union[NDArray, float]) -> Union[NDArray, float]:
+def transfer_func(f, f_rh):
     """Calculate the transfer function as a function of GW frequency.
 
     :param Union[NDArray, float] f: Frequency of GW in Hz
@@ -31,7 +29,7 @@ def transfer_func(f: Union[NDArray, float], f_rh: Union[NDArray, float]) -> Unio
     return (1 - 0.22 * f_ratio**1.5 + 0.65*f_ratio**2)**-1
 
 
-def power_spec(f: Union[NDArray, float], n_t: float, r: float) -> Union[NDArray, float]:
+def power_spec(f, n_t, r):
     """Calculate primordial tensor power spectrum.
 
     :param Union[NDArray, float] f: Frequency [Hz] of GW
@@ -40,11 +38,11 @@ def power_spec(f: Union[NDArray, float], n_t: float, r: float) -> Union[NDArray,
     :return: Primordial tensor power spectrum
     :rtype: Union[NDArray, float]"""
 
-    return r * aux.A_s * ( f / aux.f_cmb )**n_t
+    return r * aux.A_s * (f / aux.f_cmb)**n_t
 
 
 @aux.omega2cross
-def spectrum(f: Union[NDArray, float], n_t: float, log10_r: float, log10_T_rh: float) -> Union[NDArray, float]:
+def spectrum(f, n_t, log10_r, log10_T_rh):
     """Calculate GW energy density.
 
     Returns the GW energy density as a fraction of the closure density as a
@@ -62,18 +60,17 @@ def spectrum(f: Union[NDArray, float], n_t: float, log10_r: float, log10_T_rh: f
     T_rh = 10**log10_T_rh
     f_rh = aux.freq_at_temp(T_rh)
 
-
-    idx = f <= f_rh # this creates an array of booleans
+    idx = f <= f_rh  # this creates an array of booleans
     # use this if f<=f_rh
     prefactor_lt = (
-        ( aux.omega_r / 24 ) * ( aux.g_rho(aux.temp_at_freq(f)) / aux.g_rho_0 ) *
-        ( aux.g_s_0 / aux.g_s(aux.temp_at_freq(f)) )**4/3
+        (aux.omega_r / 24) * (aux.g_rho(aux.temp_at_freq(f)) / aux.g_rho_0) *
+        (aux.g_s_0 / aux.g_s(aux.temp_at_freq(f)))**4/3
         )
 
     # use this if f>f_rh
     prefactor_gt = (
-        ( aux.omega_r / 24 ) * ( aux.g_rho(aux.temp_at_freq(f_rh)) / aux.g_rho_0 ) *
-        ( aux.g_s_0 / aux.g_s(aux.temp_at_freq(f_rh)) )**4/3
+        (aux.omega_r / 24) * (aux.g_rho(aux.temp_at_freq(f_rh)) / aux.g_rho_0) *
+        (aux.g_s_0 / aux.g_s(aux.temp_at_freq(f_rh)))**4/3
         )
 
     # Now, f is actually an array so we need an array of prefactors that differ
