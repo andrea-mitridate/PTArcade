@@ -245,4 +245,4 @@ def temp_at_freq(f):
     :rtype: Union[NDArray, float]
     """
 
-    return np.interp(f, gs[:, -1], gs[:, 0], left=np.nan, right=np.nan)
+    return np.interp(f, gs[:, 1], gs[:, 0], left=np.nan, right=np.nan)
