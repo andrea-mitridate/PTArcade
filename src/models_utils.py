@@ -27,20 +27,43 @@ H_0 = h * 100 * nat.convert(nat.km * nat.s**-1 * nat.Mpc**-1, nat.GeV) # Hubble 
 # freedom from reference 1803.01038
 gs = np.loadtxt(cwd + '/inputs/models/models_data/g_star.dat')
 
-def g_rho(T):
+
+def g_rho(x, is_freq=False):
     """
     | Returns the number of relativistic degrees of 
-    | freedom as a function of T/GeV
+    | freedom as a function of T/GeV or f/Hz.
+
+    :param x: The temperature(s) [GeV] or frequency/frequencies [Hz]
+    :param is_freq: True if `x` is a frequency/frequencies, False if temperature(s)
+    :return: the relativistic degrees of freedom at `x`
     """
-    return np.interp(T, gs[:,0], gs[:,1])
+
+    if is_freq:
+        dof = np.interp(x, gs[:, -1], gs[:, 1])
+
+    else:
+        dof = np.interp(x, gs[:, 0], gs[:, 1])
+
+    return dof
 
 
-def g_s(T):
+def g_s(x, is_freq=False):
     """
-    | Returns the number of entropic relativistic 
-    | degrees of freedom as a function of T/GeV
+    | Returns the number of entropic relativistic degrees of
+    | freedom as a function of T/GeV or f/Hz.
+
+    :param x: The temperature(s) [GeV] or frequency/frequencies [Hz]
+    :param is_freq: True if `x` is a frequency/frequencies, False if temperature(s)
+    :return: the entropic relativistic degrees of freedom at `x`
     """
-    return np.interp(T, gs[:,0], gs[:,3])
+
+    if is_freq:
+        dof = np.interp(x, gs[:, -1], gs[:, 3])
+
+    else:
+        dof = np.interp(x, gs[:, 0], gs[:, 3])
+
+    return dof
 
 
 # -----------------------------------------------------------

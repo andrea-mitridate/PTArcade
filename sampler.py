@@ -5,8 +5,8 @@ import numpy as np
 from enterprise_extensions import hypermodel
 
 import src.pta_importer as pta_importer
-import src.signals as signals
-import src.input_hander as input_handler
+import src.signal_builder as signal_builder
+import src.input_handler as input_handler
 
 
 print('\n--- Starting to run ---\n\n')
@@ -23,8 +23,7 @@ if not cmd_input_okay:
     print('ERROR:')
     print("\t- Models info file\n"+
     "\t- Numerics info file\n"+
-    "\t- PTA info file\n\n"+
-    "must be present. These are added with the -m, -n, -p input flags. Add -h (--help) flags for more help.")
+    "must be present. These are added with the -m, -n input flags. Add -h (--help) flags for more help.")
 
     sys.exit()
 
@@ -48,7 +47,7 @@ print('--- Initializing PTA ... ---\n')
 
 pta = {}
 
-pta[0] = signals.builder(
+pta[0] = signal_builder.builder(
     psrs=psrs, 
     model=inputs['model'], 
     noisedict=noise_params,
@@ -62,7 +61,7 @@ pta[0] = signals.builder(
 if inputs["numerics"].mod_sel:
     pta[1] = pta[0]
 
-    pta[0] = signals.builder(
+    pta[0] = signal_builder.builder(
         psrs=psrs, 
         model=None, 
         noisedict=noise_params,

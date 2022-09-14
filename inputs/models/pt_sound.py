@@ -1,5 +1,6 @@
 import enterprise.signals.parameter as parameter
 import src.models_utils as aux
+from scipy.special import gamma
 import natpy as nat
 import numpy as np
 
@@ -44,8 +45,8 @@ def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
 
     H_beta = H_R * (8 * np.pi)**(-1/3) # we are assuming v~1
     
-    delta = 0.513 # velocity factor from 1705.01783
-    f_peak = 0.35 / (1 + 0.69 + 0.07) # peak frequency at emission (beta norm.) from 1705.01783
+    delta = 1 # velocity factor from 1705.01783
+    f_peak = 0.536 # peak frequency at emission (beta norm.) from 1705.01783
     p = 2 # alpha coefficient 
     q = 1 # rate coefficient 
     kappa = alpha / (0.73 + 0.083 * alpha**(1/2) + alpha) # efficiency factor assuming v~1
@@ -58,6 +59,15 @@ def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
     U_sq = 3/4 * kappa * alpha / (1 + alpha)
     tau_H = H_R / U_sq**(1/2)
     supp = 1 - (1 + 2 * tau_H)**(-1/2)
+
+    # normalization factor
+    n = (a+b)/c
+    norm = (
+            (b/a)**(a/n)
+            * (n * c / b)**c
+            * gamma(a/n) * gamma(b/n)
+            / (n * gamma(c))
+    )
 
     # dilution factor 
     dil = (
@@ -76,7 +86,8 @@ def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
             )
 
     return (
-            aux.h**2 * dil * supp
+            norm
+            * aux.h**2 * dil * supp
             * delta
             * (H_beta)**q
             * (kappa * alpha / (1 + alpha)) ** p

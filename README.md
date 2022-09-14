@@ -64,7 +64,7 @@ The numerics info allow to specify enterprise parameters for the run:
 
 # How to use
 
-    > python sampler.py -m (model info file).py -n (numeri info file).py -p (PTA info file).py - c (chain number)
+    > python sampler.py -m (model info file).py -n (numeri info file).py -c (chain number)
 
 
 # Output

@@ -1,21 +1,17 @@
 import sys
 from enterprise.signals import utils
 from enterprise.signals import signal_base
-from enterprise.signals import white_signals
 from enterprise.signals import gp_signals
-import enterprise.signals.parameter as parameter
-from enterprise.signals import selections
 from enterprise.signals import deterministic_signals
 from enterprise_extensions import model_utils
 from enterprise import constants as const
 from enterprise_extensions import chromatic as chrom
 
-from enterprise_extensions.blocks import (chromatic_noise_block,
+from enterprise_extensions.blocks import (
                                           common_red_noise_block,
                                           dm_noise_block, red_noise_block,
                                           white_noise_block)
 
-import numpy as np
 
 def tnequad_conv(noisedict):
     """
@@ -55,7 +51,7 @@ def builder(
         [default = None]
     :param noisedict: Dictionary of pulsar noise properties.
         [default = None]
-    :gamma_bhb: fixed common bhb process spectral index value. If set to
+    :param gamma_bhb: fixed common bhb process spectral index value. If set to
         None we vary the spectral index over the range [0, 7].
         [default = None]
     :param A_bhb_logmin: specifies lower prior on the log amplitude of the bhb
@@ -65,6 +61,8 @@ def builder(
         common process. If set to None, -14 is used if gamma_bhb = 13/3, -11 is
         used otherwise.
         [default = None]
+    :param corr: if set to True HD correlations are assumed for GWBs
+        [default = False]
     :red_components: number of frequency components for the intrinsic
         red noise. 
         [default = 30]
@@ -107,7 +105,7 @@ def builder(
 
 
     # add DM variations 
-    dm_var = [hasattr(psr, 'dmx') for psr in psrs]
+    dm_var = [hasattr(psr, 'dmx') for psr in psrs] # check is dmx parameters are present in pulsars objects
 
     if any(dm_var):
         pass
@@ -166,10 +164,11 @@ def builder(
             s2 = s + white_noise_block(
                 vary=white_vary, inc_ecorr=True, tnequad=tnequad, select='backend')
             if '1713' in p.name and dm_var:
-                tmin = p.toas.min() / const.day
-                tmax = p.toas.max() / const.day
                 s3 = s2 + chrom.dm_exponential_dip(
-                    tmin=tmin, tmax=tmax, idx=2, sign=False, name='dmexp')
+                    tmin=54500, tmax=55000, idx=2, sign=False, name='dmexp_1')
+                if p.toas.max() / const.day > 57850:
+                    s3 += chrom.dm_exponential_dip(
+                        tmin=57300, tmax=57850, idx=2, sign=False, name='dmexp_2')
                 models.append(s3(p))
             else:
                 models.append(s2(p))
@@ -177,18 +176,17 @@ def builder(
             s4 = s + white_noise_block(
                 vary=white_vary, inc_ecorr=False, tnequad=tnequad, select='backend')
             if '1713' in p.name and dm_var:
-                tmin = p.toas.min() / const.day
-                tmax = p.toas.max() / const.day
                 s5 = s4 + chrom.dm_exponential_dip(
-                    tmin=tmin, tmax=tmax, idx=2, sign=False, name='dmexp')
+                    tmin=54500, tmax=55000, idx=2, sign=False, name='dmexp_1')
+                if p.toas.max() / const.day > 57850:
+                    s5 += chrom.dm_exponential_dip(
+                        tmin=57300, tmax=57850, idx=2, sign=False, name='dmexp_2')
                 models.append(s5(p))
             else:
                 models.append(s4(p))
 
-
     # set up PTA
     pta = signal_base.PTA(models)
-
 
     # set white noise parameters
     if noisedict is not None:
