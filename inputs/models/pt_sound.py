@@ -3,13 +3,13 @@ import src.models_utils as aux
 import natpy as nat
 import numpy as np
 
-name = 'pt_bubble' # name of the model
+name = 'pt_sound' # name of the model
 
-smbhb = True # set to True if you want to overlay the new-physics signal to the SMBHB signal
+smbhb = False # set to True if you want to overlay the new-physics signal to the SMBHB signal
 
 parameters = {
     'log10_alpha':parameter.Uniform(-2,1)('log10_alpha'),
-    'log10_T':parameter.Uniform(-4,4)('log10_T'), 
+    'log10_T_star':parameter.Uniform(-4,4)('log10_T_star'), 
     'log10_H_R':parameter.Uniform(-3,0.5)('log10_H_R'),
     'a':parameter.Uniform(3, 5)('a'),
     'b':parameter.Uniform(2, 4)('b'),
