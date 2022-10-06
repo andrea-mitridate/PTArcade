@@ -66,7 +66,7 @@ def spectrum(f, n_t, log10_r, log10_T_rh):
 
     prefactor = (
         (aux.omega_r / 24) * (aux.g_rho(f_constr, is_freq=True) / aux.g_rho_0) *
-        (aux.g_s_0 / aux.g_s(f_constr, is_freq=True))**4/3
+        (aux.g_s_0 / aux.g_s(f_constr, is_freq=True))**(4/3)
         )
 
     return aux.h**2 * prefactor * power_spec(f, n_t, r) * transfer_func(f, f_rh)
