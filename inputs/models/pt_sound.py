@@ -4,17 +4,17 @@ from scipy.special import gamma
 import natpy as nat
 import numpy as np
 
-name = 'pt_bubble' # name of the model
+name = 'pt_sound' # name of the model
 
-smbhb = True # set to True if you want to overlay the new-physics signal to the SMBHB signal
+smbhb = False # set to True if you want to overlay the new-physics signal to the SMBHB signal
 
 parameters = {
     'log10_alpha':parameter.Uniform(-2,1)('log10_alpha'),
-    'log10_T':parameter.Uniform(-4,4)('log10_T'), 
+    'log10_T_star':parameter.Uniform(-4,4)('log10_T_star'), 
     'log10_H_R':parameter.Uniform(-3,0.5)('log10_H_R'),
     'a':parameter.Uniform(3, 5)('a'),
     'b':parameter.Uniform(2, 4)('b'),
-    'c':parameter.Uniform(1, 3)('c')
+    'c':parameter.Uniform(3, 5)('c')
     }
 
 group = []
@@ -45,12 +45,12 @@ def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
 
     H_beta = H_R * (8 * np.pi)**(-1/3) # we are assuming v~1
     
-    delta = 1 # velocity factor from 1705.01783
-    f_peak = 0.536 # peak frequency at emission (beta norm.) from 1705.01783
+    delta = 3 * 0.012 * (8 * np.pi)**(1/3) # velocity factor from 2005.10789
+    f_peak = 0.54 # peak frequency at emission (beta norm.) from 1704.05871 p17 eq (40)
     p = 2 # alpha coefficient 
     q = 1 # rate coefficient 
     kappa = alpha / (0.73 + 0.083 * alpha**(1/2) + alpha) # efficiency factor assuming v~1
-
+    
     g_s_eq = aux.g_s(aux.T_eq) # number of entropic relativistic dof at equality
     g_s_star = aux.g_s(T_star) # number of entropic relativistic dof at time of emission
     g_star = aux.g_rho(T_star) # number of relativistic dof at time of emission
@@ -86,8 +86,7 @@ def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
             )
 
     return (
-            norm
-            * aux.h**2 * dil * supp
+            aux.h**2 * dil * supp
             * delta
             * (H_beta)**q
             * (kappa * alpha / (1 + alpha)) ** p

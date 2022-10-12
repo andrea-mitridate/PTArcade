@@ -12,9 +12,9 @@ parameters = {
     'log10_alpha':parameter.Uniform(-2,1)('log10_alpha'),
     'log10_T_star':parameter.Uniform(-4,4)('log10_T_star'), 
     'log10_H_R':parameter.Uniform(-3,0.5)('log10_H_R'), 
-    'a':parameter.Uniform(0,3)('a'),
+    'a':parameter.Uniform(1,3)('a'),
     'b':parameter.Uniform(1,3)('b'),
-    'c':parameter.Uniform(1,4)('c')
+    'c':parameter.Uniform(1,3)('c')
     }
 
 group = []
@@ -72,6 +72,7 @@ def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
             * g_star * (g_s_eq / g_s_star)**(4/3)
             * aux.T_0**4 / (aux.M_pl * aux.H_0)**2
             )
+   
 
     # peak frequncy today in Hz
     f_0 = (
