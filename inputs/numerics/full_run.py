@@ -10,6 +10,7 @@ mod_sel = True # set to True if you want to compare the new-physics signal to th
 
 # mcmc parameteres
 out_dir = './chains/'
+resume = True
 N_samples = int(5e5) # number of sample points for the mcmc
 scam_weight = 30
 am_weight = 15

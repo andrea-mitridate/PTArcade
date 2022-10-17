@@ -151,7 +151,7 @@ def vol_2d_contour(sigma):
 
 
 def plot_posteriors(
-    chain,
+    chains,
     params,
     params_name=None,
     model_id = None,
@@ -190,96 +190,130 @@ def plot_posteriors(
         model name used to name the output files
     """
 
-    # define the filter for the model to plot 
-    nmodel_idx = list(params).index('nmodel')
+    if len(np.shape(chains)) == 2:
+        chains = np.array([chains])
+        params = np.array([params])
 
-    if model_id is None:
-        print("No model ID specified, posteriors are plotted for model 1")
-        filter = chain[:, nmodel_idx] > 0.5
-    elif model_id == 0:
-        filter = chain[:, nmodel_idx] < 0.5
-    elif model_id == 1:
-        filter = chain[:, nmodel_idx] > 0.5
-    else:
-        sys.exit(" ERROR: model_idx can only be an integer equal to 0 or 1")
+    for idx, chain in enumerate(chains):
+        # define the filter for the model to plot 
+        nmodel_idx = list(params[idx]).index('nmodel')
 
-    # define the list of parameters to plot and find therir position in the chains
-    params_dic = {}
-
-    if params_name:
-        for par, name in params_name.items():
-            try:
-                params_dic[name] = list(params).index(par)
-            except:
-                print(f"WARNING: {par} does not appear in the parameter list")
-
-    else:
-        params = [
-            x
-            for x in params
-            if x
-            not in [
-                "nmodel",
-                "log_posterior",
-                "log_likelihood",
-                "acceptance_rate",
-                "n_parall"]]
-
-        for idx, par in enumerate(params):
-            if '+' not in par and '-' not in par:
-                params_dic[par] =  idx
-
-    # gets the data for the plot
-    corner_data = []
-    labels = []
-    for par, pos in params_dic.items():
-        corner_data.append(chain[filter, pos])
-        labels.append(par)
-    
-    corner_data = np.stack(list(corner_data), axis=-1)
-
-    # if only one parameter needs to be plotted create the histogram
-    if len(corner_data[0]) == 1:
-        plt.hist(
-            corner_data, 
-            bins=50, 
-            density=True, 
-            histtype='stepfilled', 
-            lw=2, 
-            color='C0', 
-            alpha=0.5)
-
-        plt.xlabel(labels[0])
-        plt.ylabel('PDF')
-        if ranges:
-            plt.xlim(ranges[0])
-        plt.tight_layout()
-
-    # if multiple parameters need to be plotted creates a corner plot 
-    else:
-        if sigmas is None:
-            levels = (vol_2d_contour(2),vol_2d_contour(1))
+        if model_id is None:
+            print("No model ID specified, posteriors are plotted for model 1")
+            filter = chain[:, nmodel_idx] > 0.5
+        elif model_id == 0:
+            filter = chain[:, nmodel_idx] < 0.5
+        elif model_id == 1:
+            filter = chain[:, nmodel_idx] > 0.5
         else:
-            levels = list([vol_2d_contour[x] for x in sigmas])
+            sys.exit(" ERROR: model_idx can only be an integer equal to 0 or 1")
 
-        corner.corner(
-            corner_data,
-            labels=labels,
-            bins=50,
-            color='steelblue',
-            smooth=smooth,
-            alpha=1,
-            plot_datapoints=False,
-            plot_contours=True,
-            levels=levels,
-            range=ranges,
-            plot_density=True
-            )
+        # define the list of parameters to plot and find therir position in the chains
+        params_dic = {}
+
+        if params_name:
+            for par, name in params_name.items():
+                try:
+                    params_dic[name] = list(params[idx]).index(par)
+                except:
+                    print(f"WARNING: {par} does not appear in the parameter list")
+
+        else:
+            params[idx] = [
+                x
+                for x in params[idx]
+                if x
+                not in [
+                    "nmodel",
+                    "log_posterior",
+                    "log_likelihood",
+                    "acceptance_rate",
+                    "n_parall"]]
+
+            for idx, par in enumerate(params[idx]):
+                if '+' not in par and '-' not in par:
+                    params_dic[par] =  idx
+
+        # gets the data for the plot
+        corner_data = []
+        labels = []
+        for par, pos in params_dic.items():
+            corner_data.append(chain[filter, pos])
+            labels.append(par)
+        
+        corner_data = np.stack(list(corner_data), axis=-1)
+
+        # if only one parameter needs to be plotted create the histogram
+        if len(corner_data[0]) == 1:
+            if idx == 0:
+                fig = plt.hist(
+                    corner_data, 
+                    bins=50, 
+                    density=True, 
+                    histtype='stepfilled', 
+                    lw=2, 
+                    color='C0', 
+                    alpha=0.5)
+
+                plt.xlabel(labels[0])
+                plt.ylabel('PDF')
+                if ranges:
+                    plt.xlim(ranges[0])
+                plt.tight_layout()
+            else:
+                plt.hist(
+                    corner_data, 
+                    bins=50, 
+                    density=True, 
+                    histtype='stepfilled', 
+                    lw=2, 
+                    color='C0', 
+                    alpha=0.5)
+
+
+        # if multiple parameters need to be plotted creates a corner plot 
+        else:
+            if sigmas is None:
+                levels = (vol_2d_contour(2),vol_2d_contour(1))
+            else:
+                levels = list([vol_2d_contour[x] for x in sigmas])
+
+            if idx == 0:
+                fig = corner.corner(
+                    corner_data,
+                    labels=labels,
+                    bins=50,
+                    color='steelblue',
+                    smooth=smooth,
+                    alpha=1,
+                    plot_datapoints=False,
+                    plot_contours=True,
+                    levels=levels,
+                    range=ranges,
+                    plot_density=True
+                    )
+            else:
+                corner.corner(
+                    corner_data,
+                    labels=labels,
+                    bins=50,
+                    color='tomato',
+                    smooth=smooth,
+                    alpha=0.,
+                    plot_datapoints=False,
+                    plot_contours=True,
+                    levels=levels,
+                    range=ranges,
+                    plot_density=True,
+                    fig=fig
+                    )
 
     if save:
         if model_name:
             plt.savefig(f"./plots/{model_name}_corner.pdf")
         else:
             print('Please specify a model name to save the corner plot.')
+
+    plt.show()
 
     return 

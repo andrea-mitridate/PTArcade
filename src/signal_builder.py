@@ -94,7 +94,7 @@ def builder(
         
         s += common_red_noise_block(
             psd='powerlaw', 
-            prior='lof-uniform', 
+            prior='log-uniform', 
             Tspan=Tspan, 
             components=gwb_components,
             gamma_val=gamma_bhb, 

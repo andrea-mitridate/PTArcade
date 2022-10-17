@@ -84,7 +84,7 @@ out_dir = os.path.join(
 
 super_model = hypermodel.HyperModel(pta)
 sampler = super_model.setup_sampler(
-    resume=False,
+    resume=inputs["numerics"].resume,
     outdir=out_dir,
     sample_nmodel=inputs["numerics"].mod_sel,
     empirical_distr=emp_dist)
@@ -99,7 +99,7 @@ if inputs["model"].group:
     groups = sampler.groups
 
     sampler = super_model.setup_sampler(
-        resume=False,
+        resume=inputs["numerics"].resume,
         outdir=out_dir,
         sample_nmodel=inputs["numerics"].mod_sel, 
         groups=groups, 

@@ -1,6 +1,5 @@
 from enterprise.signals.parameter import function
 import enterprise.signals.parameter as parameter
-import scipy.constants as scon
 import numpy as np
 import src.models_utils as aux
 
