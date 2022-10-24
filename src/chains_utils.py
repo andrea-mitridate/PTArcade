@@ -191,7 +191,6 @@ def plot_posteriors(
     """
 
     if len(np.shape(chains)) == 2:
-        print("Hello There")
         chains = np.array([chains])
         params = np.array([params])
 
