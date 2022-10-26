@@ -20,7 +20,7 @@ de_weight = 50
 red_components = 30 # number of frequency components for the intrinsic red noise
 
 # bhbh signal parameters
-corr = False # set to True if you want to include HD spatial correlations in the analysis 
+corr = True # set to True if you want to include HD spatial correlations in the analysis 
 gwb_components = 13 # number of frequency components for common process
 A_bhb_logmin = None # lower limit for the prior of the bhb signal amplitude. If set to None -18 is used
 A_bhb_logmax = None # upper limit for the prior of the bhb signal amplitude. If set to None -14 is used
