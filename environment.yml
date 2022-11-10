@@ -3,10 +3,10 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - ptmcmcsampler
-  - mpi4py
+  - ptmcmcsampler==2.1.1
+  - mpi4py==3.1.4
   - enterprise-pulsar==3.3.1
-  - pip
+  - pip==22.3.1
   - compilers
   - pip:
     - git+https://github.com/dfm/acor.git@b55eb8efa7df6c73b6f3f0c9b64fa1c801e8f821
