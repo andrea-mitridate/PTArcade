@@ -18,7 +18,7 @@ ng12_dic = {
 
 ipta2_dic = {
     'psrs_data': 'ipta2_psrs_de438.pkl',
-    'noise_data': 'ipta2_wn_de438j.json',
+    'noise_data': 'ipta2_wn_de438.json',
     'emp_dist': None}
 
 

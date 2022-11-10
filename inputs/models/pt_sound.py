@@ -85,8 +85,8 @@ def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
             * nat.convert(nat.GeV, nat.Hz)
             )
 
-    return (
-            aux.h**2 * dil * supp
+    return (norm 
+            * aux.h**2 * dil * supp
             * delta
             * (H_beta)**q
             * (kappa * alpha / (1 + alpha)) ** p

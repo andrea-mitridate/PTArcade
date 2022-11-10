@@ -1,6 +1,9 @@
 import sys
+import numpy as np
+
 from enterprise.signals import utils
 from enterprise.signals import signal_base
+from enterprise.signals import parameter
 from enterprise.signals import gp_signals
 from enterprise.signals import deterministic_signals
 from enterprise_extensions import model_utils
@@ -11,6 +14,22 @@ from enterprise_extensions.blocks import (
                                           common_red_noise_block,
                                           dm_noise_block, red_noise_block,
                                           white_noise_block)
+
+@parameter.function
+def powerlaw2(f, log10_Agamma, components=2):
+    """
+    Defines a modified  powerlaw function that takes as input an
+    array containing the values of the amplitude and spectral index.
+    """
+    df = np.diff(np.concatenate((np.array([0]), f[::components])))
+    return (
+        (10 ** log10_Agamma[0]) ** 2
+        / 12.0
+        / np.pi**2
+        * const.fyr ** (log10_Agamma[1] - 3)
+        * f ** (-log10_Agamma[1])
+        * np.repeat(df, components)
+    )
 
 
 def tnequad_conv(noisedict):
@@ -37,6 +56,7 @@ def builder(
     psrs, 
     model=None, 
     noisedict=None, 
+    bhb_th_prior=False,
     gamma_bhb=None, 
     A_bhb_logmin=None, 
     A_bhb_logmax=None,
@@ -51,6 +71,10 @@ def builder(
         [default = None]
     :param noisedict: Dictionary of pulsar noise properties.
         [default = None]
+    :param bhb_th_prior: if set to True the prior for the bhb signal will be 
+        derived by fitting a 2D Gaussian to the distribution of A and gamma 
+        found in 2011.01246
+        [default = False]
     :param gamma_bhb: fixed common bhb process spectral index value. If set to
         None we vary the spectral index over the range [0, 7].
         [default = None]
@@ -71,7 +95,7 @@ def builder(
     """
 
     # timing model
-    tm = gp_signals.TimingModel(use_svd=True)
+    tm = gp_signals.MarginalizingTimingModel(use_svd=True)
     s = tm
 
     # find the maximum time span to set the GW frequency sampling 
@@ -91,17 +115,41 @@ def builder(
             orf = 'hd'
         else:
             orf = None
-        
-        s += common_red_noise_block(
-            psd='powerlaw', 
-            prior='log-uniform', 
-            Tspan=Tspan, 
-            components=gwb_components,
-            gamma_val=gamma_bhb, 
-            orf=orf, 
-            name = 'gw_bhb',
-            logmin=A_bhb_logmin, 
-            logmax=A_bhb_logmax)
+
+        if bhb_th_prior:
+            # gaussian parameters extracted from 2011.01246
+            mu = np.array([-15.13106549, 4.4989238])
+            sigma = np.array([[0.07035029, -0.02700442], [-0.02700442, 0.23993858]])
+
+            log10_Agamma_gw = parameter.Normal(mu=mu, sigma=sigma , size=2)('gw_bhb')
+            powerlaw_gw = powerlaw2(log10_Agamma=log10_Agamma_gw)
+
+            if orf == 'hd':
+                s += gp_signals.FourierBasisCommonGP(
+                    spectrum=powerlaw_gw,
+                    orf=orf,
+                    components=gwb_components,
+                    Tspan=Tspan,
+                    name='gw_bhb')
+
+            else:
+                s += gp_signals.FourierBasisGP(
+                    spectrum=powerlaw_gw,
+                    components=gwb_components,
+                    Tspan=Tspan,
+                    name='gw_bhb')
+
+        else:
+            s += common_red_noise_block(
+                    psd='powerlaw', 
+                    prior='log-uniform', 
+                    Tspan=Tspan, 
+                    components=gwb_components,
+                    gamma_val=gamma_bhb, 
+                    orf=orf, 
+                    name = 'gw_bhb',
+                    logmin=A_bhb_logmin, 
+                    logmax=A_bhb_logmax)
 
 
     # add DM variations 

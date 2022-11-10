@@ -51,6 +51,7 @@ pta[0] = signal_builder.builder(
     psrs=psrs, 
     model=inputs['model'], 
     noisedict=noise_params,
+    bhb_th_prior=inputs['numerics'].bhb_th_prior,
     gamma_bhb=inputs['numerics'].gamma_bhb,
     A_bhb_logmin=inputs['numerics'].A_bhb_logmin,
     A_bhb_logmax=inputs['numerics'].A_bhb_logmax,
@@ -65,6 +66,7 @@ if inputs["numerics"].mod_sel:
         psrs=psrs, 
         model=None, 
         noisedict=noise_params,
+        bhb_th_prior=inputs['numerics'].bhb_th_prior,
         gamma_bhb=inputs['numerics'].gamma_bhb,
         A_bhb_logmin=inputs['numerics'].A_bhb_logmin,
         A_bhb_logmax=inputs['numerics'].A_bhb_logmax,
@@ -92,6 +94,7 @@ sampler = super_model.setup_sampler(
 x0 = super_model.initial_sample()
 
 if inputs["model"].group:
+
     pars = np.loadtxt(out_dir + '/pars.txt', dtype=np.unicode_)
 
     idx_params = [list(pars).index(pp) for pp in pars if pp in inputs["model"].group]
