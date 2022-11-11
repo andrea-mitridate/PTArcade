@@ -1,5 +1,7 @@
 name: Singularity Build and Deploy
 on:
+  # Allow manual run
+  workflow_dispatch:
   # Build on pushes to master
   push:
     branches:
