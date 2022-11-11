@@ -96,11 +96,7 @@ jobs:
            ls
          fi
       - name: Login and Deploy Container
-        if: (github.event_name != 'pull_request')
-        env:
-          keepgoing: ${{ env.keepgoing }}
+        if: ${{ env.keepgoing == 'true' }}
         run: |
-            if [[ "${keepgoing}" == "true" ]]; then
-                echo ${{ secrets.GITHUB_TOKEN }} | singularity remote login -u ${{ github.actor }} --password-stdin oras://ghcr.io
-                singularity push ${{ matrix.container }} oras://ghcr.io/${github.repository}:${tag}
-            fi
+          echo ${{ secrets.GITHUB_TOKEN }} | singularity remote login -u ${{ github.actor }} --password-stdin oras://ghcr.io
+          singularity push ${{ matrix.container }} oras://ghcr.io/${github.repository}:${tag}
