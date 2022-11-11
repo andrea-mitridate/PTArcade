@@ -67,4 +67,4 @@ From: ubuntu:22.04
 %help
     This container houses all the runtime dependencies for the NANOGrav 15yr non-bhb search.
     Intended usage:
-    $ singularity run non-bhb.sif python sampler.py -m (model info file).py -n (numeric info file).py -c (chain number)
+    $ singularity run non-bhb-search.sif python sampler.py -m (model info file).py -n (numeric info file).py -c (chain number)
