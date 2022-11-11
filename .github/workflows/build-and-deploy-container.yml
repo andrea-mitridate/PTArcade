@@ -101,4 +101,4 @@ jobs:
         if: ${{ env.keepgoing == 'true' }}
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | singularity remote login -u ${{ github.actor }} --password-stdin oras://ghcr.io
-          singularity push ${{ matrix.container }} oras://ghcr.io/${github.repository}:${tag}
+          singularity push ${{ matrix.container }} oras://ghcr.io/${{ github.repository}}:${tag}
