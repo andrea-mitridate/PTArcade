@@ -127,7 +127,7 @@ def builder(
             if orf == 'hd':
                 s += gp_signals.FourierBasisCommonGP(
                     spectrum=powerlaw_gw,
-                    orf=orf,
+                    orf=utils.hd_orf(),
                     components=gwb_components,
                     Tspan=Tspan,
                     name='gw_bhb')
