@@ -61,7 +61,7 @@ From: ubuntu:22.04
     exec /bin/bash -c "source /.singularity_bashrc && IFS=' ' && $*"
 
 %labels
-    Author = David Wright <davecwright3>
+    Author = David Wright <davecwright@knights.ucf.edu>
     Version = v0.0.1
 
 %help
