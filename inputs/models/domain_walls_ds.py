@@ -45,7 +45,7 @@ def spectrum(f, log10_N_eff, log10_T_star, a, b, c):
     gs_star = aux.g_s(T_star)
     g_star = aux.g_rho(T_star)
 
-    alpha = N_eff / (13.6 * g_star / gs_star**(4.3))
+    alpha = N_eff / (13.6 * g_star / gs_star**(4/3))
 
     epsilon = 0.7
 

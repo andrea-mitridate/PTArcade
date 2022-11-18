@@ -17,7 +17,7 @@ parameters = {
     'c':parameter.Uniform(1,3)('c')
     }
 
-group = ['log10_alpha', 'log10_T_star', 'log10_H_R']
+group = ['log10_alpha', 'log10_T_star', 'log10_H_R', 'a', 'b', 'c']
 
 
 def S(x, a, b, c):
