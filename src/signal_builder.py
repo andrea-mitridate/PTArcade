@@ -9,11 +9,31 @@ from enterprise.signals import deterministic_signals
 from enterprise_extensions import model_utils
 from enterprise import constants as const
 from enterprise_extensions import chromatic as chrom
+from enterprise_extensions.sampler import get_parameter_groups
 
 from enterprise_extensions.blocks import (
                                           common_red_noise_block,
                                           dm_noise_block, red_noise_block,
                                           white_noise_block)
+
+
+def unique_sampling_groups(super_model):
+    """
+    Fixes the hypermodel group structure
+    """
+    unique_groups = []
+    for p in super_model.models.values():
+        groups = get_parameter_groups(p)
+        for group in groups:
+            check_group = []
+            for idx in group:
+                param_name = p.param_names[idx]
+                check_group.append(super_model.param_names.index(param_name))
+            if check_group not in unique_groups:
+                unique_groups.append(check_group)
+    
+    return unique_groups
+
 
 @parameter.function
 def powerlaw2(f, log10_Agamma, components=2):

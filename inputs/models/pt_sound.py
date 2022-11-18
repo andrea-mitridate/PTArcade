@@ -11,7 +11,7 @@ smbhb = False # set to True if you want to overlay the new-physics signal to the
 parameters = {
     'log10_alpha':parameter.Uniform(-2,1)('log10_alpha'),
     'log10_T_star':parameter.Uniform(-4,4)('log10_T_star'), 
-    'log10_H_R':parameter.Uniform(-3,0.5)('log10_H_R'),
+    'log10_H_R':parameter.Uniform(-3,0)('log10_H_R'),
     'a':parameter.Uniform(3, 5)('a'),
     'b':parameter.Uniform(2, 4)('b'),
     'c':parameter.Uniform(3, 5)('c')

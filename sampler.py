@@ -85,28 +85,24 @@ out_dir = os.path.join(
     inputs["numerics"].out_dir, inputs["model"].name, f'chain_{input_options["c"]}')
 
 super_model = hypermodel.HyperModel(pta)
+
+groups = signal_builder.unique_sampling_groups(super_model)
+
+if inputs["model"].group:
+    idx_params = [super_model.param_names.index(pp) for pp in inputs["model"].group]
+    [groups.append(idx_params) for _ in range(5)]
+
+# add nmodel index to group structure
+groups.extend([[len(super_model.param_names)-1]])
+
 sampler = super_model.setup_sampler(
     resume=inputs["numerics"].resume,
     outdir=out_dir,
     sample_nmodel=inputs["numerics"].mod_sel,
+    groups=groups,
     empirical_distr=emp_dist)
 
 x0 = super_model.initial_sample()
-
-if inputs["model"].group:
-
-    pars = np.loadtxt(out_dir + '/pars.txt', dtype=np.unicode_)
-
-    idx_params = [list(pars).index(pp) for pp in pars if pp in inputs["model"].group]
-    [sampler.groups.append(idx_params) for _ in range(5)]
-    groups = sampler.groups
-
-    sampler = super_model.setup_sampler(
-        resume=inputs["numerics"].resume,
-        outdir=out_dir,
-        sample_nmodel=inputs["numerics"].mod_sel, 
-        groups=groups, 
-        empirical_distr=emp_dist)
 
 print('--- Starting to sample... ---\n')
 
