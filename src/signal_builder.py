@@ -76,6 +76,7 @@ def builder(
     psrs, 
     model=None, 
     noisedict=None, 
+    pta_dataset=None,
     bhb_th_prior=False,
     gamma_bhb=None, 
     A_bhb_logmin=None, 
@@ -136,11 +137,15 @@ def builder(
         else:
             orf = None
 
-        if bhb_th_prior:
+        if bhb_th_prior and (pta_dataset=='NG15' or pta_dataset=='IPTA2'):
             # gaussian parameters extracted from 2011.01246
-            mu = np.array([-15.13106549, 4.4989238])
-            sigma = np.array([[0.07035029, -0.02700442], [-0.02700442, 0.23993858]])
-
+            if pta_dataset == 'NG15':
+                mu = np.array([-15.1151815, 4.34183987])
+                sigma = np.array([[0.0647048, 0.00038692], [0.00038692, 0.07741015]])
+            elif pta_dataset == 'IPTA2':
+                mu = np.array([-15.02928454, 4.14290127])
+                sigma = np.array([[0.06869369, 0.00017051], [0.00017051, 0.04681747]])
+            
             log10_Agamma_gw = parameter.Normal(mu=mu, sigma=sigma , size=2)('gw_bhb')
             powerlaw_gw = powerlaw2(log10_Agamma=log10_Agamma_gw)
 
@@ -158,6 +163,16 @@ def builder(
                     components=gwb_components,
                     Tspan=Tspan,
                     name='gw_bhb')
+
+        elif bhb_th_prior and pta_dataset!='NG15' and pta_dataset!='IPTA2':
+            print('WARNING: Theory motivated priors for the SMBHB singal parameters are available only for NG15 and IPTA2. Reverting back to log uniform prior for A and uniform prior for gamma.\n')
+            s += common_red_noise_block(
+                    psd='powerlaw', 
+                    prior='log-uniform', 
+                    Tspan=Tspan, 
+                    components=gwb_components,
+                    orf=orf, 
+                    name = 'gw_bhb')
 
         else:
             s += common_red_noise_block(
