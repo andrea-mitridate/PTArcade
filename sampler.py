@@ -143,9 +143,15 @@ print(N_samples, "samples\n")
 
 sampler.sample(
     x0, 
-    inputs["numerics"].N_samples,
+    N_samples,
     SCAMweight=inputs['numerics'].scam_weight,
     AMweight=inputs['numerics'].am_weight,
     DEweight=inputs['numerics'].de_weight)
 
-print('--- Done sampling. ---\n\n')
+print('--- Done sampling. ---')
+
+real_time = time.perf_counter()-start_real
+cpu_time = time.process_time()-start_cpu
+print("Sampling times {:.2f} seconds real =  {:.4f} s/sample, {:.2f} seconds CPU =  {:.4f} s/sample\n".format(
+    real_time, real_time/N_samples, cpu_time, cpu_time/N_samples))
+
