@@ -8,8 +8,29 @@ import src.pta_importer as pta_importer
 import src.signal_builder as signal_builder
 import src.input_handler as input_handler
 
+import time
+import timeit
+import platform
 
-print('\n--- Starting to run ---\n\n')
+
+from pstats import SortKey
+import cProfile
+import pstats
+
+try:
+    import cpuinfo
+    def cpu_model():
+        return cpuinfo.get_cpu_info()["brand_raw"]
+
+except ModuleNotFoundError:
+    def cpu_model():
+        return "unknown CPU (for better info install py-cpuinfo)"
+
+print('\n--- Starting to run ---')
+print("Node", platform.node(), cpu_model(),"\n");
+
+start_cpu = time.process_time()
+start_real = time.perf_counter()
 
 ###############################################################################
 # load inputs
@@ -38,7 +59,8 @@ print('--- Loading Pulsars and noise data ... ---\n')
 # import pta data
 psrs, noise_params, emp_dist = pta_importer.pta_data_importer(inputs['numerics'].pta_data)
 
-print('--- Done loading Pulsars and noise data. ---\n\n')
+print('--- Done loading Pulsars and noise data. ---')
+print(len(psrs), "pulsars\n")
 
 ###############################################################################
 # define models and initialize PTA
@@ -106,7 +128,18 @@ sampler = super_model.setup_sampler(
 
 x0 = super_model.initial_sample()
 
-print('--- Starting to sample... ---\n')
+super_model.get_lnlikelihood(x0) # Cache now to make timing more accurate
+
+print("Setup times (including first sample) {:.2f} seconds real, {:.2f} seconds CPU".format(
+    time.perf_counter()-start_real, time.process_time()-start_cpu));
+start_cpu = time.process_time()
+start_real = time.perf_counter()
+
+print('--- Starting to sample... ---')
+
+N_samples = inputs["numerics"].N_samples
+
+print(N_samples, "samples\n")
 
 sampler.sample(
     x0, 
