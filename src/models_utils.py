@@ -24,6 +24,7 @@ z_eq = 3402 # redshift of  matter-radiation equality
 T_eq = T_0 * (1 + z_eq) # temperature of matter-radiation equality (GeV)
 h = 0.674 # scaling factor for Hubble expansion rate 
 H_0 = h * 100 * nat.convert(nat.km * nat.s**-1 * nat.Mpc**-1, nat.GeV) # Hubble constant (GeV)
+H_0_Hz = H_0 * nat.convert(nat.GeV, nat.Hz)
 omega_v = 0.6847 # DE density today Planck 2018
 omega_m = 0.3153 # matter density today Planck 2018
 omega_r = 9.2188e-5 # radiation density today Planck 2018
@@ -152,7 +153,7 @@ def omega2cross(omega_hh):
         h2_omega = omega_hh(f, **kwargs)
 
         # characteristic strain spectrum h_c(f)
-        hcf = H_0 / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f) * nat.convert(nat.GeV, nat.Hz)
+        hcf = H_0_Hz / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f)
 
         # cross-power spectral density S(f) (s^3)s
         sf = (hcf**2 / (12 * np.pi**2 * f**3)) * np.repeat(df, components)
@@ -220,7 +221,7 @@ def freq_at_temp(T):
     :rtype: Union[NDArray, float]
     """
 
-    f_0 = H_0 * nat.convert(nat.GeV, nat.Hz) / (2 * np.pi)
+    f_0 = H_0_Hz / (2 * np.pi)
 
     T_ratio = T_0 / T
     g_ratio = g_rho_0 / g_rho(T)
