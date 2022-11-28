@@ -8,7 +8,7 @@ name = 'kinks' # name of the model
 smbhb = True # set to True if you want to overlay the new-physics signal to the SMBHB signal
 
 parameters = {
-    'log10_Gmu' : parameter.Uniform(-14, -3)('log10_Gmu'),
+    'log10_Gmu' : parameter.Uniform(-14, -6)('log10_Gmu'),
     }
 
 group = ['log10_Gmu']   
