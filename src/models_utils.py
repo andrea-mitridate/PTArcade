@@ -24,12 +24,13 @@ z_eq = 3402 # redshift of  matter-radiation equality
 T_eq = T_0 * (1 + z_eq) # temperature of matter-radiation equality (GeV)
 h = 0.674 # scaling factor for Hubble expansion rate 
 H_0 = h * 100 * nat.convert(nat.km * nat.s**-1 * nat.Mpc**-1, nat.GeV) # Hubble constant (GeV)
-H_0_Hz = H_0 * nat.convert(nat.GeV, nat.Hz)
+H_0_Hz = H_0 * nat.convert(nat.GeV, nat.Hz) # Hubble constant (Hz)
 omega_v = 0.6847 # DE density today Planck 2018
 omega_m = 0.3153 # matter density today Planck 2018
 omega_r = 9.2188e-5 # radiation density today Planck 2018
 A_s = np.exp(3.044)*10**-10 # Planck 2018 amplitude of primordial scalar power spectrum
 f_cmb = 7.7314e-17 # CMB pivot scale (Hz)
+gev_to_hz = nat.convert(nat.GeV, nat.Hz) # conversion from gev to Hz
 
 # tabulated values for the number of relativistic degrees of
 # freedom from reference 1803.01038

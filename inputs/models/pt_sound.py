@@ -82,7 +82,7 @@ def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
             * np.pi * g_star**(1/2) * (g_s_eq/g_s_star)**(1/3)
             * aux.T_0 / aux.M_pl
             * T_star * f_peak * H_beta**-1
-            * nat.convert(nat.GeV, nat.Hz)
+            * aux.gev_to_hz
             )
 
     return (norm 
