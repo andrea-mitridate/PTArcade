@@ -10,15 +10,16 @@ name = 'sigw_box' # name of the model
 smbhb = True # set to True if you want to overlay the new-physics signal to the SMBHB signal
 
 parameters = {
-    'log10_fmax' : parameter.Uniform(-11, -5)('log10_fmax'),
     'log10_fmin' : parameter.Uniform(-11, -5)('log10_fmin'),
+    'log10_fmax' : parameter.Uniform(-11, -5)('log10_fmax'),
     'log10_A' : parameter.Uniform(-3,1)('log10_A')
+    
     }
 
-group = ['log10_A','log10_fmin','log10_fmax']   
+group = ['log10_fmin','log10_fmax','log10_A']   
 
 cwd = os.getcwd()
-spectrum_file = aux.spec_importer(cwd + '/inputs/models/models_data/sigw_box.txt')
+spectrum_file = aux.spec_importer(cwd + '/inputs/models/models_data/sigw_box.dat')
 
 @aux.omega2cross
 def spectrum(f, log10_A, log10_fmin , log10_fmax):
@@ -34,11 +35,13 @@ def spectrum(f, log10_A, log10_fmin , log10_fmax):
     :param float log10_A: Dimensionless scaling factor in log10 space.
     :returns: GW energy density as a fraction of the closure density.
     :rtype: float
-    """    
+    """
+    
+    A = 10**log10_A
 
     prefactor = ( # assumes f_reheating > f 
         (aux.omega_r) * (aux.g_rho(f, is_freq=True) / aux.g_rho_0) *
         (aux.g_s_0 / aux.g_s(f, is_freq=True))**(4/3)
         )
     
-    return aux.h**2 * prefactor * 10**spectrum_file(np.log10(f),log10_A=log10_A, log10_fmin = log10_fmin, log10_fmax = log10_fmax)
+    return aux.h**2 * A**2 * prefactor * 10**spectrum_file(np.log10(f), log10_fmin = log10_fmin, log10_fmax = log10_fmax)

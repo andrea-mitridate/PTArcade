@@ -11,7 +11,7 @@ smbhb = True # set to True if you want to overlay the new-physics signal to the 
 
 parameters = {
     'log10_f_peak':parameter.Uniform(-11,-5)('log10_f_peak'),
-    'log10_A':parameter.Uniform(-5,1)('log10_A')
+    'log10_A':parameter.Uniform(-3,1)('log10_A')
     }
 
 group = ['log10_f_peak','log10_A']   
