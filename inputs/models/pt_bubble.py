@@ -1,7 +1,6 @@
 import enterprise.signals.parameter as parameter
 import src.models_utils as aux
 from scipy.special import gamma
-import natpy as nat
 import numpy as np
 
 name = 'pt_bubble' # name of the model

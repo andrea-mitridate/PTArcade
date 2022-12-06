@@ -1,6 +1,5 @@
 import enterprise.signals.parameter as parameter
 import src.models_utils as aux
-import natpy as nat
 import numpy as np
 
 
@@ -55,7 +54,7 @@ def spectrum(f, log10_N_eff, log10_T_star, a, b, c):
         * aux.T_0
         * T_star
         / aux.M_pl
-        * nat.convert(nat.GeV, nat.Hz)
+        * aux.gev_to_hz
     )
 
     g_facts = g_star * (gs_eq / gs_star) ** (4 / 3)

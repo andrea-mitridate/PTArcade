@@ -26,8 +26,8 @@ except ModuleNotFoundError:
     def cpu_model():
         return "unknown CPU (for better info install py-cpuinfo)"
 
-print('\n--- Starting to run ---')
-print("Node", platform.node(), cpu_model(),"\n");
+print('\n--- Starting to run ---\n')
+print("\tNode", platform.node(), cpu_model(),"\n");
 
 start_cpu = time.process_time()
 start_real = time.perf_counter()
@@ -59,8 +59,8 @@ print('--- Loading Pulsars and noise data ... ---\n')
 # import pta data
 psrs, noise_params, emp_dist = pta_importer.pta_data_importer(inputs['numerics'].pta_data)
 
-print('--- Done loading Pulsars and noise data. ---')
-print(len(psrs), "pulsars\n")
+print(f"\t loaded {len(psrs)} pulsars\n")
+print('--- Done loading Pulsars and noise data. ---\n')
 
 ###############################################################################
 # define models and initialize PTA
@@ -130,16 +130,14 @@ x0 = super_model.initial_sample()
 
 super_model.get_lnlikelihood(x0) # Cache now to make timing more accurate
 
-print("Setup times (including first sample) {:.2f} seconds real, {:.2f} seconds CPU".format(
+print("Setup times (including first sample) {:.2f} seconds real, {:.2f} seconds CPU\n".format(
     time.perf_counter()-start_real, time.process_time()-start_cpu));
 start_cpu = time.process_time()
 start_real = time.perf_counter()
 
-print('--- Starting to sample... ---')
-
 N_samples = inputs["numerics"].N_samples
 
-print(N_samples, "samples\n")
+print(f'--- Starting to sample {N_samples} samples... ---\n')
 
 sampler.sample(
     x0, 
@@ -154,4 +152,3 @@ real_time = time.perf_counter()-start_real
 cpu_time = time.process_time()-start_cpu
 print("Sampling times {:.2f} seconds real =  {:.4f} s/sample, {:.2f} seconds CPU =  {:.4f} s/sample\n".format(
     real_time, real_time/N_samples, cpu_time, cpu_time/N_samples))
-
