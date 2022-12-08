@@ -10,16 +10,16 @@ name = 'sigw_log' # name of the model
 smbhb = True # set to True if you want to overlay the new-physics signal to the SMBHB signal
 
 parameters = {
-    'log10_fpeak' : parameter.Uniform(-10, -6)('log10_fpeak'),
-    'log10_A' : parameter.Uniform(-3,1)('log10_A'),
-    'width' : parameter.Uniform(0.1,3)('width')
+    'log10_fpeak' : parameter.Uniform(-11, -5)('log10_fpeak'),
+    'width' : parameter.Uniform(0.1,3)('width'),
+    'log10_A' : parameter.Uniform(-3,1)('log10_A')
     
     }
 
 group = ['log10_fpeak','width','log10_A']   
 
 cwd = os.getcwd()
-spectrum_file = aux.spec_importer(cwd +'/inputs/models/models_data/sigw_log.txt')
+spectrum_file = aux.spec_importer(cwd +'/inputs/models/models_data/sigw_log.dat')
 
 @aux.omega2cross
 def spectrum(f,log10_A, width,log10_fpeak):

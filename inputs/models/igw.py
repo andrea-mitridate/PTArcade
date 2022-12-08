@@ -7,12 +7,12 @@ name = 'igw'  # name of the model
 smbhb = True  # set to True if you want to overlay the new-physics signal to the SMBHB signal
 
 parameters = {
-    'n_t': parameter.Uniform(0, 5)('n_t'),
-    'log10_r': parameter.Uniform(-10, 0)('log10_r'),
+    'n_t': parameter.Uniform(0, 6)('n_t'),
+    'log10_r': parameter.Uniform(-40, 0)('log10_r'),
     'log10_T_rh': parameter.Uniform(-3, 3)('log10_T_rh')  # this in GeV
     }
 
-group = []
+group = ['n_t','log10_r','log10_T_rh']
 
 
 def transfer_func(f, f_rh):
