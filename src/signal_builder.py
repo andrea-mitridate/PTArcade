@@ -188,9 +188,9 @@ def builder(
 
 
     # add DM variations 
-    dm_var = [hasattr(psr, 'dmx') for psr in psrs] # check is dmx parameters are present in pulsars objects
+    dm_var = [hasattr(psr, 'dmx') for psr in psrs] # check if dmx parameters are present in pulsars objects
 
-    if any(dm_var):
+    if all(dm_var):
         pass
     elif not any(dm_var):
         s += dm_noise_block(
@@ -246,7 +246,7 @@ def builder(
         if 'NANOGrav' in p.flags['pta']:
             s2 = s + white_noise_block(
                 vary=white_vary, inc_ecorr=True, tnequad=tnequad, select='backend')
-            if '1713' in p.name and dm_var:
+            if '1713' in p.name and not any(dm_var):
                 s3 = s2 + chrom.dm_exponential_dip(
                     tmin=54500, tmax=55000, idx=2, sign=False, name='dmexp_1')
                 if p.toas.max() / const.day > 57850:
@@ -258,7 +258,7 @@ def builder(
         else:
             s4 = s + white_noise_block(
                 vary=white_vary, inc_ecorr=False, tnequad=tnequad, select='backend')
-            if '1713' in p.name and dm_var:
+            if '1713' in p.name and not any(dm_var):
                 s5 = s4 + chrom.dm_exponential_dip(
                     tmin=54500, tmax=55000, idx=2, sign=False, name='dmexp_1')
                 if p.toas.max() / const.day > 57850:
