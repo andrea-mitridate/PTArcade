@@ -15,7 +15,7 @@ parameters = {
 group = ['log10_Gmu', 'sqrt_kappa']   
 
 cwd = os.getcwd()
-log_spectrum = aux.spec_importer(cwd +'/inputs/models/models_data/meta_l+s.dat')
+log_spectrum = aux.spec_importer(cwd +'/inputs/models/models_data/meta_l+s.h5')
 
 @aux.omega2cross
 def spectrum(f, log10_Gmu, sqrt_kappa):

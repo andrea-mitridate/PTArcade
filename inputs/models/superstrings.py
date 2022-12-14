@@ -15,7 +15,7 @@ parameters = {
 group = ['log10_Gmu', 'log10_P']   
 
 cwd = os.getcwd()
-log_spectrum = aux.spec_importer(cwd +'/inputs/models/models_data/superstrings.dat')
+log_spectrum = aux.spec_importer(cwd +'/inputs/models/models_data/superstrings.h5')
 
 @aux.omega2cross
 def spectrum(f, log10_Gmu, log10_P):
