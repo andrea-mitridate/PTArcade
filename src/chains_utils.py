@@ -1,24 +1,77 @@
 import os
+import re
 import sys
 import math
 import numpy as np
 import pandas as pd
-from cycler import cycler
+from scipy.stats import norm
+import importlib.util
 
 from enterprise_extensions import model_utils
 
 import matplotlib.pyplot as plt
+from matplotlib import ticker
 from matplotlib.ticker import ScalarFormatter
 from matplotlib.ticker import FormatStrFormatter
-import matplotlib as mpl
-import seaborn as sns
-import corner
+from getdist import plots, MCSamples
+import getdist
+
 
 class ScalarFormatterClass(ScalarFormatter):
    def _set_format(self):
       self.format = "%1.2f"
 
-colors = sns.color_palette("tab10")
+
+def set_custom_tick_options(
+    ax,
+    left=True,
+    right=True,
+    bottom=True,
+    top=True,
+    ):
+    
+    ax.minorticks_on()
+    
+    ax.tick_params(which='major', direction='in', 
+                   length=6, width = 1, 
+                   bottom = bottom, 
+                   top = top,
+                   left = left,
+                   right = right,
+                   pad = 5)
+    ax.tick_params(which='minor',direction='in',
+                   length = 3, width = 1, 
+                   bottom = bottom, 
+                   top = top,
+                   left = left,
+                   right = right)
+
+
+def params_loader(file):
+    params = {}
+
+    with open(file) as f:
+        for line in f:
+            if ':' not in line:
+                continue
+
+            key = line.split(":")[0]
+
+            if "Uniform" in line:
+                min = float(re.search('pmin=(.*?),', line).group(1))
+                max = float(re.search('pmax=(.*?)\\)', line).group(1))
+
+                params[key] = (min, max)
+            
+            elif "Normal" in line:
+                dim = len(re.search('\\[(.*?)\\]', line).group(1).split('    '))
+                for i in range(dim):
+                    params[f"{key}_{i}"] = None
+
+            else:
+                params[key] = None
+
+    return params
 
 
 def import_chains(chains_dir, burn_frac=1/4):
@@ -32,18 +85,23 @@ def import_chains(chains_dir, burn_frac=1/4):
     directories = [x for x in os.listdir(chains_dir) if not x.startswith(".")]
 
     # get the parameter lits and check that all the chains have the same parameters
-    params = np.loadtxt(os.path.join(chains_dir, directories[0], 'pars.txt'), dtype=str)
+    params = params_loader(os.path.join(chains_dir, directories[0], 'priors.txt'))
 
     for chain in directories:
-        temp_par = np.loadtxt(os.path.join(chains_dir, chain, 'pars.txt'), dtype=str)
+        temp_par = params_loader(os.path.join(chains_dir, chain, 'priors.txt'))
 
-        if (temp_par != params).all():
+        if temp_par != params:
             sys.exit(" ERROR: chains have differnt parameters.")
 
     # add name for sampler parameters 
-    params = np.concatenate(
-        (params,
-        ['log_posterior', 'log_likelihood', 'acceptance_rate', 'n_parall']))
+
+    params.update({
+        'nmodel' : None,
+        'log_posterior' : None,
+        'log_likelihood' : None,
+        'acceptance_rate' : None,
+        'n_parall' : None
+        })
 
     # import and merge all the chains removing the burn-in
     for idx, dir in enumerate(directories):
@@ -51,13 +109,13 @@ def import_chains(chains_dir, burn_frac=1/4):
             mrgd_chain = pd.read_csv(
                 os.path.join(chains_dir, dir, 'chain_1.txt'),
                 sep='\t',
-                names=params)
+                names=list(params.keys()))
             mrgd_chain = mrgd_chain.iloc[int(len(mrgd_chain) * burn_frac):]
 
         temp_chain = pd.read_csv(
             os.path.join(chains_dir, dir, 'chain_1.txt'),
             sep='\t',
-            names=params)
+            names=list(params.keys()))
         mrgd_chain = pd.concat(
             [mrgd_chain, temp_chain.iloc[int(len(temp_chain) * burn_frac):]],
             ignore_index=True,
@@ -150,170 +208,299 @@ def vol_2d_contour(sigma):
     return 1 - np.exp(-(sigma**2)/2)
 
 
-def plot_posteriors(
-    chains,
-    params,
-    params_name=None,
-    model_id = None,
-    ranges=None,
-    smooth=1.5,
-    sigmas=None,
-    save=False,
-    model_name=None):
+def chain_filter(chain, params, model_id, par_to_plot):
     """
-    Plot a corner plot with the posterior distributions.
-
-    chain: numpy array
-        chain to be plotted
-    params: list
-        list of parameters names 
-    params_names: dict (optional)
-        dictionary with as keys the names of the parameters in the params list
-        to be plotted, and with values the formatted parameters name to be shown
-        in the plots. (default is None, and in this case  plots all
-        common parameters + the mcmc parameters are shown without any formatting.
-    model_id: 0 or 1 (optional)
-        assuming that the data are generated using hypermodels, specifies the model
-        for which to plot the posteriors (default is None and in this case nmodel
-        is taken to be 1)
-    ranges: list of lists (optional)
-        containing the ranges for the parameters to plot (default is None, in this 
-        case the whole range of the data is shown)
-    smooth: int (optional)
-        The standard deviation for Gaussian kernel passed to 
-        scipy.ndimage.gaussian_filter to smooth the 2-D and 1-D histograms
-        respectively. If None (default), no smoothing is applied.
-    save: boolean (optional) 
-        if set to True the plot is going to be saved in the folder
-        "./plots/" (default is False, and in this case not plot is saved)
-    model_name: str (required if save is set to True)
-        model name used to name the output files
+    Select the rows in the chain that correspond the model and paramerers 
+    we want to plot the posteriors for.
     """
+    nmodel_idx = list(params).index('nmodel')
 
-    if len(np.shape(chains)) == 2:
-        chains = np.array([chains])
-        params = np.array([params])
+    if model_id is None:
+        print("No model ID specified, posteriors are plotted for model 1")
+        filter_model = chain[:, nmodel_idx] > 0.5
+    elif model_id == 0:
+        filter_model = chain[:, nmodel_idx] < 0.5
+    elif model_id == 1:
+        filter_model = chain[:, nmodel_idx] > 0.5
+    else:
+        sys.exit(" ERROR: model_idx can only be an integer equal to 0 or 1")
 
-    for idx, chain in enumerate(chains):
-        # define the filter for the model to plot 
-        nmodel_idx = list(params[idx]).index('nmodel')
+    chain = chain[filter_model]
 
-        if model_id is None:
-            print("No model ID specified, posteriors are plotted for model 1")
-            filter = chain[:, nmodel_idx] > 0.5
-        elif model_id == 0:
-            filter = chain[:, nmodel_idx] < 0.5
-        elif model_id == 1:
-            filter = chain[:, nmodel_idx] > 0.5
-        else:
-            sys.exit(" ERROR: model_idx can only be an integer equal to 0 or 1")
-
-        # define the list of parameters to plot and find therir position in the chains
-        params_dic = {}
-
-        if params_name:
-            for par, name in params_name.items():
-                try:
-                    params_dic[name] = list(params[idx]).index(par)
-                except:
-                    print(f"WARNING: {par} does not appear in the parameter list")
-
-        else:
-            params[idx] = [
-                x
-                for x in params[idx]
+    if par_to_plot:
+        filter_par = [list(params).index(x) for x in par_to_plot if x in params]
+    else:
+        filter_par = [list(params).index(x)
+                for x in params 
                 if x
                 not in [
                     "nmodel",
                     "log_posterior",
                     "log_likelihood",
                     "acceptance_rate",
-                    "n_parall"]]
+                    "n_parall"]
+                and '+' not in x
+                and '-' not in x]
 
-            for idx, par in enumerate(params[idx]):
-                if '+' not in par and '-' not in par:
-                    params_dic[par] =  idx
+    return chain[:, filter_par], params[filter_par]
 
-        # gets the data for the plot
-        corner_data = []
-        labels = []
-        for par, pos in params_dic.items():
-            corner_data.append(chain[filter, pos])
-            labels.append(par)
+def create_ax_labels(par_names):
+
+    plt_params = {
+        'font.cursive'  : ['Apple Chancery','Textile,Zapf Chancery', 'Sand', 'Script MT','Felipa','cursive'],
+        'font.family'  : 'serif',
+        'font.serif'  : 'Palatino',
+        'font.size'  : 16.0,
+        'font.stretch'  : 'normal',
+        'font.style'  : 'normal',
+        'font.variant'  : 'normal',
+        'font.weight'  : 'normal',
+        'text.usetex'  : False,
+        'mathtext.fontset'  : 'custom',
+        'mathtext.rm'  : 'serif',
+        'mathtext.it'  : 'serif:italic',
+        'mathtext.bf'  : 'serif:bold'}
+
+    plt.rcParams.update(plt_params) 
+
+    labelsize = 25
+    ticksize = 25
+
+    f = plt.gcf()
+    axarr = f.get_axes()
+
+    N_params = len(par_names)
+
+    if N_params == 1:
+        set_custom_tick_options(axarr[0])
+        set_custom_tick_options(axarr[0], left=False, right=False)
+        axarr[0].tick_params(axis='x', which='both', labelsize=ticksize - 8)
+        axarr[0].set_xlabel(par_names[0],
+                        fontsize=labelsize - 8)
+        axarr[0].set_ylabel('',
+                        fontsize=labelsize - 8)
+        fmtr = ticker.ScalarFormatter(useMathText=True)
+        axarr[0].xaxis.set_major_formatter(fmtr)
+
+        return
+
+    for idx in range(N_params):
+        for idy in range(N_params - idx):
+            id = int(N_params * idx + idy - max(idx * (idx - 1) /2, 0))
+
+            axarr[id].tick_params(axis='x', which='both', labelsize=ticksize - 8)
+
+            if idx == 0 and idy == 0:
+                set_custom_tick_options(axarr[id])
+                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize - 8)
+                axarr[id].set_xlabel(par_names[idx], fontsize=labelsize - 8)
+                axarr[id].set_ylabel(par_names[N_params - idy - 1],
+                              fontsize=labelsize - 8)
+            elif idx == N_params - 1:
+                set_custom_tick_options(axarr[id], left=False, right=False)
+                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize - 8)
+                axarr[id].set_xlabel(par_names[idx], fontsize=labelsize - 8)
+            elif idy == N_params - idx - 1:
+                set_custom_tick_options(axarr[id], left=False, right=False)
+            elif idx == 0:
+                set_custom_tick_options(axarr[id])
+                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize - 8)
+                axarr[id].set_ylabel(par_names[N_params - idy - 1],
+                              fontsize=labelsize - 8)
+            elif idy == 0:
+                set_custom_tick_options(axarr[id])
+                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize - 8)
+                axarr[id].set_xlabel(par_names[idx], fontsize=labelsize - 8)
+            else:
+                set_custom_tick_options(axarr[id])
+                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize - 8)
+
+        fmtr = ticker.ScalarFormatter(useMathText=True)
+        axarr[id].xaxis.set_major_formatter(fmtr)
+    
+    return
+
+
+def plot_bhb_prior(params, bhb_prior, sigmas):
+
+    if bhb_prior == 'NG15':
+        mu = np.array([-15.1151815, 4.34183987])
+        cov = np.array([[0.0647048, 0.00038692], [0.00038692, 0.07741015]])
+    elif bhb_prior == 'IPTA2':
+        mu = np.array([-15.02928454, 4.14290127])
+        cov = np.array([[0.06869369, 0.00017051], [0.00017051, 0.04681747]])
         
-        corner_data = np.stack(list(corner_data), axis=-1)
+    A_0, gamma_0 = mu
 
-        # if only one parameter needs to be plotted create the histogram
-        if len(corner_data[0]) == 1:
-            if idx == 0:
-                fig = plt.hist(
-                    corner_data, 
-                    bins=50, 
-                    density=True, 
-                    histtype='stepfilled', 
-                    lw=2, 
-                    color='C0', 
-                    alpha=0.5)
+    eig = np.linalg.eig(np.linalg.inv(cov))
+    a, b = eig[0]
+    R_rot =  eig[1]
 
-                plt.xlabel(labels[0])
-                plt.ylabel('PDF')
-                if ranges:
-                    plt.xlim(ranges[0])
-                plt.tight_layout()
-            else:
-                plt.hist(
-                    corner_data, 
-                    bins=50, 
-                    density=True, 
-                    histtype='stepfilled', 
-                    lw=2, 
-                    color='C0', 
-                    alpha=0.5)
+    t = np.linspace(0, 2*np.pi, 100)
+    Ell = - np.array([(a)**(-1/2) * np.cos(t) , (b)**(-1/2) * np.sin(t)])
+
+    Ell_rot = np.zeros((len(sigmas), 2, Ell.shape[1]))
+    for idx, sigma in enumerate(sigmas):
+        for i in range(Ell.shape[1]):
+            Ell_rot[idx, :, i] = np.dot(R_rot, sigma * Ell[:,i])
+
+    f = plt.gcf()
+    axarr = f.get_axes()
+
+    N_params = len(params)
+    for idx in range(N_params):
+        for idy in range(N_params - idx):
+            id = int(N_params * idx + idy - max(idx * (idx - 1) /2, 0))
+            c2t = N_params - idx - idy - 1
+
+            if str(params[idx]) == 'gw_bhb_0' and str(params[N_params - idy - 1]) == 'gw_bhb_1':
+                id_marg_A = int(id + N_params - idx - idy - 1)
+                id_marg_g = int(id + c2t*(N_params - idx) - c2t * (c2t + 1) / 2 + c2t)
+                for idx in range(len(sigmas)):
+                    axarr[id].plot(A_0 + Ell_rot[idx, 0, :] , gamma_0 + Ell_rot[idx, 1, :],
+                    color='black', 
+                    linestyle='dashed',
+                    linewidth=0.7,
+                    alpha=0.9)
+            elif params[idx] == 'gw_bhb_1' and params[N_params - idy - 1] == 'gw_bhb_0':
+                id_marg_g = int(id + N_params - idx - idy - 1)
+                id_marg_A = int(id + c2t*(N_params - idx) - c2t * (c2t + 1) / 2 + c2t)
+                for idx in range(len(sigmas)):
+                    axarr[id].plot( A_0 + Ell_rot[idx, 1, :] , gamma_0 + Ell_rot[idx, 0, :],
+                    'black',
+                    linestyle='dashed',
+                    linewidth=0.7,
+                    alpha=0.9)
+        
+    A_pts = np.arange(-17, 15, 0.001)
+    g_pts = np.arange(2, 6, 0.001)
+    axarr[id_marg_A].plot(A_pts, norm.pdf(A_pts, mu[0], cov[0,0]**(1/2)),
+        color='black',
+        linestyle='dashed',
+        linewidth=1)
+    axarr[id_marg_g].plot(g_pts, norm.pdf(g_pts, mu[1], cov[1,1]**(1/2)),
+        color='black',
+        linestyle='dashed',
+        linewidth=1)
 
 
-        # if multiple parameters need to be plotted creates a corner plot 
-        else:
-            if sigmas is None:
-                levels = (vol_2d_contour(2),vol_2d_contour(1))
-            else:
-                levels = list([vol_2d_contour[x] for x in sigmas])
+def plot_settings(sigmas, samples, one_column):
 
-            if idx == 0:
-                fig = corner.corner(
-                    corner_data,
-                    labels=labels,
-                    bins=50,
-                    color='steelblue',
-                    smooth=smooth,
-                    alpha=1,
-                    plot_datapoints=False,
-                    plot_contours=True,
-                    levels=levels,
-                    range=ranges,
-                    plot_density=True
-                    )
-            else:
-                corner.corner(
-                    corner_data,
-                    labels=labels,
-                    bins=50,
-                    color='tomato',
-                    smooth=smooth,
-                    alpha=0.,
-                    plot_datapoints=False,
-                    plot_contours=True,
-                    levels=levels,
-                    range=ranges,
-                    plot_density=True,
-                    fig=fig
-                    )
+    sets = plots.GetDistPlotSettings()
+    sets.legend_fontsize = 18
+    sets.prob_y_ticks = False
+    sets.figure_legend_loc = 'upper right'
+    sets.linewidth = 2
+    sets.norm_1d_density = 'integral'
+    sets.alpha_filled_add = 0.8
+    if one_column:
+        sets.subplot_size_inch = 2
+    else:
+        sets.subplot_size_inch = 3
 
-    if save:
-        if model_name:
-            plt.savefig(f"./plots/{model_name}_corner.pdf")
-        else:
-            print('Please specify a model name to save the corner plot.')
+    if sigmas is not None:
+        sets.num_plot_contours = len(sigmas)
+        for sample in samples:
+            sample.updateSettings({'contours': [vol_2d_contour(x) for x in sigmas]})
 
-    plt.show()
+    return sets
 
-    return 
+
+def plot_posteriors(
+    chains,
+    params,
+    par_to_plot=None,
+    par_names=None,
+    model_id=None,
+    samples_name=None,
+    ranges={},
+    sigmas=None,
+    bhb_prior=False,
+    one_column = False,
+    save=False,
+    model_name=None):
+    """"
+    Plot posterior distributions for the chosen parameteres in the chains. 
+    chains: list of lists
+        contains all the chains to be plotted
+    params: list of lists
+        contains the name of the parameters appearing in the chains
+    par_to_plot: list of lists (optional)
+        contains the paramter to plot from each chain
+    par_names: lists of list (optional)
+        contains the LaTeX formatted names for the plotted parameters 
+        of each model. If not specified the name in the par files will be used.
+    model_id: 0 or 1 (optional)
+        assuming that the data are generated using hypermodels, specifies the model
+        for which to plot the posteriors (default is None and in this case nmodel
+        is taken to be 1)
+    samples_name: list of strings
+        contains the name of the models associated to each chains, and it's used to
+        create the legend . If not specified, the labels in the legend will be
+        Sample 1, Sample 2, ...
+    ranges: list of lists (optional)
+        containing the ranges for the parameters to plot (default is None, in this 
+        case the whole range of the data is shown)
+    save: boolean (optional) 
+        if set to True the plot is going to be saved in the folder
+        "./plots/" (default is False, and in this case not plot is saved)
+    model_name: str (optional)
+        model name used to name the output files. If not specified the plot will be
+        saved as 'corner.pdf'
+    """
+
+    N_chains = len(chains)
+
+    ranges = params
+    params = [np.array(list(par.keys())) for par in params]
+
+    if par_to_plot is None:
+        par_to_plot = [None] * N_chains
+    if model_id is None:
+        model_id = [None] * N_chains
+    if not samples_name:
+        samples_name = [f'Sample {idx+1}' for idx in range(N_chains)]
+
+    samples = []
+    par_union = []
+    for idx, chain in enumerate(chains):
+        filtered = chain_filter(chain, params[idx], model_id[idx], par_to_plot[idx])
+        filtered_ranges= {k:v for k,v in ranges[idx].items() if k in filtered[1] and v is not None}
+
+        samples.append(MCSamples(samples=filtered[0], names=filtered[1], ranges=filtered_ranges, ignore_rows=1))
+
+        par_union += [par for par in filtered[1] if par not in par_union]    
+   
+    if par_names is None:
+        names_union = par_union
+    else:
+        names_union = []
+        for names in par_names:
+            names_union += [name for name in names if name not in names_union]   
+
+    sets = plot_settings(sigmas, samples, one_column)
+
+    if len(par_union) > 1:
+        g = plots.get_subplot_plotter(settings=sets)
+        g.triangle_plot(samples,
+            filled=True, 
+            params=par_union, 
+            legend_labels=samples_name, 
+            diag1d_kwargs={'normalized':True})
+        if bhb_prior:
+            plot_bhb_prior(par_union, bhb_prior, sigmas)
+    if len(par_union) == 1:
+        g = plots.get_single_plotter(width_inch=5, settings=sets)
+        g.plot_1d(samples,
+            par_union[0], 
+            legend_labels=samples_name, 
+            normalized=True)
+    
+    create_ax_labels(names_union)
+
+    if save and model_name:
+        plt.savefig(f'./plots/{model_name}_corner.pdf', bbox_inches="tight")
+    elif save:
+        plt.savefig('./plots/corner.pdf', bbox_inches="tight")
+
+    return
