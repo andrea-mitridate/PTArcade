@@ -6,7 +6,7 @@ import natpy as nat
 import numpy as np
 import scipy.stats as ss
 from enterprise.signals.parameter import function
-from scipy import interpolate
+from src import fast_interpolate
 
 cwd = os.getcwd()
 
@@ -195,21 +195,15 @@ def spec_importer(path):
     Interpolate the GWB power spectrum from tabulated data. 
     """
 
-    grids, omega_grid, par_names = prep_data(path)
+    info, data = fast_interpolate.load_data(path)
+    # info is a list of (name, start, step)
 
     def spectrum(f, **kwargs):
 
-        points = np.zeros((len(f), len(kwargs) + 1))
-
-        for idx, par in enumerate(par_names):
-            if par == 'f':
-                points.T[idx] = f
-
-            else:
-                points.T[idx] = kwargs[par] * np.ones(len(f))
-
-        return interpolate.interpn((grids), omega_grid, points)
-
+        # Construct right information format for interpolation
+        return fast_interpolate.interp([(start, step, f if name == 'f' else kwargs[name])
+                                         for (name, start, step) in info],
+                                        data)
     return spectrum
 
 

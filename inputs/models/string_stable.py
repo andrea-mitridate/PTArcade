@@ -14,7 +14,7 @@ parameters = {
 group = ['log10_mu']
 
 cwd = os.getcwd()
-log_spectrum = aux.spec_importer(cwd +'/inputs/models/models_data/stable.dat')
+log_spectrum = aux.spec_importer(cwd +'/inputs/models/models_data/stable.h5')
 
 @aux.omega2cross
 def spectrum(f, log10_mu):
