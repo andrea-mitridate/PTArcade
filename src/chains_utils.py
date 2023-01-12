@@ -22,6 +22,19 @@ class ScalarFormatterClass(ScalarFormatter):
       self.format = "%1.2f"
 
 
+def optimal_bin_n(data):
+    """
+    Computes the optimal number of bins following the Freedman-Diaconis rule 
+    """
+    q1 = np.quantile(data, 0.25)
+    q3 = np.quantile(data, 0.75)
+    iqr = q3 - q1
+    bin_width = (2 * iqr) / (len(data) ** (1 / 3))
+    bin_count = int(np.ceil((data.max() - data.min()) / bin_width))
+
+    return bin_count
+
+
 def set_custom_tick_options(
     ax,
     left=True,
@@ -121,7 +134,9 @@ def import_chains(chains_dir, burn_frac=1/4):
             ignore_index=True,
             sort=False)
 
-    mrgd_chain = mrgd_chain.to_numpy()
+    mrgd_chain = mrgd_chain.dropna()
+
+    mrgd_chain = mrgd_chain.to_numpy(dtype=float)
 
     return params, mrgd_chain
 
@@ -244,6 +259,7 @@ def chain_filter(chain, params, model_id, par_to_plot):
 
     return chain[:, filter_par], params[filter_par]
 
+
 def create_ax_labels(par_names):
 
     plt_params = {
@@ -273,12 +289,11 @@ def create_ax_labels(par_names):
 
     if N_params == 1:
         set_custom_tick_options(axarr[0])
-        set_custom_tick_options(axarr[0], left=False, right=False)
+        set_custom_tick_options(axarr[0])
         axarr[0].tick_params(axis='x', which='both', labelsize=ticksize - 8)
         axarr[0].set_xlabel(par_names[0],
-                        fontsize=labelsize - 8)
-        axarr[0].set_ylabel('',
-                        fontsize=labelsize - 8)
+                        fontsize=labelsize - 9)
+        axarr[0].set_ylabel('A', alpha=0) # here just ot prevent padding issues
         fmtr = ticker.ScalarFormatter(useMathText=True)
         axarr[0].xaxis.set_major_formatter(fmtr)
 
@@ -366,7 +381,7 @@ def plot_bhb_prior(params, bhb_prior, sigmas):
                 id_marg_g = int(id + N_params - idx - idy - 1)
                 id_marg_A = int(id + c2t*(N_params - idx) - c2t * (c2t + 1) / 2 + c2t)
                 for idx in range(len(sigmas)):
-                    axarr[id].plot( A_0 + Ell_rot[idx, 1, :] , gamma_0 + Ell_rot[idx, 0, :],
+                    axarr[id].plot(gamma_0 + Ell_rot[idx, 0, :], A_0 + Ell_rot[idx, 1, :],
                     'black',
                     linestyle='dashed',
                     linewidth=0.7,
@@ -384,7 +399,7 @@ def plot_bhb_prior(params, bhb_prior, sigmas):
         linewidth=1)
 
 
-def plot_settings(sigmas, samples, one_column):
+def corner_plot_settings(sigmas, samples, one_column):
 
     sets = plots.GetDistPlotSettings()
     sets.legend_fontsize = 18
@@ -402,6 +417,26 @@ def plot_settings(sigmas, samples, one_column):
         sets.num_plot_contours = len(sigmas)
         for sample in samples:
             sample.updateSettings({'contours': [vol_2d_contour(x) for x in sigmas]})
+
+    return sets
+
+def oned_plot_settings():
+    sets = plots.GetDistPlotSettings()
+    sets.subplot_size_inch = 2
+    sets.legend_fontsize = 10
+    sets.prob_y_ticks = False
+    sets.figure_legend_loc = 'upper right'
+    sets.linewidth = 1
+    sets.norm_1d_density = 'integral'
+    sets.line_styles = ['#006FED',
+        '#E03424',
+        'gray',
+        '#009966',
+        '#000866',
+        '#336600',
+        '#006633',
+        'm',
+        'r']
 
     return sets
 
@@ -465,22 +500,21 @@ def plot_posteriors(
     par_union = []
     for idx, chain in enumerate(chains):
         filtered = chain_filter(chain, params[idx], model_id[idx], par_to_plot[idx])
-        filtered_ranges= {k:v for k,v in ranges[idx].items() if k in filtered[1] and v is not None}
+        filtered_ranges = {
+            k: v for k, v in ranges[idx].items() if k in filtered[1] and v is not None}
 
-        samples.append(MCSamples(samples=filtered[0], names=filtered[1], ranges=filtered_ranges, ignore_rows=1))
+        samples.append(
+            MCSamples(
+                samples=filtered[0],
+                names=filtered[1],
+                ranges=filtered_ranges,
+                ignore_rows=1))
 
         par_union += [par for par in filtered[1] if par not in par_union]    
-   
-    if par_names is None:
-        names_union = par_union
-    else:
-        names_union = []
-        for names in par_names:
-            names_union += [name for name in names if name not in names_union]   
-
-    sets = plot_settings(sigmas, samples, one_column)
-
+     
     if len(par_union) > 1:
+        sets = corner_plot_settings(sigmas, samples, one_column)
+
         g = plots.get_subplot_plotter(settings=sets)
         g.triangle_plot(samples,
             filled=True, 
@@ -489,18 +523,35 @@ def plot_posteriors(
             diag1d_kwargs={'normalized':True})
         if bhb_prior:
             plot_bhb_prior(par_union, bhb_prior, sigmas)
-    if len(par_union) == 1:
-        g = plots.get_single_plotter(width_inch=5, settings=sets)
-        g.plot_1d(samples,
-            par_union[0], 
-            legend_labels=samples_name, 
-            normalized=True)
+
+    elif len(par_union) == 1:
+        sets = oned_plot_settings()
+
+        g = plots.get_single_plotter(settings=sets)
+        g.plot_1d(samples, par_union[0], normalized=True)
+
+        g.add_legend(samples_name, legend_loc='best')
+
+        for idx, sample in enumerate(samples):
+            plt.hist(sample.samples,
+                density=True,
+                bins=optimal_bin_n(sample.samples),
+                alpha=0.1,
+                color=sets.line_styles[idx])
+
+    if par_names is None:
+        par_names_union = par_union
+    else:
+        par_names_union = []
+        for names in par_names:
+            par_names_union += [name for name in names if name not in par_names_union] 
     
-    create_ax_labels(names_union)
+    create_ax_labels(par_names_union)
 
     if save and model_name:
-        plt.savefig(f'./plots/{model_name}_corner.pdf', bbox_inches="tight")
+        plt.savefig(f'./plots/{model_name}_posteriors.pdf', bbox_inches="tight")
     elif save:
-        plt.savefig('./plots/corner.pdf', bbox_inches="tight")
+        plt.savefig('./plots/posteriors.pdf', bbox_inches="tight")
 
     return
+
