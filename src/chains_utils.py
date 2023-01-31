@@ -5,6 +5,7 @@ import math
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
+from scipy import integrate
 import importlib.util
 
 from enterprise_extensions import model_utils
@@ -440,6 +441,103 @@ def oned_plot_settings():
 
     return sets
 
+def bisection(f, a, b, tol): 
+    """"
+    approximates a root of f bounded 
+    by a and b to within tolerance 
+    |f(m)| < tol with m the midpoint 
+    between a and b; Recursive implementation
+    """
+    
+    # check if a and b bound a root
+    if np.sign(f(a)) == np.sign(f(b)):
+        return None
+        
+    # get midpoint
+    m = (a + b)/2
+    
+    if np.abs(f(m)) < tol:
+        # stopping condition, report m as root
+        return m
+    elif np.sign(f(a)) == np.sign(f(m)):
+        # case where m is an improvement on a. 
+        # make recursive call with a = m
+        return bisection(f, m, b, tol)
+    elif np.sign(f(b)) == np.sign(f(m)):
+        # case where m is an improvement on b. 
+        # make recursive call with b = m
+        return bisection(f, a, m, tol)
+
+
+def k_ratio_aux_1D(
+    sample, 
+    BF, 
+    par,
+    par_range,
+    k_ratio):
+    """"
+    Return unnormalized 1D posterior density, corresponding normalization and k_ratio bound
+    sample: MCSamples instance
+    BF: float
+        Bayes factor for exotic + SMBHB vs. SMBHB model
+    par: string
+        name of the two parameters for which the K-ratio bound should be plotted
+    par_range: list
+        lower and upper prior limits
+    k_ratio: float
+        Fraction of plateau height at which height level is determined
+    """
+    #Get 1D unnormalized posterior density
+    density1D = MCSamples.get1DDensity(sample, par)
+    #Get normalization
+    norm = integrate.quad(density1D, par_range[0], par_range[1])[0]
+    print(norm)
+    #Get prior value at each point
+    prior = 1/(par_range[1]-par_range[0])
+    #Calculate height level corresponding to k_ratio
+    height_KB = k_ratio*prior/BF*norm
+    
+    #Find value at which unnormalized posterior density reaches height_KB
+    #Look for this point around the middle of the parameter range
+    x_start = 1/2*(par_range[1]+par_range[0])
+    
+    #Find k-ratio limit (absolute tolerance set to 10**(-8))
+    k_val = bisection(f = (lambda x: density1D(x)-height_KB), a = par_range[0], b = par_range[1], tol = 10**(-8))
+    
+    print('Upper limit for k-ratio = '+str(k_ratio)+' is reached for: '+str(par)+' = '+str(k_val))
+    return k_val
+
+def k_ratio_aux_2D(
+    sample, 
+    BF, 
+    par_1, 
+    par_2, 
+    par_range_1, 
+    par_range_2, 
+    k_ratio):
+    """"
+    Return unnormalized 2D posterior density, corresponding normalization and height level corresponding 
+    to given k_ratio
+    sample: MCSamples instance
+    BF: float
+        Bayes factor for exotic + SMBHB vs. SMBHB model
+    par_1/2: string
+        name of the two parameters for which the K-ratio bound should be plotted
+    par_range_1/2: list
+        lower and upper prior limits
+    k_ratio: float (optional)
+        Fraction of plateau height at which height level is determined
+    """
+    #Get 2D unnormalized posterior density
+    density2D = MCSamples.get2DDensity(sample, par_1, par_2)
+    #Get normalization
+    norm = integrate.dblquad(density2D, par_range_2[0], par_range_2[1], par_range_1[0], par_range_1[1])[0]
+    #Calculate prior value at each point
+    prior = 1/(par_range_2[1]-par_range_2[0]) * 1/(par_range_1[1]-par_range_1[0])
+    #Calculate height level corresponding to k_ratio
+    height_KB = k_ratio*prior/BF*norm
+    return height_KB
+
 
 def plot_posteriors(
     chains,
@@ -448,6 +546,7 @@ def plot_posteriors(
     par_names=None,
     model_id=None,
     samples_name=None,
+    k_ratio = None,
     ranges={},
     sigmas=None,
     bhb_prior=False,
@@ -511,7 +610,7 @@ def plot_posteriors(
                 ignore_rows=1))
 
         par_union += [par for par in filtered[1] if par not in par_union]    
-     
+    
     if len(par_union) > 1:
         sets = corner_plot_settings(sigmas, samples, one_column)
 
@@ -523,12 +622,49 @@ def plot_posteriors(
             diag1d_kwargs={'normalized':True})
         if bhb_prior:
             plot_bhb_prior(par_union, bhb_prior, sigmas)
+        
+        if k_ratio:
+            for i in range(0, len(chains)):
+                chain = chains[i]
+                param = ranges[i]
+                BF = compute_bf(chain, param)[0]
+            
+                for ii in range(len(par_union)):
+                    for jj in range(len(par_union)):
+                        if par_union[ii]!='gw_bhb_0' and par_union[ii]!='gw_bhb_1' and par_union[jj]!='gw_bhb_0' and par_union[jj]!='gw_bhb_1':
+                                if ii>jj:
+                                    h_2D = k_ratio_aux_2D(sample = samples[i], BF = BF, par_1 = par_union[ii], 
+                                                          par_2 = par_union[jj], par_range_1 = param.get(par_union[ii]),
+                                                          par_range_2 = param.get(par_union[jj]), k_ratio = k_ratio)
+                                    ax = ii*len(par_union)+jj
+                                    g.add_2d_contours(root = samples[i], param1 = par_union[jj], param2 = par_union[ii], contour_levels = [h_2D], ax = ax, color = 'red')
+                            
+                                elif ii==jj:
+                                    k_val = k_ratio_aux_1D(sample = samples[i], BF = BF, par = par_union[ii],
+                                                           par_range = param.get(par_union[ii]), k_ratio = k_ratio)
+                                    ax = ii*len(par_union)+ii
+                                    if k_val:
+                                        g.add_x_marker(k_val, ax= ax, color = 'red')
+                                else:
+                                    pass
+        
 
     elif len(par_union) == 1:
         sets = oned_plot_settings()
 
         g = plots.get_single_plotter(settings=sets)
         g.plot_1d(samples, par_union[0], normalized=True)
+       
+        if k_ratio:
+            for i in range(0, len(chains)):
+                chain = chains[i]
+                param = ranges[i]
+                BF = compute_bf(chain, param)[0]
+                
+                k_val = k_ratio_aux_1D(sample = samples[i], BF = BF, par = par_union[0], 
+                                       par_range = param.get(par_union[0]), k_ratio = k_ratio)
+                if k_val:
+                    g.add_x_marker(k_val, color = 'red')
 
         g.add_legend(samples_name, legend_loc='best')
 
@@ -554,4 +690,3 @@ def plot_posteriors(
         plt.savefig('./plots/posteriors.pdf', bbox_inches="tight")
 
     return
-
