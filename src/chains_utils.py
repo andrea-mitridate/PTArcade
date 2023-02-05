@@ -5,7 +5,6 @@ import math
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
-import importlib.util
 
 from enterprise_extensions import model_utils
 
@@ -14,7 +13,23 @@ from matplotlib import ticker
 from matplotlib.ticker import ScalarFormatter
 from matplotlib.ticker import FormatStrFormatter
 from getdist import plots, MCSamples
-import getdist
+
+from matplotlib import rc
+
+plt_params = {
+        'font.cursive'  : ['Apple Chancery','Textile,Zapf Chancery', 'Sand', 'Script MT','Felipa','cursive'],
+        'font.family'  : 'serif',
+        'font.serif'  : 'Palatino',
+        'font.size'  : 16.0,
+        'font.stretch'  : 'normal',
+        'font.style'  : 'normal',
+        'font.variant'  : 'normal',
+        'font.weight'  : 'normal',
+        'text.usetex'  : False,
+        'mathtext.fontset'  : 'cm',
+        'mathtext.rm'  : 'serif',
+        'mathtext.it'  : 'serif:italic',
+        'mathtext.bf'  : 'serif:bold'}
 
 
 class ScalarFormatterClass(ScalarFormatter):
@@ -262,37 +277,21 @@ def chain_filter(chain, params, model_id, par_to_plot):
 
 def create_ax_labels(par_names):
 
-    plt_params = {
-        'font.cursive'  : ['Apple Chancery','Textile,Zapf Chancery', 'Sand', 'Script MT','Felipa','cursive'],
-        'font.family'  : 'serif',
-        'font.serif'  : 'Palatino',
-        'font.size'  : 16.0,
-        'font.stretch'  : 'normal',
-        'font.style'  : 'normal',
-        'font.variant'  : 'normal',
-        'font.weight'  : 'normal',
-        'text.usetex'  : False,
-        'mathtext.fontset'  : 'custom',
-        'mathtext.rm'  : 'serif',
-        'mathtext.it'  : 'serif:italic',
-        'mathtext.bf'  : 'serif:bold'}
-
-    plt.rcParams.update(plt_params) 
-
-    labelsize = 25
-    ticksize = 25
+    labelsize = 20
+    ticksize = 19
 
     f = plt.gcf()
     axarr = f.get_axes()
+
 
     N_params = len(par_names)
 
     if N_params == 1:
         set_custom_tick_options(axarr[0])
         set_custom_tick_options(axarr[0])
-        axarr[0].tick_params(axis='x', which='both', labelsize=ticksize - 8)
+        axarr[0].tick_params(axis='x', which='both', labelsize=ticksize )
         axarr[0].set_xlabel(par_names[0],
-                        fontsize=labelsize - 9)
+                        fontsize=labelsize)
         axarr[0].set_ylabel('A', alpha=0) # here just ot prevent padding issues
         fmtr = ticker.ScalarFormatter(useMathText=True)
         axarr[0].xaxis.set_major_formatter(fmtr)
@@ -303,32 +302,32 @@ def create_ax_labels(par_names):
         for idy in range(N_params - idx):
             id = int(N_params * idx + idy - max(idx * (idx - 1) /2, 0))
 
-            axarr[id].tick_params(axis='x', which='both', labelsize=ticksize - 8)
+            axarr[id].tick_params(axis='x', which='both', labelsize=ticksize)
 
             if idx == 0 and idy == 0:
                 set_custom_tick_options(axarr[id])
-                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize - 8)
-                axarr[id].set_xlabel(par_names[idx], fontsize=labelsize - 8)
+                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize)
+                axarr[id].set_xlabel(par_names[idx], fontsize=labelsize)
                 axarr[id].set_ylabel(par_names[N_params - idy - 1],
-                              fontsize=labelsize - 8)
+                              fontsize=labelsize)
             elif idx == N_params - 1:
                 set_custom_tick_options(axarr[id], left=False, right=False)
-                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize - 8)
-                axarr[id].set_xlabel(par_names[idx], fontsize=labelsize - 8)
+                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize)
+                axarr[id].set_xlabel(par_names[idx], fontsize=labelsize)
             elif idy == N_params - idx - 1:
                 set_custom_tick_options(axarr[id], left=False, right=False)
             elif idx == 0:
                 set_custom_tick_options(axarr[id])
-                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize - 8)
+                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize)
                 axarr[id].set_ylabel(par_names[N_params - idy - 1],
-                              fontsize=labelsize - 8)
+                              fontsize=labelsize)
             elif idy == 0:
                 set_custom_tick_options(axarr[id])
-                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize - 8)
-                axarr[id].set_xlabel(par_names[idx], fontsize=labelsize - 8)
+                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize)
+                axarr[id].set_xlabel(par_names[idx], fontsize=labelsize)
             else:
                 set_custom_tick_options(axarr[id])
-                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize - 8)
+                axarr[id].tick_params(axis='y', which='both', labelsize=ticksize)
 
         fmtr = ticker.ScalarFormatter(useMathText=True)
         axarr[id].xaxis.set_major_formatter(fmtr)
@@ -420,6 +419,7 @@ def corner_plot_settings(sigmas, samples, one_column):
 
     return sets
 
+
 def oned_plot_settings():
     sets = plots.GetDistPlotSettings()
     sets.subplot_size_inch = 2
@@ -428,8 +428,9 @@ def oned_plot_settings():
     sets.figure_legend_loc = 'upper right'
     sets.linewidth = 1
     sets.norm_1d_density = 'integral'
-    sets.line_styles = ['#006FED',
+    sets.line_styles = [
         '#E03424',
+        '#006FED',
         'gray',
         '#009966',
         '#000866',
@@ -483,6 +484,8 @@ def plot_posteriors(
         model name used to name the output files. If not specified the plot will be
         saved as 'corner.pdf'
     """
+
+    plt.rcParams.update(plt_params) 
 
     N_chains = len(chains)
 
@@ -553,5 +556,8 @@ def plot_posteriors(
     elif save:
         plt.savefig('./plots/posteriors.pdf', bbox_inches="tight")
 
-    return
+    f = plt.gcf()
+    axs = f.get_axes()
+
+    return f, axs
 
