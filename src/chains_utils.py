@@ -544,9 +544,13 @@ def compute_cl(sample, par, par_range,  l = [0.68, 0.95]):
     density1D = MCSamples.get1DDensity(sample, par)
     #Get limits
     ret = []
-    for level in l:
-        res = density1D.getLimits(level)
-        ret.append(res)
+    if density1D:
+        for level in l:
+            res = density1D.getLimits(level)
+            ret.append(res)
+    else:
+        for level in l:
+            ret.append([None, None, True, True])
     return ret
 
 
