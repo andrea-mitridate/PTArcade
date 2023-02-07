@@ -28,7 +28,7 @@ plt_params = {
         'font.style'  : 'normal',
         'font.variant'  : 'normal',
         'font.weight'  : 'normal',
-        'text.usetex'  : False,
+        'text.usetex'  : True,
         'mathtext.fontset'  : 'cm',
         'mathtext.rm'  : 'serif',
         'mathtext.it'  : 'serif:italic',
@@ -743,10 +743,10 @@ def plot_posteriors(
                 ignore_rows=1))
 
         par_union += [par for par in filtered[1] if par not in par_union]    
-     
+    
     if len(par_union) > 1:
-        sets = corner_plot_settings(sigmas, samples, one_column)
-
+        sets = corner_plot_settings(sigmas, samples, one_column)        
+        
         g = plots.get_subplot_plotter(settings=sets)
         g.triangle_plot(samples,
             filled=True, 
@@ -755,8 +755,14 @@ def plot_posteriors(
             diag1d_kwargs={'normalized':True})
         if bhb_prior:
             plot_bhb_prior(par_union, bhb_prior, sigmas)
-            
+        
+        
+        
         for i in range(0, len(chains)):
+            if 'gw_bhb_0' in par_to_plot[i]:
+                co = 'red'
+            else:
+                co = 'blue'
             chain = chains[i]
             param = ranges[i]
             BF = compute_bf(chain, param)
@@ -784,7 +790,7 @@ def plot_posteriors(
                         if k_val:
                             if print_bounds: 
                                 print('Upper limit for k-ratio = '+str(k_ratio[i])+' is reached for: '+str(par_union[ii])+' = '+str(k_val))
-                            g.add_x_marker(k_val, ax = ax, color = 'red', lw = 1)
+                            g.add_x_marker(k_val, ax = ax, color = 'grey', lw = 1)
                         else:
                             if print_bounds:
                                 print('Upper limit for k_ratio = '+str(k_ratio[i])+' not reached for: ' +str(par_union[ii]))
@@ -799,14 +805,14 @@ def plot_posteriors(
                     for j in range(len(levels)):
                         res = CL[j]
                         if not res[2]:
-                            g.add_x_marker(res[0], ax = ax, color = 'green', ls = 'dashed', lw = 1)
+                            g.add_x_marker(res[0], ax = ax, color = co, ls = 'dashed', lw = 1)
                             if print_bounds:
                                 print('Lower '+str(100*levels[j])+'%-HPDI limit is reached for '+ str(par_union[ii])+' = '+str(res[0]))
                         else:
                             if print_bounds:
                                 print('Lower '+str(100*levels[j])+'%-HPDI limit for '+ str(par_union[ii])+' does not exist')
                         if not res[3]:
-                            g.add_x_marker(res[1], ax = ax, color = 'grey', ls = 'dashed', lw = 1)
+                            g.add_x_marker(res[1], ax = ax, color = co, ls = 'dashed', lw = 1)
                             if print_bounds:    
                                 print('Upper '+str(100*levels[j])+'%-HPDI limit is reached for '+ str(par_union[ii])+' = '+str(res[1]))
                         else: 
@@ -821,6 +827,10 @@ def plot_posteriors(
         g.plot_1d(samples, par_union[0], normalized=True)
         
         for i in range(0, len(chains)):
+            if 'gw_bhb_0' in par_to_plot[i]:
+                co = 'red'
+            else:
+                co = 'blue'
             chain = chains[i]
             param = ranges[i]
             BF = compute_bf(chain, param)
@@ -892,4 +902,3 @@ def plot_posteriors(
     axs = f.get_axes()
 
     return f, axs
-
