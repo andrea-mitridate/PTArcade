@@ -14,7 +14,9 @@ from matplotlib import ticker
 from matplotlib.ticker import ScalarFormatter
 from matplotlib.ticker import FormatStrFormatter
 from getdist import plots, MCSamples
+from getdist.gaussian_mixtures import MixtureND
 
+import matplotlib
 from matplotlib import rc
 
 plt_params = {
@@ -443,6 +445,117 @@ def oned_plot_settings():
     return sets
 
 
+def add_2d_contours(g, root, param1=None, param2=None, plotno=0, of=None, cols=None, contour_levels=None,
+                        add_legend_proxy=True, param_pair=None, density=None, alpha=None, ax=None, **kwargs):
+        """
+        Low-level function to add 2D contours to plot for samples with given root name and parameters
+
+        :param root: The root name of samples to use or a MixtureND gaussian mixture
+        :param param1: x parameter
+        :param param2: y parameter
+        :param plotno: The index of the contour lines being added
+        :param of: the total number of contours being added (this is line plotno of ``of``)
+        :param cols: optional list of colors to use for contours, by default uses default for this plotno
+        :param contour_levels: levels at which to plot the contours, by default given by contours array in
+                               the analysis settings
+        :param add_legend_proxy: True to add a proxy to the legend of this plot.
+        :param param_pair: an [x,y] parameter name pair if you prefer to provide this rather than param1 and param2
+        :param density: optional :class:`~.densities.Density2D` to plot rather than that computed automatically
+                        from the samples
+        :param alpha: alpha for the contours added
+        :param ax: optional :class:`~matplotlib:matplotlib.axes.Axes` instance (or y,x subplot coordinate)
+                   to add to (defaults to current plot or the first/main plot if none)
+        :param kwargs: optional keyword arguments:
+
+               - **filled**: True to make filled contours
+               - **color**: top color to automatically make paling contour colours for a filled plot
+               - kwargs for :func:`~matplotlib:matplotlib.pyplot.contour` and :func:`~matplotlib:matplotlib.pyplot.contourf`
+        :return: bounds (from :meth:`~.densities.GridDensity.bounds`) for the 2D density plotted
+        """
+
+        ax = g.get_axes(ax)
+        if density is None:
+            param1, param2 = g.get_param_array(root, param_pair or [param1, param2])
+            ax.getdist_params = (param1, param2)
+            if isinstance(root, MixtureND):
+                density = root.marginalizedMixture(params=[param1, param2]).density2D()
+            else:
+                density = g.sample_analyser.get_density_grid(root, param1, param2,
+                                                                conts=g.settings.num_plot_contours,
+                                                                likes=g.settings.shade_meanlikes)
+            if density is None:
+                if add_legend_proxy:
+                    g.contours_added.append(None)
+                return None
+        if alpha is None:
+            alpha = g._get_alpha_2d(plotno, **kwargs)
+        if contour_levels is None:
+            if not hasattr(density, 'contours'):
+                contours = g.sample_analyser.ini.ndarray('contours')
+                if contours is not None:
+                    contours = contours[:g.settings.num_plot_contours]
+                density.contours = density.getContourLevels(contours)
+            contour_levels = density.contours
+
+        if add_legend_proxy:
+            proxy_ix = len(g.contours_added)
+            g.contours_added.append(None)
+        elif None in g.contours_added and g.contours_added.index(None) == plotno:
+            proxy_ix = plotno
+        else:
+            proxy_ix = -1
+
+        def clean_args(_args):  # prevent unused argument warnings
+            _args = dict(_args)
+            _args.pop('color', None)
+            _args.pop('ls', None)
+            _args.pop('lw', None)
+            return _args
+
+        if kwargs.get('filled'):
+            if cols is None:
+                color = kwargs.get('color')
+                if color is None:
+                    color = g._get_color_at_index(g.settings.solid_colors,
+                                                     (of - plotno - 1) if of is not None else plotno)
+                if isinstance(color, str) or matplotlib.colors.is_color_like(color):
+                    cols = g._get_paler_colors(color, len(contour_levels))
+                else:
+                    cols = color
+            levels = sorted(np.append([density.P.max() + 1], contour_levels))
+            cs = ax.contourf(density.x, density.y, density.P, levels, colors='#ffffff00', alpha=alpha, extend = 'both', **clean_args(kwargs))
+            cs.cmap.set_over('#ffffff00')
+            cs.cmap.set_under('grey')
+            cs.changed()
+            
+            if proxy_ix >= 0:
+                g.contours_added[proxy_ix] = (
+                    matplotlib.patches.Rectangle((0, 0), 1, 1, fc=matplotlib.colors.to_rgb(cs.tcolors[-1][0])))
+            ax.contour(density.x, density.y, density.P, levels[:1], colors=cs.tcolors[-1],
+                       linewidths=g._scaled_linewidth(g.settings.linewidth_contour),
+                       alpha=alpha * g.settings.alpha_factor_contour_lines, **clean_args(kwargs))
+        else:
+            args = g._get_line_styles(plotno, **kwargs)
+            linestyles = [args['ls']]
+            cols = [args['color']]
+            lws = args['lw']  # not linewidth_contour is only used for filled contours
+            kwargs = g._get_plot_args(plotno, **kwargs)
+            kwargs['alpha'] = alpha
+            cs = ax.contour(density.x, density.y, density.P, sorted(contour_levels), colors=cols, linestyles=linestyles,
+                            linewidths=lws, **clean_args(kwargs))
+            dashes = args.get('dashes')
+            if dashes:
+                for c in cs.collections:
+                    c.set_dashes([(0, dashes)])
+            if proxy_ix >= 0:
+                line = matplotlib.lines.Line2D([0, 1], [0, 1], ls=linestyles[0], lw=lws, color=cols[0],
+                                               alpha=args.get('alpha'))
+                if dashes:
+                    line.set_dashes(dashes)
+                g.contours_added[proxy_ix] = line
+
+        return density.bounds()
+
 
 def bisection(f, a, b, tol): 
     """"
@@ -663,7 +776,7 @@ def plot_posteriors(
                                                           par_2 = par_union[jj], par_range_1 = param.get(par_union[ii]),
                                                           par_range_2 = param.get(par_union[jj]), k_ratio = k_ratio[i])
                                     ax = ii*len(par_union)+jj
-                                    g.add_2d_contours(root = samples[i], param1 = par_union[jj], param2 = par_union[ii], contour_levels = [h_2D], ax = ax, color = 'red')
+                                    add_2d_contours(g = g, root = samples[i], param1 = par_union[jj], param2 = par_union[ii], contour_levels = [h_2D], ax = ax, color = 'grey', alpha = 0.25,  filled = True,)
                     if par_union[ii]!='gw_bhb_0' and par_union[ii]!='gw_bhb_1':
                         k_val = k_ratio_aux_1D(sample = samples[i], BF = BF, par = par_union[ii],
                                                par_range = param.get(par_union[ii]), k_ratio = k_ratio[i])
