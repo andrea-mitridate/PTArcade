@@ -861,14 +861,14 @@ def plot_posteriors(
                 for j in range(len(levels)):
                     res = CL[j]
                     if not res[2]:
-                        g.add_x_marker(res[0], color = 'green', ls = 'dashed', lw = 1)
+                        g.add_x_marker(res[0], color = co, ls = 'dashed', lw = 1)
                         if print_bounds:
                             print('Lower '+str(100*levels[j])+'%-HPDI limit is reached for '+ str(par_union[0])+' = '+str(res[0]))
                     else:
                         if print_bounds:
                             print('Lower '+str(100*levels[j])+'%-HPDI limit for '+ str(par_union[0])+' does not exist')
                     if not res[3]:
-                        g.add_x_marker(res[1], color = 'grey', ls = 'dashed', lw = 1)
+                        g.add_x_marker(res[1], color = co, ls = 'dashed', lw = 1)
                         if print_bounds:    
                             print('Upper '+str(100*levels[j])+'%-HPDI limit is reached for '+ str(par_union[0])+' = '+str(res[1]))
                     else: 
