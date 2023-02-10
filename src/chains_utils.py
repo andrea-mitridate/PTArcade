@@ -22,7 +22,7 @@ from matplotlib import rc
 plt_params = {
         'font.cursive'  : ['Apple Chancery','Textile,Zapf Chancery', 'Sand', 'Script MT','Felipa','cursive'],
         'font.family'  : 'serif',
-        'font.serif'  : 'Palatino',
+        'font.serif'  : 'pifont',
         'font.size'  : 16.0,
         'font.stretch'  : 'normal',
         'font.style'  : 'normal',
@@ -280,8 +280,8 @@ def chain_filter(chain, params, model_id, par_to_plot):
 
 def create_ax_labels(par_names):
 
-    labelsize = 20
-    ticksize = 19
+    labelsize = 18
+    ticksize = 16
 
     f = plt.gcf()
     axarr = f.get_axes()
@@ -525,7 +525,7 @@ def add_2d_contours(g, root, param1=None, param2=None, plotno=0, of=None, cols=N
             levels = sorted(np.append([density.P.max() + 1], contour_levels))
             cs = ax.contourf(density.x, density.y, density.P, levels, colors='#ffffff00', alpha=alpha, extend = 'both', **clean_args(kwargs))
             cs.cmap.set_over('#ffffff00')
-            cs.cmap.set_under('grey')
+            cs.cmap.set_under('gray')
             cs.changed()
             
             if proxy_ix >= 0:
@@ -534,26 +534,7 @@ def add_2d_contours(g, root, param1=None, param2=None, plotno=0, of=None, cols=N
             ax.contour(density.x, density.y, density.P, levels[:1], colors=cs.tcolors[-1],
                        linewidths=g._scaled_linewidth(g.settings.linewidth_contour),
                        alpha=alpha * g.settings.alpha_factor_contour_lines, **clean_args(kwargs))
-        else:
-            args = g._get_line_styles(plotno, **kwargs)
-            linestyles = [args['ls']]
-            cols = [args['color']]
-            lws = args['lw']  # not linewidth_contour is only used for filled contours
-            kwargs = g._get_plot_args(plotno, **kwargs)
-            kwargs['alpha'] = alpha
-            cs = ax.contour(density.x, density.y, density.P, sorted(contour_levels), colors=cols, linestyles=linestyles,
-                            linewidths=lws, **clean_args(kwargs))
-            dashes = args.get('dashes')
-            if dashes:
-                for c in cs.collections:
-                    c.set_dashes([(0, dashes)])
-            if proxy_ix >= 0:
-                line = matplotlib.lines.Line2D([0, 1], [0, 1], ls=linestyles[0], lw=lws, color=cols[0],
-                                               alpha=args.get('alpha'))
-                if dashes:
-                    line.set_dashes(dashes)
-                g.contours_added[proxy_ix] = line
-
+        
         return density.bounds()
 
 
@@ -652,14 +633,11 @@ def k_ratio_aux_2D(
     height_KB = k_ratio*prior/BF*norm
     return height_KB
 
-def compute_cl(sample, par, par_range,  l = [0.68, 0.95]):
-    #Get 1D unnormalized posterior density
-    density1D = MCSamples.get1DDensity(sample, par)
-    #Get limits
+def compute_cl(density,  l = [0.68, 0.95]):
     ret = []
-    if density1D:
+    if density:
         for level in l:
-            res = density1D.getLimits(level)
+            res = density.getLimits(level)
             ret.append(res)
     else:
         for level in l:
@@ -756,11 +734,11 @@ def plot_posteriors(
         if bhb_prior:
             plot_bhb_prior(par_union, bhb_prior, sigmas)
         
-        
-        
+        plot_list = []
         for i in range(0, len(chains)):
+            plot_list.append([])
             if 'gw_bhb_0' in par_to_plot[i]:
-                co = 'red'
+                co = '#E03424'
             else:
                 co = 'blue'
             chain = chains[i]
@@ -782,7 +760,8 @@ def plot_posteriors(
                                                           par_2 = par_union[jj], par_range_1 = param.get(par_union[ii]),
                                                           par_range_2 = param.get(par_union[jj]), k_ratio = k_ratio[i])
                                     ax = ii*len(par_union)+jj
-                                    add_2d_contours(g = g, root = samples[i], param1 = par_union[jj], param2 = par_union[ii], contour_levels = [h_2D], ax = ax, color = 'grey', alpha = 0.25,  filled = True,)
+                                    g.add_2d_contours(root = samples[i], param1 = par_union[jj], param2 = par_union[ii], contour_levels = [h_2D], ax = ax, color = 'gray')
+                                    add_2d_contours(g = g, root = samples[i], param1 = par_union[jj], param2 = par_union[ii], contour_levels = [h_2D], ax = ax, color = 'gray', alpha = 0.25,  filled = True,)
                     if par_union[ii]!='gw_bhb_0' and par_union[ii]!='gw_bhb_1':
                         k_val = k_ratio_aux_1D(sample = samples[i], BF = BF, par = par_union[ii],
                                                par_range = param.get(par_union[ii]), k_ratio = k_ratio[i])
@@ -790,7 +769,7 @@ def plot_posteriors(
                         if k_val:
                             if print_bounds: 
                                 print('Upper limit for k-ratio = '+str(k_ratio[i])+' is reached for: '+str(par_union[ii])+' = '+str(k_val))
-                            g.add_x_marker(k_val, ax = ax, color = 'grey', lw = 1)
+                            g.add_x_marker(k_val, ax = ax, color = 'gray', lw = 1, alpha = 0.5)
                         else:
                             if print_bounds:
                                 print('Upper limit for k_ratio = '+str(k_ratio[i])+' not reached for: ' +str(par_union[ii]))
@@ -799,24 +778,21 @@ def plot_posteriors(
             if levels:
                 for ii in range(len(par_union)):
                     ax = ii*len(par_union)+ii
-                    CL = compute_cl(sample = samples[i], par = par_union[ii], 
-                                    par_range = param.get(par_union[ii]), l = levels)
+                    density1D = MCSamples.get1DDensity(samples[i], par_union[ii])
+                    CL = compute_cl(density = density1D, l = levels)
+                
+                    plot_list[i].append([ax, density1D, CL])
                                            
                     for j in range(len(levels)):
                         res = CL[j]
-                        if not res[2]:
-                            g.add_x_marker(res[0], ax = ax, color = co, ls = 'dashed', lw = 1)
-                            if print_bounds:
+                        if print_bounds:
+                            if not res[2]:
                                 print('Lower '+str(100*levels[j])+'%-HPDI limit is reached for '+ str(par_union[ii])+' = '+str(res[0]))
-                        else:
-                            if print_bounds:
+                            else:
                                 print('Lower '+str(100*levels[j])+'%-HPDI limit for '+ str(par_union[ii])+' does not exist')
-                        if not res[3]:
-                            g.add_x_marker(res[1], ax = ax, color = co, ls = 'dashed', lw = 1)
-                            if print_bounds:    
+                            if not res[3]:   
                                 print('Upper '+str(100*levels[j])+'%-HPDI limit is reached for '+ str(par_union[ii])+' = '+str(res[1]))
-                        else: 
-                            if print_bounds:
+                            else: 
                                 print('Upper '+str(100*levels[j])+'%-HPDI limit for '+ str(par_union[ii])+' does not exist')
                                 
 
@@ -826,9 +802,11 @@ def plot_posteriors(
         g = plots.get_single_plotter(settings=sets)
         g.plot_1d(samples, par_union[0], normalized=True)
         
+        plot_list = []
         for i in range(0, len(chains)):
+            plot_list.append([])
             if 'gw_bhb_0' in par_to_plot[i]:
-                co = 'red'
+                co = '#E03424'
             else:
                 co = 'blue'
             chain = chains[i]
@@ -848,31 +826,31 @@ def plot_posteriors(
                     if k_val:
                         if print_bounds: 
                             print('Upper limit for k-ratio = '+str(k_ratio[i])+' is reached for: '+str(par_union[0])+' = '+str(k_val))
-                        g.add_x_marker(k_val, color = 'red', lw = 1)
+                        g.add_x_marker(k_val, color = sets.line_styles[i], lw = 1, alpha = 0.5)
                     else:
                         if print_bounds:
                             print('Upper limit for k_ratio = '+str(k_ratio[i])+' not reached for: ' +str(par_union[0]))
             
+            
+            
             ####Calculate, print, and plot HPDI
-            if levels:           
-                CL = compute_cl(sample = samples[i], par = par_union[0], 
-                                par_range = param.get(par_union[0]), l = levels)
+            if levels:
+                ax = 0
+                density1D = MCSamples.get1DDensity(samples[i], par_union[0])
+                CL = compute_cl(density = density1D, l = levels)
                 
+                plot_list[i].append([ax, density1D, CL])
+                                           
                 for j in range(len(levels)):
                     res = CL[j]
-                    if not res[2]:
-                        g.add_x_marker(res[0], color = co, ls = 'dashed', lw = 1)
-                        if print_bounds:
+                    if print_bounds:
+                        if not res[2]:
                             print('Lower '+str(100*levels[j])+'%-HPDI limit is reached for '+ str(par_union[0])+' = '+str(res[0]))
-                    else:
-                        if print_bounds:
+                        else:
                             print('Lower '+str(100*levels[j])+'%-HPDI limit for '+ str(par_union[0])+' does not exist')
-                    if not res[3]:
-                        g.add_x_marker(res[1], color = co, ls = 'dashed', lw = 1)
-                        if print_bounds:    
+                        if not res[3]:   
                             print('Upper '+str(100*levels[j])+'%-HPDI limit is reached for '+ str(par_union[0])+' = '+str(res[1]))
-                    else: 
-                        if print_bounds:
+                        else: 
                             print('Upper '+str(100*levels[j])+'%-HPDI limit for '+ str(par_union[0])+' does not exist')
 
         g.add_legend(samples_name, legend_loc='best')
@@ -892,13 +870,75 @@ def plot_posteriors(
             par_names_union += [name for name in names if name not in par_names_union] 
     
     create_ax_labels(par_names_union)
-
-    if save and model_name:
-        plt.savefig(f'./plots/{model_name}_posteriors.pdf', bbox_inches="tight")
-    elif save:
-        plt.savefig('./plots/posteriors.pdf', bbox_inches="tight")
-
+    
     f = plt.gcf()
     axs = f.get_axes()
 
+    if len(par_union) > 1:
+        for i in range(0, len(chains)):
+            if 'gw_bhb_0' in par_to_plot[i]:
+                co = '#E03424'
+            else:
+                co = 'blue'
+            if levels:
+                ax = -1
+                for ii in range(len(par_to_plot[i])):
+                        ax += len(par_union) - ii
+                        density1D = plot_list[i][ii][1]
+                        CL = plot_list[i][ii][2]
+                                                           
+                        for j in range(len(levels)):
+                            res = CL[j]
+                        
+                            if not res[2] and not res[3]:
+                                x = np.linspace(res[0], res[1], 100)
+                                p1 = density1D(res[0])
+                                p2 = density1D(res[1])
+                                axs[ax].plot([res[0], res[0]], [0, p1], ls = 'dotted', color = co)
+                                axs[ax].plot([res[1], res[1]], [0, p2], ls = 'dotted', color = co)
+                            elif not res[2]:
+                                x = np.linspace(res[0], param.get(par_union[ii])[1], 100)
+                                p2 = density1D(res[0])
+                                axs[ax].plot([res[0], res[0]], [0, p2], ls = 'dotted', color = co)
+                            elif not res[3]:
+                                x = np.linspace(param.get(par_union[ii])[0], res[1], 100)
+                                p1 = density1D(res[1])
+                                axs[ax].plot([res[1], res[1]], [0, p1], ls = 'dotted', color = co)
+                            
+                            y = density1D(x)
+                            axs[ax].fill_between(x,y,0, color = co, alpha = 0.1)
+                            
+    elif len(par_union) == 1:
+        for i in range(0, len(chains)):
+            co = oned_plot_settings().line_styles[i]
+            if levels:
+                ax = -1
+                for ii in range(len(par_to_plot[i])):
+                        ax += len(par_union) - ii
+                        density1D = plot_list[i][ii][1]
+                        CL = plot_list[i][ii][2]
+                                                           
+                        for j in range(len(levels)):
+                            res = CL[j]
+                        
+                            if not res[2] and not res[3]:
+                                x = np.linspace(res[0], res[1], 100)
+                                p1 = density1D(res[0])
+                                p2 = density1D(res[1])
+                                axs[ax].plot([res[0], res[0]], [0, p1], ls = 'dotted', color = co)
+                                axs[ax].plot([res[1], res[1]], [0, p2], ls = 'dotted', color = co)
+                            elif not res[2]:
+                                x = np.linspace(res[0], param.get(par_union[ii])[1], 100)
+                                p2 = density1D(res[0])
+                                axs[ax].plot([res[0], res[0]], [0, p2], ls = 'dotted', color = co)
+                            elif not res[3]:
+                                x = np.linspace(param.get(par_union[ii])[0], res[1], 100)
+                                p1 = density1D(res[1])
+                                axs[ax].plot([res[1], res[1]], [0, p1], ls = 'dotted', color = co)
+                            
+    if save and model_name:
+        plt.savefig(f'./plots/{model_name}_posteriors.pdf', bbox_inches="tight")
+    elif save:
+        plt.savefig('./plots/posteriors.pdf', bbox_inches="tight")                        
+                            
     return f, axs
