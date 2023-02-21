@@ -343,28 +343,27 @@ def chain_filter(chain, params, model_id, par_to_plot):
 
 def create_ax_labels(par_names):
 
-    labelsize = 6
-    ticksize = 6
-
     N_params = len(par_names)
 
     f = plt.gcf()
     axs = f.get_axes()
 
     if N_params == 1:
-        set_custom_tick_options(axs[0], width=0.5)
-        set_custom_tick_options(axs[0], width=0.5)
+        labelsize = 10
+        ticksize = 10
+
+        set_custom_tick_options(axs[0], width=0.5, length=5)
         axs[0].tick_params(axis='x', which='both', labelsize=ticksize)
-        axs[0].set_xlabel(par_names[0],
-                        fontsize=labelsize)
+        axs[0].tick_params(axis='y', which='both', labelsize=ticksize)
+        axs[0].set_xlabel(par_names[0], fontsize=labelsize, labelpad=10)
         axs[0].set_ylabel('A', alpha=0) # here just ot prevent padding issues
-        fmtr = ticker.ScalarFormatter(useMathText=True)
-        axs[0].xaxis.set_major_formatter(fmtr)
 
         return
 
+    labelsize = 6
+    ticksize = 6
+    
     # do this loop using combinations_with_replacement from itertools 
-    fmtr = ticker.ScalarFormatter(useMathText=True)
     for idx in range(N_params):
             for idy in range(N_params - idx):
                 id = int(N_params * idx + idy - max(idx * (idx - 1) /2, 0))
@@ -492,11 +491,11 @@ def corner_plot_settings(levels, samples, one_column):
 
 def oned_plot_settings():
     sets = plots.GetDistPlotSettings()
-    sets.subplot_size_inch = 2
-    sets.legend_fontsize = 10
+
+    sets.legend_fontsize = 9
     sets.prob_y_ticks = False
+    sets.linewidth = 1.1
     sets.figure_legend_loc = 'upper right'
-    sets.linewidth = 1
     sets.norm_1d_density = 'integral'
     sets.line_styles = colors
 
@@ -696,7 +695,6 @@ def get_c_levels(sample, pars, levels):
 
 
 def plot_k_bounds(plot, samples, k_levels):
-    lw=0.5
 
     for idx, sample in enumerate(samples):
         if k_levels[idx]:    
@@ -705,22 +703,21 @@ def plot_k_bounds(plot, samples, k_levels):
                     par = x[0]
                     p0 = float(x[-1])
                     if len(k_levels[idx][0]) == 1:
-                        plt.plot([p0, p0], [0,1], color='grey', alpha=0.8, lw=1)
+                        plt.plot([p0, p0], [0,10], color=colors[idx], alpha=0.8, lw=0.8)
                     else:
-                        ax = plot.get_axes_for_params([par])
-                        ax.plot([p0, p0], [0,1], color='grey', alpha=0.8, lw=1)
+                        ax = plot.get_axes_for_params(par)
+                        ax.plot([p0, p0], [0,10], color=colors[idx], alpha=0.8, lw=0.8)
                     
             for x in k_levels[idx][1]:
                 par_1 = x[0]
                 par_2 = x[1]
-                level = x[-1]
+                level = float(x[-1])
                 par_1, par_2 = plot.get_param_array(sample, [par_1, par_2])
                 ax = plot.get_axes_for_params(par_1, par_2)
 
                 density = plot.sample_analyser.get_density_grid(sample, par_1, par_2,
                                                             conts=plot.settings.num_plot_contours,
                                                             likes=plot.settings.shade_meanlikes)
-                
                 
                 levels = sorted(np.append([density.P.max() + 1], level))
                 cs = ax.contourf(density.x, density.y, density.P, levels, colors='#ffffff00', alpha=0.1, extend = 'both')
@@ -732,7 +729,7 @@ def plot_k_bounds(plot, samples, k_levels):
                 ax.contour(density.x, density.y, density.P,
                         levels = [level],
                         colors='grey',
-                        linewidths=lw,
+                        linewidths=0.5,
                         alpha=1) 
    
     return
@@ -773,7 +770,7 @@ def print_stats(k_levels, hpi_points, bayes_est, max_pos, levels):
     for idx in np.arange(len(k_levels)):
         print(f'----- Stats for sample #{idx}-----')
         
-        if k_levels[idx]:
+        if any(x != [] for x in k_levels[idx]):
             k_level = k_levels[idx][0]
 
             for par, level in k_level:
@@ -783,7 +780,7 @@ def print_stats(k_levels, hpi_points, bayes_est, max_pos, levels):
                     print(f'k-ratio limit is not reached for {par}')
         
         else:
-            print(f'No stats available for this sample\n')
+            print(f'No 1D k-bounds available for this sample\n')
 
         hpi = hpi_points[idx]
 
@@ -794,11 +791,11 @@ def print_stats(k_levels, hpi_points, bayes_est, max_pos, levels):
                 x2 = level[1]
                 
                 if x1:
-                    print(f'Lower {100*levels[idy]}%-HPDI limit is reached for {par} = {x1}')
+                    print(f'Lower {100*levels[idy]}%-HPDI limit is reached for {par} = {10**x1}')
                 else:
                     print(f'Lower {100*levels[idy]}%-HPDI limit is reached for {par} does not exist')
                 if x2:
-                    print(f'Upper {100*levels[idy]}%-HPDI limit is reached for {par} = {x2}')
+                    print(f'Upper {100*levels[idy]}%-HPDI limit is reached for {par} = {10**x2}')
                 else:
                     print(f'Upper {100*levels[idy]}%-HPDI limit is reached for {par} does not exist')
 
@@ -938,7 +935,14 @@ def plot_posteriors(
     elif len(par_union) == 1:
         sets = oned_plot_settings()
 
-        g = plots.get_single_plotter(settings=sets)
+        if one_column:
+            size = set_size(246, ratio=1)[0]
+        else:
+            size = set_size(510, ratio=1)[0]
+
+        g = plots.get_single_plotter(settings=sets, 
+                                    ratio=1, 
+                                    width_inch=size)
         g.plot_1d(samples, par_union[0], normalized=True)
         
         g.add_legend(samples_name, legend_loc='best')
