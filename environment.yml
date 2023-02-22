@@ -8,6 +8,7 @@ dependencies:
   - enterprise-pulsar==3.3.1
   - pip==22.3.1
   - compilers
+  - h5py
   - pip:
     - git+https://github.com/dfm/acor.git@b55eb8efa7df6c73b6f3f0c9b64fa1c801e8f821
     - docopt==0.6.2
