@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import time
 import math
 import numpy as np
 import pandas as pd
@@ -166,11 +167,14 @@ def params_loader(file):
     return params
 
 
-def import_chains(chains_dir, burn_frac=1/4):
+def import_chains(chains_dir, burn_frac=1/4, quick_import=True, chain_ext=".txt"):
     """
     Import the chains and ther parameter file removing the burn-in region.
     :param chains_dir: name of the directory containing the chains.
     :param burn_frac: fraction of the chain that is removed from his head.
+    :param quick_import: skip importing rednoise portion of chains
+    :param chain_ext: the file extension of the chain files. Can use compressed
+                      files with `import_chains()`
     """
 
     # get all the chain directories 
@@ -196,26 +200,31 @@ def import_chains(chains_dir, burn_frac=1/4):
         })
 
     # import and merge all the chains removing the burn-in
-    for idx, dir in enumerate(directories):
-        if idx == 0:
-            mrgd_chain = pd.read_csv(
-                os.path.join(chains_dir, dir, 'chain_1.txt'),
-                sep='\t',
-                names=list(params.keys()))
-            mrgd_chain = mrgd_chain.iloc[int(len(mrgd_chain) * burn_frac):]
+    name_list = list(params.keys())
+    if quick_import:
+        usecols = name_list[name_list.index('gw_bhb_0'):]
+        params = {name: params[name] for name in usecols}
+    else:
+        usecols = name_list
+    dtypes = {name: float for name in usecols}
+    # import and merge all the chains removing the burn-in
 
-        temp_chain = pd.read_csv(
-            os.path.join(chains_dir, dir, 'chain_1.txt'),
-            sep='\t',
-            names=list(params.keys()))
-        mrgd_chain = pd.concat(
-            [mrgd_chain, temp_chain.iloc[int(len(temp_chain) * burn_frac):]],
-            ignore_index=True,
-            sort=False)
+    start_time = time.time()
+    print("Starting import from", chains_dir)
+    mrgd_chain = pd.concat((pd.read_csv(
+        os.path.join(chains_dir, dir, 'chain_1'+chain_ext),
+        sep='\t',
+        names=name_list,
+        dtype=dtypes,
+        usecols=usecols).iloc[lambda x: int(len(x) * burn_frac) <= x.index]
+                            for dir in directories),
+                           ignore_index=True,
+                           sort=False)
 
     mrgd_chain = mrgd_chain.dropna()
 
     mrgd_chain = mrgd_chain.to_numpy(dtype=float)
+    print(f"Finished importing   {chains_dir} in {int(time.time() - start_time):d}s")
 
     return params, mrgd_chain
 
