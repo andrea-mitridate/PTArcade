@@ -19,6 +19,10 @@ from matplotlib.ticker import ScalarFormatter
 from matplotlib.ticker import FormatStrFormatter
 from getdist import plots, MCSamples
 
+import pyarrow as pa
+import pyarrow.feather as pf
+import pyarrow.parquet as pq
+
 
 
 plt_params = {
@@ -202,30 +206,57 @@ def import_chains(chains_dir, burn_frac=1/4, quick_import=True, chain_ext=".txt"
     # import and merge all the chains removing the burn-in
     name_list = list(params.keys())
     if quick_import:
-        usecols = name_list[name_list.index('gw_bhb_0'):]
+        # Search reversed list for first occurence of "red_noise"
+        # Return the index (remember, the list is reversed!)
+        # The use of `next` and a generator makes it so that we don't have to
+        # search the whole list, we stop when we get the first match
+        red_noise_ind = next((i for i in enumerate(name_list[::-1]) if "red_noise" in i[1]))[0]
+
+        # Slice the list so that we begin directly after the index found above
+        usecols = name_list[-1*red_noise_ind:]
+
         params = {name: params[name] for name in usecols}
     else:
         usecols = name_list
     dtypes = {name: float for name in usecols}
     # import and merge all the chains removing the burn-in
 
-    start_time = time.time()
     print("Starting import from", chains_dir)
-    mrgd_chain = pd.concat((pd.read_csv(
-        os.path.join(chains_dir, dir, 'chain_1'+chain_ext),
-        sep='\t',
-        names=name_list,
-        dtype=dtypes,
-        usecols=usecols).iloc[lambda x: int(len(x) * burn_frac) <= x.index]
-                            for dir in directories),
-                           ignore_index=True,
-                           sort=False)
+    start_time = time.time()
 
-    mrgd_chain = mrgd_chain.dropna()
+    if chain_ext==".feather":
+        table_list = []
+        for dir in directories:
+            table = pf.read_table(os.path.join(chains_dir, dir, 'chain_1' + chain_ext), columns=usecols)
+            table_list.append(table.slice(offset=int(table.num_rows * burn_frac)).drop_null())
+
+
+        mrgd_chain = pa.concat_tables(table_list).to_pandas()
+
+    elif chain_ext==".parquet":
+        table_list = []
+        for dir in directories:
+            table = pq.read_table(os.path.join(chains_dir, dir, 'chain_1' + chain_ext), columns=usecols)
+            table_list.append(table.slice(offset=int(table.num_rows * burn_frac)).drop_null())
+
+        mrgd_chain = pa.concat_tables(table_list).to_pandas()
+
+
+    else:
+        mrgd_chain = pd.concat((pd.read_csv(
+            os.path.join(chains_dir, dir, 'chain_1' + chain_ext),
+            sep='\t',
+            names=name_list,
+            dtype=dtypes,
+            usecols=usecols).iloc[lambda x: int(len(x) * burn_frac) <= x.index]
+                                for dir in directories),
+                               ignore_index=True,
+                               sort=False)
+        mrgd_chain = mrgd_chain.dropna()
 
     mrgd_chain = mrgd_chain.to_numpy(dtype=float)
-    print(f"Finished importing   {chains_dir} in {int(time.time() - start_time):d}s")
 
+    print(f"Finished importing   {chains_dir} in {time.time() - start_time:.2f}s")
     return params, mrgd_chain
 
 
