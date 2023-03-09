@@ -5,7 +5,7 @@ channels:
 dependencies:
   - ptmcmcsampler==2.1.1
   - mpi4py==3.1.4
-  - enterprise-pulsar==3.3.1
+  - enterprise-pulsar==3.3.2
   - pip==22.3.1
   - compilers
   - h5py
