@@ -1,22 +1,32 @@
-# Search for Non Black Hole Binaries signals in NANOGrav data 
+# Search for Non Black Hole Binaries signals in NANOGrav data
 
-This code provides a simple interface to the ENTERPRISE analysis suite and allows for easy implementations of new-physics searches in NANOGrav data. 
+*\*insert name\** provides an interface to the ENTERPRISE analysis suite and allows for simple implementation of new-physics searches in PTA data. 
 
 The user can specify a new physics signal (either deterministic or stochastic), and the code will output Monte Carlo chains that can be used to reconstruct the model's parameter posterior distributions. 
 
+The following illustrates how to get started with *\* insert name\** and some basic functionalities. More informations can be found at [this link]().
 # Installation 
+The dependencies required to run *\*insert name\** can be installed following either one of the following procedures
 
+## conda installation
 1) Install `(mini)conda`, an environment management system for python, from [here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html])
-2)  
+2) Exectue 
+```
+conda env create -f environment.yml
+conda activate non-bhb-search
+```
 
-    > conda env create -f environment.yml
-    > conda activate non-bhb-search
+## pip installation
 
-3) Unzip `pta_data.zip` folder located in './inputs/pta_data.zip`
+## singularity environment
+A singularity environment with all the necessary dependencies already installed can be downloaded by typing 
+```
+singularity pull oras://ghcr.io/andrea-mitridate/non-bhb-search:latest
+```
 
 # Input 
 
-All the input files required for the code to run are stored in `/inputs`. There are two types of input files required by the code: PTA data (such as timing measurements, pulsar noise parameters, etc...) provided by one of the IPTA collaborations, and info files specified by the user (for example to specify the new-physics signal, numerical parameter of the Monte Carlo, etc...).
+All the input files required for the code to run are stored in `/inputs`. There are two types of input files required by the code: PTA data (such as timing measurements, pulsar noise parameters, etc...) provided by one of the IPTA collaborations, and info files that contain the user specified parameters (like the new-physics signal, the number of sample points, ...)
 ## Pulsar Data
 
 The essential pulsar data needed by the code to run are the `.tim` and `.par` files which need to be stored in the `inputs/pta_data` directory. 
@@ -25,6 +35,8 @@ Additional pulsar data can be used by the code (as previously, if used they need
 
 - White noise parameters
 - Prior distributions 
+
+PTA data for NANOGrav 12.5 and 15 years data releases, together with the ones for IPTA DR2 can be found at [this link](). Just download them an place them inside the `inputs/pta_data` directory. 
 
 ## User-specified inputs
 
@@ -64,7 +76,7 @@ The numerics info allow to specify enterprise parameters for the run:
 
 # How to use
 
-    > python sampler.py -m (model info file).py -n (numeri info file).py -c (chain number)
+    python sampler.py -m (model info file).py -n (numeri info file).py -c (chain number)
 
 
 # Output

@@ -112,6 +112,6 @@ def pta_data_importer(pta_data):
         emp_dist = pta_data['emp_dist']
 
     if emp_dist is not None:
-        emp_dist = os.path.join(pta_dat_dir, ng15_dic['emp_dist'])
+        emp_dist = os.path.join(pta_dat_dir, emp_dist)
 
     return psrs, params, emp_dist

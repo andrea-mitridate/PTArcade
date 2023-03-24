@@ -13,7 +13,6 @@ parameters = {
     'log10_fmin' : parameter.Uniform(-11, -5)('log10_fmin'),
     'log10_fmax' : parameter.Uniform(-11, -5)('log10_fmax'),
     'log10_A' : parameter.Uniform(-3,1)('log10_A')
-    
     }
 
 group = ['log10_fmin','log10_fmax','log10_A']   

@@ -32,7 +32,6 @@ def interp(info, data):
     return (interp(info[1:], data[index]) * (1-fract)
             + interp(info[1:], data[index+1]) * fract)
 
-
 # Convert an old-style file to our HDF5 format.
 # The old-style has a header giving the parameter names including 'spectrum', then
 # on each line the parameter values and the resulting omega_GW.

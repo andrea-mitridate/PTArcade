@@ -156,7 +156,7 @@ def omega2cross(omega_hh):
         # characteristic strain spectrum h_c(f)
         hcf = H_0_Hz / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f)
 
-        # cross-power spectral density S(f) (s^3)s
+        # cross-power spectral density S(f) (s^3)
         sf = (hcf**2 / (12 * np.pi**2 * f**3)) * np.repeat(df, components)
 
         return sf
