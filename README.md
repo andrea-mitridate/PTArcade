@@ -1,12 +1,12 @@
-# Search for Non Black Hole Binaries signals in NANOGrav data
+# PTArcade
 
-*\*insert name\** provides an interface to the ENTERPRISE analysis suite and allows for simple implementation of new-physics searches in PTA data. 
+PTArcade provides an interface to the ENTERPRISE analysis suite and allows for simple implementation of new-physics searches in PTA data. 
 
 The user can specify a new physics signal (either deterministic or stochastic), and the code will output Monte Carlo chains that can be used to reconstruct the model's parameter posterior distributions. 
 
-The following illustrates how to get started with *\* insert name\** and some basic functionalities. More informations can be found at [this link]().
+The following illustrates how to get started with PTArcade and some basic functionalities. More informations can be found at [this link]().
 # Installation 
-The dependencies required to run *\*insert name\** can be installed following either one of the following procedures
+The dependencies required to run PTArcade can be installed following either one of the following procedures
 
 ## conda installation
 1) Install `(mini)conda`, an environment management system for python, from [here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html])
