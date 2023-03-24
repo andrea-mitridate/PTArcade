@@ -279,7 +279,7 @@ def plot_chains(chain, params, params_name=None, save=False, model_name=None):
         y = idx % n_row
         
         ax[y,x].plot(chain[:, params_dic[par]])
-        ax[y,x].set_ylabel(par, fontsize=15)
+        ax[y,x].set_ylabel(par.replace('_','-'), fontsize=15)
         yScalarFormatter = ScalarFormatterClass(useMathText=True)
         yScalarFormatter.set_powerlimits((-1,2))
         ax[y,x].yaxis.set_major_formatter(yScalarFormatter)
@@ -770,7 +770,7 @@ def print_stats(k_levels, hpi_points, bayes_est, max_pos, levels):
     for idx in np.arange(len(k_levels)):
         print(f'----- Stats for sample #{idx}-----')
         
-        if any(x != [] for x in k_levels[idx]):
+        if k_levels[idx] and any(x != [] for x in k_levels[idx]):
             k_level = k_levels[idx][0]
 
             for par, level in k_level:
@@ -885,7 +885,7 @@ def plot_posteriors(
             for k, v in priors[idx].items()
             if k.replace("_", "-") in filtered[1] and v is not None
         }
-
+        
         samples.append(
             MCSamples(
                 samples=filtered[0],
@@ -914,7 +914,7 @@ def plot_posteriors(
             bayes_est[idx] = get_bayes_est(samples[-1], filtered[1])
             max_pos[idx] = get_max_pos(filtered[1], bayes_est[idx], samples[-1], filtered_priors)
 
-        par_union += [par for par in filtered[1] if par not in par_union]    
+        par_union += [par for par in filtered[1] if par not in par_union]   
         
 
     if len(par_union) > 1:
