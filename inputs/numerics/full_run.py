@@ -6,12 +6,12 @@ pta_data = 'NG15' # PTA dataset to use in the analysis, available options are NG
 #'noise_data': None, # set to None if you do not want to use prederive noise parameters
 #'emp_dist': None} # set to None if you do not want to use empirical distributions
 
-mod_sel = True # set to True if you want to compare the new-physics signal to the SMBHB signal
+mod_sel = False # set to True if you want to compare the new-physics signal to the SMBHB signal
 
 # mcmc parameteres
 out_dir = './chains/'
 resume = False
-N_samples = int(5e5) # number of sample points for the mcmc
+N_samples = int(2e6) # number of sample points for the mcmc
 scam_weight = 30
 am_weight = 15
 de_weight = 50

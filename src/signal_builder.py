@@ -140,13 +140,16 @@ def builder(
         if bhb_th_prior and (pta_dataset=='NG15' or pta_dataset=='IPTA2'):
             # gaussian parameters extracted from 2011.01246
             if pta_dataset == 'NG15':
-                mu = np.array([-15.1151815, 4.34183987])
-                sigma = np.array([[0.0647048, 0.00038692], [0.00038692, 0.07741015]])
+                mu = np.array([-15.54398667, 4.53454624])
+                sigma = np.array([[0.29921382, -0.02242464], [-0.02242464, 0.10293028]])
             elif pta_dataset == 'IPTA2':
                 mu = np.array([-15.02928454, 4.14290127])
                 sigma = np.array([[0.06869369, 0.00017051], [0.00017051, 0.04681747]])
             
-            log10_Agamma_gw = parameter.Normal(mu=mu, sigma=sigma , size=2)('gw_bhb')
+            if model is None:
+                log10_Agamma_gw = parameter.Normal(mu=mu, sigma=sigma , size=2)('gw_bhb')
+            elif model.smbhb:
+                log10_Agamma_gw = parameter.Normal(mu=mu, sigma=sigma , size=2)('gw_bhb_np')
             powerlaw_gw = powerlaw2(log10_Agamma=log10_Agamma_gw)
 
             if orf == 'hd':
