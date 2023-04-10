@@ -94,7 +94,7 @@ def builder(
         [default = None]
     :param bhb_th_prior: if set to True the prior for the bhb signal will be 
         derived by fitting a 2D Gaussian to the distribution of A and gamma 
-        found in 2011.01246
+        in the holodeck library astro-02-gw
         [default = False]
     :param gamma_bhb: fixed common bhb process spectral index value. If set to
         None we vary the spectral index over the range [0, 7].
@@ -138,10 +138,10 @@ def builder(
             orf = None
 
         if bhb_th_prior and (pta_dataset=='NG15' or pta_dataset=='IPTA2'):
-            # gaussian parameters extracted from 2011.01246
+            # gaussian parameters extracted from the holodeck library astro-02-gw
             if pta_dataset == 'NG15':
-                mu = np.array([-15.54398667, 4.53454624])
-                sigma = np.array([[0.29921382, -0.02242464], [-0.02242464, 0.10293028]])
+                mu = np.array([-15.61492963, 4.70709637])
+                sigma = np.array([[0.27871359, -0.00263617], [-0.00263617, 0.12415383]])
             elif pta_dataset == 'IPTA2':
                 mu = np.array([-15.02928454, 4.14290127])
                 sigma = np.array([[0.06869369, 0.00017051], [0.00017051, 0.04681747]])
