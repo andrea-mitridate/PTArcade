@@ -85,7 +85,8 @@ def set_custom_tick_options(
     bottom=True,
     top=True,
     width=0.5,
-    length=2.5
+    #length=2.5
+    length=3.5
     ):
     '''
     Sets custom tick options for a matplotlib axis.
@@ -156,7 +157,7 @@ def params_loader(file):
                 params[key] = (min, max)
             
             elif "Normal" in line:
-                dim = len(re.search('\\[(.*?)\\]', line).group(1).split('    '))
+                dim = len(re.search('\\[(.*?)\\]', line).group(1).split())
                 for i in range(dim):
                     params[f"{key}_{i}"] = None
 
@@ -310,8 +311,8 @@ def chain_filter(chain, params, model_id, par_to_plot):
     nmodel_idx = list(params).index('nmodel')
 
     if model_id is None:
-        print("No model ID specified, posteriors are plotted for model 1")
-        filter_model = chain[:, nmodel_idx] > 0.5
+        print("No model ID specified, posteriors are plotted for model 0")
+        filter_model = chain[:, nmodel_idx] < 0.5
     elif model_id == 0:
         filter_model = chain[:, nmodel_idx] < 0.5
     elif model_id == 1:
@@ -337,11 +338,12 @@ def chain_filter(chain, params, model_id, par_to_plot):
                 and '-' not in x]
 
     filtered_par = [par.replace('_','-') for par in params[filter_par]]
+    filtered_par = [par.replace('np-', '') if 'gw-bhb-np' in par else par for par in filtered_par]
 
     return chain[:, filter_par], filtered_par
 
 
-def create_ax_labels(par_names):
+def create_ax_labels(par_names, small_font=False):
 
     N_params = len(par_names)
 
@@ -349,8 +351,8 @@ def create_ax_labels(par_names):
     axs = f.get_axes()
 
     if N_params == 1:
-        labelsize = 10
-        ticksize = 10
+        labelsize = 12
+        ticksize = 12
 
         set_custom_tick_options(axs[0], width=0.5, length=5)
         axs[0].tick_params(axis='x', which='both', labelsize=ticksize)
@@ -360,8 +362,13 @@ def create_ax_labels(par_names):
 
         return
 
-    labelsize = 6
-    ticksize = 6
+
+    if small_font:
+        labelsize = 5
+        ticksize = 6
+    else:
+        labelsize = 8
+        ticksize = 8
     
     # do this loop using combinations_with_replacement from itertools 
     for idx in range(N_params):
@@ -404,8 +411,8 @@ def plot_bhb_prior(params, bhb_prior, levels):
     sigmas = [level_to_sigma(level) for level in levels]
 
     if bhb_prior == 'NG15':
-        mu = np.array([-15.1151815, 4.34183987])
-        cov = np.array([[0.0647048, 0.00038692], [0.00038692, 0.07741015]])
+        mu = np.array([-15.61492963, 4.70709637])
+        cov = np.array([[0.27871359, -0.00263617], [-0.00263617, 0.12415383]])
     elif bhb_prior == 'IPTA2':
         mu = np.array([-15.02928454, 4.14290127])
         cov = np.array([[0.06869369, 0.00017051], [0.00017051, 0.04681747]])
@@ -427,7 +434,8 @@ def plot_bhb_prior(params, bhb_prior, levels):
     f = plt.gcf()
     axs = f.get_axes()
 
-    lw = 0.45
+    #lw = 0.45
+    lw = 0.5
 
     N_params = len(params)
     #just get the axes for the bhb parameters using plot.get_param_array(sample, [par_1, par_2])
@@ -475,7 +483,7 @@ def corner_plot_settings(levels, samples, one_column):
     sets.norm_1d_density = 'integral'
     sets.alpha_filled_add = 0.8
     sets.legend_fontsize = 12
-    sets.linewidth = 2
+    sets.linewidth = 2.35
     if one_column:
         sets.fig_width_inch = set_size(246, ratio=1)[0]
     else:
@@ -737,7 +745,8 @@ def plot_k_bounds(plot, samples, k_levels):
 
 def plot_hpi(plot, samples, hpi_points):
 
-    lw=0.5
+    #lw=0.5
+    lw=0.6
 
     for idx, sample in enumerate(samples):
         hpi = hpi_points[idx]
@@ -823,6 +832,7 @@ def plot_posteriors(
     levels=None,
     bhb_prior=False,
     one_column = False,
+    small_font = False,
     verbose = False,
     save=False,
     model_name=None):
@@ -918,6 +928,9 @@ def plot_posteriors(
         
 
     if len(par_union) > 1:
+        if not levels:
+            levels = [0.68, 0.95]
+            
         sets = corner_plot_settings(levels, samples, one_column)        
         
         g = plots.get_subplot_plotter(settings=sets)
@@ -959,7 +972,7 @@ def plot_posteriors(
         for names in par_names:
             par_names_union += [name for name in names if name not in par_names_union] 
 
-    create_ax_labels(par_names_union)
+    create_ax_labels(par_names_union, small_font=small_font)
     g.fig.align_labels()
 
     if save and model_name:
