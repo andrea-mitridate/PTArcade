@@ -5,7 +5,7 @@ import numpy as np
 
 name = 'pt_bubble' # name of the model
 
-smbhb = False # set to True if you want to overlay the new-physics signal to the SMBHB signal
+smbhb = True # set to True if you want to overlay the new-physics signal to the SMBHB signal
 
 parameters = {
     'log10_alpha':parameter.Uniform(-2,1)('log10_alpha'),
