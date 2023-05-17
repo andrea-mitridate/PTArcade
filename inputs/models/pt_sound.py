@@ -18,14 +18,12 @@ parameters = {
 
 group = ['log10_alpha', 'log10_T_star', 'log10_H_R', 'a', 'b', 'c']
 
-
 def S(x, a, b, c):
     """
     | Spectral shape as a functino of x=f/f_peak
     """
     return (a + b)**c / (b * x**(-a/c) + a * x**(b/c))**c
 
-@aux.omega2cross
 def spectrum(f, log10_alpha, log10_T_star, log10_H_R, a, b, c):
     """
     | Returns the GW energy density as a fraction of the 

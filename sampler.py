@@ -1,7 +1,10 @@
 import os
 import sys
-import optparse
-import numpy as np
+
+import warnings
+from astropy.utils.exceptions import AstropyDeprecationWarning
+warnings.filterwarnings('ignore', category=AstropyDeprecationWarning)
+
 from enterprise_extensions import hypermodel
 
 import src.pta_importer as pta_importer
@@ -9,13 +12,7 @@ import src.signal_builder as signal_builder
 import src.input_handler as input_handler
 
 import time
-import timeit
 import platform
-
-
-from pstats import SortKey
-import cProfile
-import pstats
 
 try:
     import cpuinfo
@@ -49,6 +46,9 @@ if not cmd_input_okay:
     sys.exit()
 
 inputs = input_handler.load_inputs(input_options)
+
+input_handler.check_config(inputs['numerics'])
+input_handler.check_model(inputs['model'])
 
 ###############################################################################
 # load pulsars and noise parameters

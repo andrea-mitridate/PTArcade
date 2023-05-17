@@ -17,6 +17,6 @@ group = ['log10_Gmu', 'sqrt_kappa']
 cwd = os.getcwd()
 log_spectrum = aux.spec_importer(cwd +'/inputs/models/models_data/meta_l.h5')
 
-@aux.omega2cross
+
 def spectrum(f, log10_Gmu, sqrt_kappa):
     return 10**log_spectrum(np.log10(f), log10_Gmu=log10_Gmu, sqrt_kappa=sqrt_kappa)

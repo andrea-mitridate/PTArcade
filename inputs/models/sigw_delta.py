@@ -16,7 +16,7 @@ parameters = {
 
 group = ['log10_f_peak','log10_A']   
 
-@aux.omega2cross
+
 def spectrum(f: float, log10_f_peak: float, log10_A: float) -> float:
     
     """Calculate GW energy density.

@@ -21,7 +21,7 @@ group = ['log10_fpeak','width','log10_A']
 cwd = os.getcwd()
 spectrum_file = aux.spec_importer(cwd +'/inputs/models/models_data/sigw_log.h5')
 
-@aux.omega2cross
+
 def spectrum(f,log10_A, width,log10_fpeak):
     
     

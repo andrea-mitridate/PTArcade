@@ -16,6 +16,6 @@ group = ['log10_Gmu']
 cwd = os.getcwd()
 log_spectrum = aux.spec_importer(cwd +'/inputs/models/models_data/cusps.h5')
 
-@aux.omega2cross
+
 def spectrum(f, log10_Gmu):
     return 10**log_spectrum(np.log10(f), log10_Gmu=log10_Gmu)

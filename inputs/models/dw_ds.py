@@ -25,7 +25,6 @@ def S(x, a, b, c):
     return (a + b) ** c / (b * x ** (-a / c) + a * x ** (b / c)) ** c
 
 
-@aux.omega2cross
 def spectrum(f, log10_N_eff, log10_T_star, a, b, c):
     """
     | Returns the GW energy density as a fraction of the

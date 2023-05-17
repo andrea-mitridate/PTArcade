@@ -20,7 +20,7 @@ group = ['log10_fmin','log10_fmax','log10_A']
 cwd = os.getcwd()
 spectrum_file = aux.spec_importer(cwd + '/inputs/models/models_data/sigw_box.h5')
 
-@aux.omega2cross
+
 def spectrum(f, log10_A, log10_fmin , log10_fmax):
     
     """Calculate GW energy density.

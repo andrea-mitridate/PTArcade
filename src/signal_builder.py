@@ -6,10 +6,12 @@ from enterprise.signals import signal_base
 from enterprise.signals import parameter
 from enterprise.signals import gp_signals
 from enterprise.signals import deterministic_signals
+from enterprise.signals.parameter import function
 from enterprise_extensions import model_utils
 from enterprise import constants as const
 from enterprise_extensions import chromatic as chrom
 from enterprise_extensions.sampler import get_parameter_groups
+import src.models_utils as aux
 
 from enterprise_extensions.blocks import (
                                           common_red_noise_block,
@@ -209,13 +211,15 @@ def builder(
     # add new-physics signal
     if model:
         if hasattr(model, "signal"):
-            signal = model.signal(**model.parameters)
+            signal = function(model.signal)
+            signal = signal(**model.parameters)
             np_signal = deterministic_signals.Deterministic(signal, name=model.name)
 
             s += np_signal
         
         elif hasattr(model, "spectrum"):
-            cpl_np = model.spectrum(**model.parameters)
+            spectrum = aux.omega2cross(model.spectrum)
+            cpl_np = spectrum(**model.parameters)
 
             if corr:
                 orf = utils.hd_orf()

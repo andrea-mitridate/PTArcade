@@ -42,7 +42,6 @@ def power_spec(f, n_t, r):
     return r * aux.A_s * (f / aux.f_cmb)**n_t
 
 
-@aux.omega2cross
 def spectrum(f, n_t, log10_r, log10_T_rh):
     """Calculate GW energy density.
 
