@@ -39,28 +39,31 @@ input_options, cmd_input_okay = input_handler.get_cmdline_arguments()
 if not cmd_input_okay:
 
     print('ERROR:')
-    print("\t- Models info file\n"+
-    "\t- Numerics info file\n"+
-    "must be present. These are added with the -m, -n input flags. Add -h (--help) flags for more help.")
+    print("\t- Model and configuration files must be present\n"+
+    "\t- These are added with the -m, -c input flags. Add -h (--help) flags for more help.")
 
     sys.exit()
 
 inputs = input_handler.load_inputs(input_options)
 
-input_handler.check_config(inputs['numerics'])
-input_handler.check_model(inputs['model'])
+input_handler.check_config(inputs['config'])
 
 ###############################################################################
 # load pulsars and noise parameters
 ###############################################################################
 print('--- Loading Pulsars and noise data ... ---\n')
 
-
 # import pta data
-psrs, noise_params, emp_dist = pta_importer.pta_data_importer(inputs['numerics'].pta_data)
+psrs, noise_params, emp_dist = pta_importer.pta_data_importer(inputs['config'].pta_data)
 
 print(f"\t loaded {len(psrs)} pulsars\n")
 print('--- Done loading Pulsars and noise data. ---\n')
+
+input_handler.check_model(
+    model=inputs['model'],
+    psrs=psrs,
+    red_components=inputs['config'].red_components,
+    gwb_components=inputs['config'].gwb_components)
 
 ###############################################################################
 # define models and initialize PTA
@@ -73,30 +76,30 @@ pta[0] = signal_builder.builder(
     psrs=psrs, 
     model=inputs['model'], 
     noisedict=noise_params,
-    pta_dataset=inputs['numerics'].pta_data,
-    bhb_th_prior=inputs['numerics'].bhb_th_prior,
-    gamma_bhb=inputs['numerics'].gamma_bhb,
-    A_bhb_logmin=inputs['numerics'].A_bhb_logmin,
-    A_bhb_logmax=inputs['numerics'].A_bhb_logmax,
-    corr=inputs['numerics'].corr,
-    red_components=inputs["numerics"].red_components, 
-    gwb_components=inputs["numerics"].gwb_components)
+    pta_dataset=inputs['config'].pta_data,
+    bhb_th_prior=inputs['config'].bhb_th_prior,
+    gamma_bhb=inputs['config'].gamma_bhb,
+    A_bhb_logmin=inputs['config'].A_bhb_logmin,
+    A_bhb_logmax=inputs['config'].A_bhb_logmax,
+    corr=inputs['config'].corr,
+    red_components=inputs["config"].red_components, 
+    gwb_components=inputs["config"].gwb_components)
 
-if inputs["numerics"].mod_sel:
+if inputs["config"].mod_sel:
     pta[1] = pta[0]
 
     pta[0] = signal_builder.builder(
         psrs=psrs, 
         model=None, 
         noisedict=noise_params,
-        pta_dataset=inputs['numerics'].pta_data,
-        bhb_th_prior=inputs['numerics'].bhb_th_prior,
-        gamma_bhb=inputs['numerics'].gamma_bhb,
-        A_bhb_logmin=inputs['numerics'].A_bhb_logmin,
-        A_bhb_logmax=inputs['numerics'].A_bhb_logmax,
-        corr=inputs['numerics'].corr,
-        red_components=inputs["numerics"].red_components, 
-        gwb_components=inputs["numerics"].gwb_components)
+        pta_dataset=inputs['config'].pta_data,
+        bhb_th_prior=inputs['config'].bhb_th_prior,
+        gamma_bhb=inputs['config'].gamma_bhb,
+        A_bhb_logmin=inputs['config'].A_bhb_logmin,
+        A_bhb_logmax=inputs['config'].A_bhb_logmax,
+        corr=inputs['config'].corr,
+        red_components=inputs["config"].red_components, 
+        gwb_components=inputs["config"].gwb_components)
 
 
 print('--- Done initializing PTA. ---\n\n')
@@ -106,7 +109,7 @@ print('--- Done initializing PTA. ---\n\n')
 ###############################################################################
 
 out_dir = os.path.join(
-    inputs["numerics"].out_dir, inputs["model"].name, f'chain_{input_options["c"]}')
+    inputs["config"].out_dir, inputs["model"].name, f'chain_{input_options["n"]}')
 
 super_model = hypermodel.HyperModel(pta)
 
@@ -120,9 +123,9 @@ if inputs["model"].group:
 groups.extend([[len(super_model.param_names)-1]])
 
 sampler = super_model.setup_sampler(
-    resume=inputs["numerics"].resume,
+    resume=inputs["config"].resume,
     outdir=out_dir,
-    sample_nmodel=inputs["numerics"].mod_sel,
+    sample_nmodel=inputs["config"].mod_sel,
     groups=groups,
     empirical_distr=emp_dist)
 
@@ -135,16 +138,16 @@ print("Setup times (including first sample) {:.2f} seconds real, {:.2f} seconds 
 start_cpu = time.process_time()
 start_real = time.perf_counter()
 
-N_samples = inputs["numerics"].N_samples
+N_samples = inputs["config"].N_samples
 
 print(f'--- Starting to sample {N_samples} samples... ---\n')
 
 sampler.sample(
     x0, 
     N_samples,
-    SCAMweight=inputs['numerics'].scam_weight,
-    AMweight=inputs['numerics'].am_weight,
-    DEweight=inputs['numerics'].de_weight)
+    SCAMweight=inputs['config'].scam_weight,
+    AMweight=inputs['config'].am_weight,
+    DEweight=inputs['config'].de_weight)
 
 print('--- Done sampling. ---')
 

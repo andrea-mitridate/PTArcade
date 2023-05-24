@@ -2,6 +2,8 @@ import os
 import sys
 import inspect
 import optparse
+import numpy as np
+from enterprise_extensions import model_utils
 
 
 class bcolors:
@@ -36,10 +38,10 @@ def get_cmdline_arguments():
 
     parser = optparse.OptionParser()
     parser.add_option('-m', action="store", default="",
-            help="Models info. Sets the white and red noise, the ULDM signal, and the ephemeris model.")
-    parser.add_option('-n', action="store", default="",
-            help="Numeric info. Sets details of the monte carlo run.")
+            help="Models file. Sets the details of the new physics signal.")
     parser.add_option('-c', action="store", default="",
+            help="Configuration file. Sets details of the monte carlo run.")
+    parser.add_option('-n', action="store", default="0",
             help="Specifies the number of the chain.")  
 
     options_in, args = parser.parse_args()
@@ -61,10 +63,10 @@ def load_inputs(input_options):
 
     input_dir = cwd + '/inputs'
     mod_dir = input_dir + '/models/'
-    num_dir = input_dir + '/numerics/'
+    num_dir = input_dir + '/config/'
 
     models_input = input_options['m']
-    num_input = input_options['n']
+    num_input = input_options['c']
 
     model_input_mod_name = os.path.splitext(os.path.basename(models_input))[0]
     model_mod = import_file(model_input_mod_name, os.path.join(mod_dir, models_input))
@@ -74,54 +76,8 @@ def load_inputs(input_options):
 
     return {
             "model": model_mod,
-            "numerics": num_mod, 
-            "mod_names": {
-                'm': model_input_mod_name, 
-                'n': num_input_mod_name
-                }
+            "config": num_mod
             }
-
-
-def check_model(model):
-
-    # checks that all the parameters are present in the config file 
-    pars = ['name',
-            'smbhb',
-            'parameters']
-    
-    for par in pars:
-        if not hasattr(model, par):
-            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                    f"{par} not found in the model file.")
-            sys.exit(error)
-    if not (hasattr(model, 'signal') or hasattr(model, 'spectrum')):
-        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                f"the model file needs to contain either a spectrum" +
-                "function or a signal function.")
-        sys.exit(error)
-
-    # check priors 
-
-    # check that parameters name match the variable of the spectrum function
-    try:
-        args = inspect.getfullargspec(model.spectrum)[0]
-        args.remove('f')
-        signal_type = 'spectrum'
-    except:
-        args = inspect.getfullargspec(model.signal)[0]
-        args.remove('toas')
-        signal_type = 'signal'
-        if 'pos' in args:
-            args.remove('pos')
-    if list(model.parameters.keys()) != args:
-        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                f"in the model file, the keys of the parameter dictionary need to " +
-                f"match the parameters of the {signal_type} function.")
-        sys.exit(error)
-
-    # check spectrum/signal function
-
-    return
 
 
 def check_config(config):
@@ -219,5 +175,101 @@ def check_config(config):
                      "Since bhb_th_prior is set to True, any value of A_bhb_logmin, " +
                      "A_bhb_logmax, or gamma_bhb will be ignored.\n")
             print(warning)
+
+    return
+
+
+def check_model(model, psrs, red_components, gwb_components):
+
+    # checks that all the parameters are present in the config file 
+    pars = ['name',
+            'smbhb',
+            'parameters']
+    
+    for par in pars:
+        if not hasattr(model, par):
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+                    f"{par} not found in the model file.")
+            sys.exit(error)
+    if not (hasattr(model, 'signal') or hasattr(model, 'spectrum')):
+        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+                f"the model file needs to contain either a spectrum" +
+                "function or a signal function.")
+        sys.exit(error)
+
+    # check priors 
+
+    # check that parameters name match the variable of the spectrum function
+    try:
+        args = inspect.getfullargspec(model.spectrum)[0]
+        args.remove('f')
+        signal_type = 'spectrum'
+    except:
+        args = inspect.getfullargspec(model.signal)[0]
+        args.remove('toas')
+        signal_type = 'signal'
+        if 'pos' in args:
+            args.remove('pos')
+    if list(model.parameters.keys()) != args:
+        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+                f"in the model file, the keys of the parameter dictionary need to " +
+                f"match the parameters of the {signal_type} function.")
+        sys.exit(error)
+
+    # check spectrum/signal function
+    x0 = {}
+
+    for name, par in model.parameters.items():
+        try:
+            x0[name] = par.sample()
+        except:
+            x0[name] = par.value
+
+    if hasattr(model, 'spectrum'):
+        N_f = max(red_components, gwb_components)
+        T = model_utils.get_tspan(psrs)
+        f_tab = np.linspace(1 / T, N_f / T, N_f)
+
+        try:
+            spectrum_tab = model.spectrum(f_tab, **x0)
+        except:
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+                f"I tried to evaluate the spectrum function on the array of " +
+                f"frequency components you selected and for random values of "+
+                f"the parameter contained in the prior range but it failed. " +
+                f"Please, check that the spectrum function can take a numpy " +
+                f"list of frequencies as argument, and that it is well defined " +
+                f"within the entire prior volume.")
+            sys.exit(error)
+
+
+        if np.shape(spectrum_tab) != np.shape(f_tab):
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+                f"the output of the spectrum function needs to have the same " +
+                f"dimensions of the frequency list passed as argument.")
+            sys.exit(error)
+
+    else:
+        tmin = np.min([p.toas.min() for p in psrs])
+        tmax = np.max([p.toas.max() for p in psrs])
+        toas_tab = np.linspace(tmin, tmax, 10)
+    
+        try:
+            signal_tab = model.signal(toas_tab, **x0)
+        except:
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+                f"I tried to evaluate the signal function on an array of " +
+                f"toas withing the observing time and for a set of model "+
+                f"parameters contained in the prior range but it failed. " +
+                f"Please, check that the signal function can take a numpy " +
+                f"list of toas as argument, and that it is well defined " +
+                f"within the entire prior volume.")
+            sys.exit(error)
+
+        if np.shape(signal_tab) != np.shape(toas_tab):
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+                f"the output of the signal function needs to have the same " +
+                f"dimensions of the toas list passed as argument.")
+            sys.exit(error)
 
     return
