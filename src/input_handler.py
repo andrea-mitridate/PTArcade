@@ -81,29 +81,54 @@ def load_inputs(input_options):
 
 
 def check_config(config):
+    # checks that all the parameters are present in the config file
+    must = ["pta_data", "N_samples"]
 
-    # checks that all the parameters are present in the config file 
-    pars = ['pta_data',
-            'mod_sel',
-            'out_dir',
-            'resume',
-            'N_samples',
-            'scam_weight',
-            'am_weight',
-            'de_weight', 
-            'red_components',
-            'corr',
-            'gwb_components',
-            'bhb_th_prior',
-            'A_bhb_logmin',
-            'A_bhb_logmax',
-            'gamma_bhb']
+    optional = [
+        "mod_sel",
+        "out_dir",
+        "resume",
+        "scam_weight",
+        "am_weight",
+        "de_weight",
+        "red_components",
+        "corr",
+        "gwb_components",
+        "bhb_th_prior",
+        "A_bhb_logmin",
+        "A_bhb_logmax",
+        "gamma_bhb",
+    ]
+
+    optional_default = {
+        "mod_sel" : False,
+        "out_dir" : './chains/',
+        "resume" : False,
+        "scam_weight" : 30,
+        "am_weight" : 15,
+        "de_weight" : 50,
+        "red_components" : 30,
+        "corr" : False,
+        "gwb_components" : 14,
+        "bhb_th_prior" : True,
+        "A_bhb_logmin": None,
+        "A_bhb_logmax" : None,
+        "gamma_bhb" : None,
+    }
+
     
-    for par in pars:
+    for par in must:
         if not hasattr(config, par):
             error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
                     f"{par} not found in the configuration file.")
             sys.exit(error)
+
+    for par in optional:
+        if not hasattr(config, par):
+            setattr(config, par, optional_default[par])
+            message = ( f"\t{par} not found in the configuration file, " + 
+                        f"it will be set to {optional_default[par]}.")
+            print(message)
 
     # checks PTA data 
     if isinstance(config.pta_data, str):
@@ -182,20 +207,28 @@ def check_config(config):
 def check_model(model, psrs, red_components, gwb_components):
 
     # checks that all the parameters are present in the config file 
-    pars = ['name',
-            'smbhb',
-            'parameters']
+    optional = ['name',
+                'smbhb']
     
-    for par in pars:
-        if not hasattr(model, par):
-            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                    f"{par} not found in the model file.")
-            sys.exit(error)
+    optional_default = {'name' : 'np_model',
+                        'smbhb' : False}
+    
+    if not (hasattr(model, 'parameters')):
+        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+                f"the model file needs to contain a parameter" +
+                "dictionary.")
+        sys.exit(error)
     if not (hasattr(model, 'signal') or hasattr(model, 'spectrum')):
         error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
                 f"the model file needs to contain either a spectrum" +
                 "function or a signal function.")
         sys.exit(error)
+    for par in optional:
+        if not hasattr(model, par):
+            setattr(model, par, optional_default[par])
+            message = ( f"\t{par} not found in the model file, " + 
+                        f"it will be set to {optional_default[par]}.")
+            print(message)
 
     # check priors 
 
@@ -231,7 +264,7 @@ def check_model(model, psrs, red_components, gwb_components):
         f_tab = np.linspace(1 / T, N_f / T, N_f)
 
         try:
-            spectrum_tab = model.spectrum(f_tab, **x0)
+            spectrum_tab = model.spectrum(f=f_tab, **x0)
         except:
             error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
                 f"I tried to evaluate the spectrum function on the array of " +

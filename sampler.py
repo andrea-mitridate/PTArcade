@@ -57,13 +57,14 @@ print('--- Loading Pulsars and noise data ... ---\n')
 psrs, noise_params, emp_dist = pta_importer.pta_data_importer(inputs['config'].pta_data)
 
 print(f"\t loaded {len(psrs)} pulsars\n")
-print('--- Done loading Pulsars and noise data. ---\n')
 
 input_handler.check_model(
     model=inputs['model'],
     psrs=psrs,
     red_components=inputs['config'].red_components,
     gwb_components=inputs['config'].gwb_components)
+
+print('--- Done loading Pulsars and noise data. ---\n')
 
 ###############################################################################
 # define models and initialize PTA
