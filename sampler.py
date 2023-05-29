@@ -56,7 +56,7 @@ print('--- Loading Pulsars and noise data ... ---\n')
 # import pta data
 psrs, noise_params, emp_dist = pta_importer.pta_data_importer(inputs['config'].pta_data)
 
-print(f"\t loaded {len(psrs)} pulsars\n")
+print(f"\tloaded {len(psrs)} pulsars\n")
 
 input_handler.check_model(
     model=inputs['model'],

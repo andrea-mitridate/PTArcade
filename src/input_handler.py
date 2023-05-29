@@ -127,7 +127,7 @@ def check_config(config):
         if not hasattr(config, par):
             setattr(config, par, optional_default[par])
             message = ( f"\t{par} not found in the configuration file, " + 
-                        f"it will be set to {optional_default[par]}.")
+                        f"it will be set to {optional_default[par]}.\n")
             print(message)
 
     # checks PTA data 
@@ -227,7 +227,7 @@ def check_model(model, psrs, red_components, gwb_components):
         if not hasattr(model, par):
             setattr(model, par, optional_default[par])
             message = ( f"\t{par} not found in the model file, " + 
-                        f"it will be set to {optional_default[par]}.")
+                        f"it will be set to {optional_default[par]}.\n")
             print(message)
 
     # check priors 
