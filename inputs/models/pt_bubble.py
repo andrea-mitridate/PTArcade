@@ -3,7 +3,7 @@ import src.models_utils as aux
 from scipy.special import gamma
 import numpy as np
 
-name = 'pt_bubble' # name of the model
+#name = 'pt_bubble' # name of the model
 
 smbhb = False # set to True if you want to overlay the new-physics signal to the SMBHB signal
 

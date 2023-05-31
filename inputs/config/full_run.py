@@ -12,9 +12,6 @@ mod_sel = False # set to True if you want to compare the new-physics signal to t
 out_dir = './chains/'
 resume = False
 N_samples = int(2e6) # number of sample points for the mcmc
-scam_weight = 30
-am_weight = 15
-de_weight = 50
 
 # intrinsic red noises parameters
 red_components = 30 # number of frequency components for the intrinsic red noise

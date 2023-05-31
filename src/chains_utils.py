@@ -551,7 +551,7 @@ def get_k_levels(sample, pars, priors, bf, k_ratio):
              par_2,
              k_ratio_aux_2D(
                 sample=sample,
-                BF=bf,
+                bf=bf,
                 par_1=par_1,
                 par_2=par_2,
                 par_range_1=priors[par_1],
@@ -564,7 +564,7 @@ def get_k_levels(sample, pars, priors, bf, k_ratio):
             [par,
             k_ratio_aux_1D(
                 sample = sample,
-                BF = bf,
+                bf = bf,
                 par = par,
                 par_range = priors[par],
                 k_ratio = k_ratio)])
