@@ -7,8 +7,8 @@ import numpy as np
 import scipy.stats as ss
 from enterprise.signals.parameter import function
 from src import fast_interpolate
+from importlib.resources import files
 
-cwd = os.getcwd()
 
 # -----------------------------------------------------------
 # Physical constants and useful cosmological functions
@@ -34,7 +34,7 @@ gev_to_hz = nat.convert(nat.GeV, nat.Hz) # conversion from gev to Hz
 
 # tabulated values for the number of relativistic degrees of
 # freedom from reference 1803.01038
-gs = np.loadtxt(cwd + '/inputs/models/models_data/g_star.dat')
+gs = np.loadtxt(files('ptarcade.data').joinpath('g_star.dat'))
 
 
 def g_rho(x, is_freq=False):

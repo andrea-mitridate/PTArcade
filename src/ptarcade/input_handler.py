@@ -38,9 +38,9 @@ def get_cmdline_arguments():
 
     parser = optparse.OptionParser()
     parser.add_option('-m', action="store", default="",
-            help="Models file. Sets the details of the new physics signal.")
+            help="Path to models file. Sets the details of the new physics signal.")
     parser.add_option('-c', action="store", default="",
-            help="Configuration file. Sets details of the monte carlo run.")
+            help="Path to configuration file. Sets details of the monte carlo run.")
     parser.add_option('-n', action="store", default="0",
             help="Specifies the number of the chain.")  
 
@@ -59,20 +59,15 @@ def load_inputs(input_options):
     """
         Load the input parameters from the relevant files.
     """
-    cwd = os.getcwd()
-
-    input_dir = cwd + '/inputs'
-    mod_dir = input_dir + '/models/'
-    num_dir = input_dir + '/config/'
 
     models_input = input_options['m']
     num_input = input_options['c']
 
     model_input_mod_name = os.path.splitext(os.path.basename(models_input))[0]
-    model_mod = import_file(model_input_mod_name, os.path.join(mod_dir, models_input))
+    model_mod = import_file(model_input_mod_name, os.path.abspath(models_input))
 
     num_input_mod_name = os.path.splitext(os.path.basename(num_input))[0]
-    num_mod = import_file(num_input_mod_name, os.path.join(num_dir, num_input))
+    num_mod = import_file(num_input_mod_name, os.path.abspath(num_input))
 
     return {
             "model": model_mod,
