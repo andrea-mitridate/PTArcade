@@ -1,0 +1,150 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "PTArcade"
+version = "0.0.1"
+authors = [
+  { name="Andrea Mitridate", email="andrea.mitridate@nanograv.org" },
+]
+description = "PTArcade provides an interface to the ENTERPRISE analysis suite and allows for simple implementation of new-physics searches in PTA data."
+readme = "README.md"
+requires-python = ">=3.9, <3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[tool.ruff]
+ignore = ["Q000", "ANN", "E402"]
+line-length = 120
+target-version = "py310"
+fix = true
+unfixable = []
+select = [
+  # pyflakes
+  "F",
+  # pycodestyle
+  "E", "W",
+  # mccabe (complexity)
+  "C90",
+  # naming
+  "N",
+  # docstyles
+  "D",
+  # pyupgrade
+  "UP",
+  # flake8-2020
+  "YTT",
+  # blind except
+  "BLE",
+  # boolean traps
+  "FBT",
+  # flake8-bugbear
+  "B",
+  # catch overshadowing builtins
+  "A",
+  # comma errors
+  "COM",
+  # list comprehension help
+  "C4",
+  # help with datetime
+  "DTZ",
+  # error messages
+  "EM",
+  # shebangs
+  "EXE",
+  # imports
+  "ICN",
+  # logging
+  "G",
+  # namespacing help for packages
+  "INP",
+  # pytest
+  "PT",
+  # raise correctly
+  "RSE",
+  # returns
+  "RET",
+  # simplify code
+  "SIM",
+  # unused arguments
+  "ARG",
+  # use pathlib
+  "PTH",
+  # catch commented out code
+  "ERA",
+  # pandas help
+  "PD",
+  # flake8-quotes
+  "Q",
+  # flake8-debugger
+  "T10",
+  # flake8-gettext
+  "INT",
+  # pylint
+  "PLC", "PLE", "PLR", "PLW",
+  # try except
+  "TRY",
+  # convert to f strings
+  "FLY",
+  # numpy things
+  "NPY",
+  # misc lints
+  "PIE",
+  # flake8-pyi
+  "PYI",
+  # tidy imports
+  "TID",
+  # implicit string concatenation
+  "ISC",
+  # type-checking imports
+  #"TCH",
+  # pygrep-hooks
+  #"PGH"
+]
+
+exclude = [
+  "doc/sphinxext/*.py",
+  "doc/build/*.py",
+  "doc/temp/*.py",
+  ".eggs/*.py",
+]
+
+[tool.poetry]
+name = "ptarcade"
+version = "0.1.0"
+description = ""
+authors = ["David Wright <davecwright@knights.ucf.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9, <3.11"
+ptmcmcsampler = "^2.1.1"
+mpi4py = "^3.1.4"
+h5py = "^3.8.0"
+enterprise-pulsar = "^3.3.3"
+enterprise-extensions = "^2.4.2"
+scikit-sparse = "^0.4.8"
+natpy = "^0.1.1"
+numpy = "^1.24.3"
+pandas = "^2.0.2"
+pyarrow = "^12.0.0"
+getdist = "^1.4.3"
+astroml = "^1.0.2.post1"
+scipy = "^1.10.1"
+setuptools = "^67.8.0"
+acor = {git = "https://github.com/davecwright3/acor.git", rev = "main"}
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.3.1"
+ruff = "^0.0.270"
+black = "^23.3.0"
+ipython = "^8.13.2"
+
+[tool.black]
+line-length = 120
+target-version = ['py310']
+include = '\.pyi?$'
