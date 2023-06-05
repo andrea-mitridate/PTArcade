@@ -2,20 +2,6 @@
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[project]
-name = "PTArcade"
-version = "0.0.1"
-authors = [
-  { name="Andrea Mitridate", email="andrea.mitridate@nanograv.org" },
-]
-description = "PTArcade provides an interface to the ENTERPRISE analysis suite and allows for simple implementation of new-physics searches in PTA data."
-readme = "README.md"
-requires-python = ">=3.9, <3.11"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
-]
-
 [tool.ruff]
 ignore = ["Q000", "ANN", "E402"]
 line-length = 120
@@ -113,11 +99,26 @@ exclude = [
 ]
 
 [tool.poetry]
-name = "ptarcade"
+name = "PTArcade"
 version = "0.1.0"
-description = ""
-authors = ["David Wright <davecwright@knights.ucf.edu>"]
+description = "PTArcade provides an interface to the ENTERPRISE analysis suite and allows for simple implementation of new-physics searches in PTA data."
 readme = "README.md"
+authors = ["Andrea Mitridate <andrea.mitridate@nanograv.org>",]
+keywords = ["ptarcade"]
+repository = "https://github.com/andrea-mitridate/PTArcade"
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/andrea-mitridate/PTArcade/issues"
 
 [tool.poetry.dependencies]
 python = ">=3.9, <3.11"
@@ -142,7 +143,17 @@ acor = {git = "https://github.com/davecwright3/acor.git", rev = "main"}
 pytest = "^7.3.1"
 ruff = "^0.0.270"
 black = "^23.3.0"
-ipython = "^8.13.2"
+
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.4.3"
+mkdocs-material = "^9.1.15"
+mkdocstrings = {extras = ["python"], version = "^0.22.0"}
+mkdocs-gen-files = "^0.5.0"
+mkdocs-literate-nav = "^0.6.0"
+
+[tool.poetry.scripts]
+ptarcade = "ptarcade.sampler:main"
 
 [tool.black]
 line-length = 120
