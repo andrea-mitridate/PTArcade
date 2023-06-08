@@ -7,21 +7,21 @@ from enterprise_extensions import model_utils
 
 
 class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
     WARNING = "\033[0;33m"
-    FAIL = '\033[0;31m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    FAIL = "\033[0;31m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 def import_file(full_name, path):
     """
-        Import a python module from a path. 3.4+ only.
-        Does not call sys.modules[full_name] = path
+    Import a python module from a path. 3.4+ only.
+    Does not call sys.modules[full_name] = path
     """
     from importlib import util
 
@@ -114,7 +114,7 @@ def check_config(config):
     
     for par in must:
         if not hasattr(config, par):
-            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
                     f"{par} not found in the configuration file.")
             sys.exit(error)
 
@@ -130,27 +130,28 @@ def check_config(config):
         if config.pta_data in ['NG15', 'NG12', 'IPTA2']:
             pass 
         else:
-            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
                     f"The pta dataset {config.pta_data} is not included in PTArcade. " +
-                    f"Please, choose between 'NG15', 'NG12', 'IPTA2' or load your own data.")
+                    "Please, choose between 'NG15', 'NG12', 'IPTA2' "+
+                    "or load your own data.")
             sys.exit(error)
     elif isinstance(config.pta_data, dict):
         if list(config.pta_data.keys()) != ['psrs_data', 'noise_data', 'emp_dist']:
-            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
                  "The keys of the pta_data dictionary in the configuration file " +
                  "need to be ['psrs_data', 'noise_data', 'emp_dist'].")
             sys.exit(error)
         elif not os.path.exists(config.pta_data['psrs_data']):
-            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
                  "The path in pta_data['psrs_data'] does not exist.")
             sys.exit(error)
         else:
             pass
     else:
-        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                 f"The 'pta_data' variable in the configuration file needs to be either a string between " +
-                 "'NG15', 'NG12', 'IPTA2', or a dictionary pointing to a set of PTA data." + 
-                 "For more details see documentation.")
+        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
+                 "The 'pta_data' variable in the configuration file needs to be " +
+                 "eithera string between 'NG15', 'NG12', 'IPTA2', " + 
+                 "or a dictionary pointing to a set of PTA data.")
         sys.exit(error)
 
     # checks booleans variables
@@ -161,7 +162,7 @@ def check_config(config):
     
     for key, value in bools.items():
         if not isinstance(value, bool):
-            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
                      f"The variable {key} in the configuration file must be a boolean.")
             sys.exit(error)
     
@@ -175,8 +176,8 @@ def check_config(config):
     
     for key, value in integers.items():
         if not isinstance(value, int):
-            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                     f"The variable {key} in the configuration file mest be an integer.")
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: The " +
+                     f"variable {key} in the configuration file must be an integer.")
             sys.exit(error)
 
     # checks bhb params 
@@ -187,14 +188,17 @@ def check_config(config):
     for key, value in bhb_pars.items():
         if not isinstance(value, (float,int)) and value is not None:
             error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                     f"The variable {key} in the configuration file mest be a number (integer or float), or set to None.")
+                     f"The variable {key} in the configuration file must "+
+                     "be a number (integer or float), or set to None.")
             sys.exit(error)
 
-    if config.bhb_th_prior and (config.A_bhb_logmin or config.A_bhb_logmax or config.gamma_bhb):
-            warning = (f"{bcolors.WARNING}WARNING{bcolors.ENDC}:" +
-                     "Since bhb_th_prior is set to True, any value of A_bhb_logmin, " +
-                     "A_bhb_logmax, or gamma_bhb will be ignored.\n")
-            print(warning)
+    if config.bhb_th_prior and (
+        config.A_bhb_logmin or config.A_bhb_logmax or config.gamma_bhb):
+        warning = (
+            f"{bcolors.WARNING}WARNING{bcolors.ENDC}: "
+            + "Since bhb_th_prior is set to True, any value of A_bhb_logmin, "
+            + "A_bhb_logmax, or gamma_bhb will be ignored.\n")
+        print(warning)
 
     return
 
@@ -209,13 +213,13 @@ def check_model(model, psrs, red_components, gwb_components):
                         'smbhb' : False}
     
     if not (hasattr(model, 'parameters')):
-        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                f"the model file needs to contain a parameter" +
+        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
+                "the model file needs to contain a parameter" +
                 "dictionary.")
         sys.exit(error)
     if not (hasattr(model, 'signal') or hasattr(model, 'spectrum')):
-        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                f"the model file needs to contain either a spectrum" +
+        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
+                "the model file needs to contain either a spectrum" +
                 "function or a signal function.")
         sys.exit(error)
     for par in optional:
@@ -232,15 +236,15 @@ def check_model(model, psrs, red_components, gwb_components):
         args = inspect.getfullargspec(model.spectrum)[0]
         args.remove('f')
         signal_type = 'spectrum'
-    except:
+    except AttributeError:
         args = inspect.getfullargspec(model.signal)[0]
         args.remove('toas')
         signal_type = 'signal'
         if 'pos' in args:
             args.remove('pos')
     if list(model.parameters.keys()) != args:
-        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                f"in the model file, the keys of the parameter dictionary need to " +
+        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
+                "in the model file, the keys of the parameter dictionary need to " +
                 f"match the parameters of the {signal_type} function.")
         sys.exit(error)
 
@@ -250,7 +254,7 @@ def check_model(model, psrs, red_components, gwb_components):
     for name, par in model.parameters.items():
         try:
             x0[name] = par.sample()
-        except:
+        except AttributeError:
             x0[name] = par.value
 
     if hasattr(model, 'spectrum'):
@@ -260,21 +264,21 @@ def check_model(model, psrs, red_components, gwb_components):
 
         try:
             spectrum_tab = model.spectrum(f=f_tab, **x0)
-        except:
-            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                f"I tried to evaluate the spectrum function on the array of " +
-                f"frequency components you selected and for random values of "+
-                f"the parameter contained in the prior range but it failed. " +
-                f"Please, check that the spectrum function can take a numpy " +
-                f"list of frequencies as argument, and that it is well defined " +
-                f"within the entire prior volume.")
+        except AttributeError:
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
+                "frequency components you selected and for random values of "+
+                "I tried to evaluate the spectrum function on the array of " +
+                "the parameter contained in the prior range but it failed. " +
+                "Please, check that the spectrum function can take a numpy " +
+                "list of frequencies as argument, and that it is well defined " +
+                "within the entire prior volume.")
             sys.exit(error)
 
 
         if np.shape(spectrum_tab) != np.shape(f_tab):
-            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                f"the output of the spectrum function needs to have the same " +
-                f"dimensions of the frequency list passed as argument.")
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
+                "the output of the spectrum function needs to have the same " +
+                "dimensions of the frequency list passed as argument.")
             sys.exit(error)
 
     else:
@@ -284,20 +288,20 @@ def check_model(model, psrs, red_components, gwb_components):
     
         try:
             signal_tab = model.signal(toas_tab, **x0)
-        except:
-            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                f"I tried to evaluate the signal function on an array of " +
-                f"toas withing the observing time and for a set of model "+
-                f"parameters contained in the prior range but it failed. " +
-                f"Please, check that the signal function can take a numpy " +
-                f"list of toas as argument, and that it is well defined " +
-                f"within the entire prior volume.")
+        except AttributeError:
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
+                "I tried to evaluate the signal function on an array of " +
+                "toas withing the observing time and for a set of model "+
+                "parameters contained in the prior range but it failed. " +
+                "Please, check that the signal function can take a numpy " +
+                "list of toas as argument, and that it is well defined " +
+                "within the entire prior volume.")
             sys.exit(error)
 
         if np.shape(signal_tab) != np.shape(toas_tab):
-            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
-                f"the output of the signal function needs to have the same " +
-                f"dimensions of the toas list passed as argument.")
+            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
+                "the output of the signal function needs to have the same " +
+                "dimensions of the toas list passed as argument.")
             sys.exit(error)
 
     return
