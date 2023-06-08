@@ -542,7 +542,7 @@ def plot_k_bounds(plot, samples, k_levels):
                     density.P,
                     levels,
                     colors="#ffffff00",
-                    alpha=0.1,
+                    alpha=0.14,
                     extend="both")
                 
                 cs.cmap.set_over("#ffffff00")
