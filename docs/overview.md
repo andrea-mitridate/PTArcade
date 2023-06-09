@@ -1,4 +1,10 @@
 # Overview
+# Welcome to PTArcade test
+PTArcade is a wrapper of the [ENTERPRISE](https://github.com/nanograv/enterprise) analysis suite that allows for easy implementation of new-physics searches in PTA data. 
+
+The user can specify a new physics signal (either deterministic or stochastic), 
+
+The following illustrates how to get started with PTArcade and some basic functionalities. More informations can be found at [this link]().
 
 ## Auxiliary functions/constants 
 
