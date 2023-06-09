@@ -1,4 +1,16 @@
-The model file is a simple Python file that serves two pourpouses: first, define the new-phyiscs signal; and second, define the priors for signal parameter.
+The model file is a simple Python file that, at minimum, needs to contain the following informaiton:
+
+* The [names and prior distributions][priors] of the new physics signal parameters.
+* A parametrized form of the new physics signal, which can either be [stochastic][spectrum]
+    (and parametrized via its power spectrum), or [deterministic][signal] (and parametrized
+    as a timeseries).
+
+In the following we will explain how these two quantities can be defined in the model file. 
+
+  [priors]: #priors
+  [spectrum]: #stochastic-signals
+  [signal]: #deterministic-signals
+
 ## Priors
 The priors for the signal parameters are defined via the `parameters` dictionary in the model file. The keys of this dictionary must be strings, which will be used as names of the model parameters. The values of this dictionary are `parameter` objects ...
 
@@ -127,13 +139,15 @@ Deterministic signals are defined via the `signal` function in the model file. T
 ## Additional settings 
 The model file can also contain additional (optional) variables that can be used to control in more details the new-physics signal. Specifically, the following 
 
+<figure markdown>
 
-| Variable name| Variable type | What isit doing                                                                          |
-| :---------:  | :------------:|                                                                                          |
-| `name`       | string        | Sets the model name. It used to [name the output directory][out_name].                   |
-| `smbhb`      | boolean       | If set to `True` the expected signal from SMBHB will be added to the new-physic signal.  |
-| `goup`       | list          |                                                                                          |
+| Variable name| Variable type | What it is doing                                                                         | Default        |
+| :---------:  | :------------:| :------------:                                                                           | :------------:           |
+| `name`       | string       | Sets the model name. It used to [name the output directory][out_name].                   | `False`    |
+| `smbhb`      | boolean      | If set to `True` the expected signal from SMBHB will be added to the new-physic signal.  | `"np_model"` |
+| `goup`       | list         |                                                                                          |         | 
 
+</figure>
 
 !!! info "NG15 model files"
     The model files used in the [NANOGrav 15-year new-physics search][ng15_np] can be found [here][ng15_models].
