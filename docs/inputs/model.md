@@ -1,18 +1,18 @@
-The model file is a simple Python file that, at minimum, needs to contain the following informaiton:
+The model file is a simple Python file that, at minimum, needs to contain the following information:
 
-* The [names and prior distributions][priors] of the new physics signal parameters.
-* A parametrized form of the new physics signal, which can either be [stochastic][spectrum]
+* [Names and prior distributions][priors] of the new physics signal parameters.
+* Parametrized form of the new physics signal, which can either be [stochastic][spectrum]
     (and parametrized via its power spectrum), or [deterministic][signal] (and parametrized
     as a timeseries).
 
-In the following we will explain how these two quantities can be defined in the model file. 
+In the following we will explain how these two quantities are defined in the model file. 
 
   [priors]: #priors
   [spectrum]: #stochastic-signals
   [signal]: #deterministic-signals
 
 ## Priors
-The priors for the signal parameters are defined via the `parameters` dictionary in the model file. The keys of this dictionary must be strings, which will be used as names of the model parameters. The values of this dictionary are `parameter` objects ...
+The priors for the signal parameters are defined via the `parameters` dictionary. The keys of this dictionary must be strings, which will be used as names of the model parameters. The values of this dictionary are `parameter` objects ...
 
 ??? example "Priors example"
     For example, the `parameters` dictionary of a model described by the parameters $a$ and $b$ which are common among all the pulsars will look like this for different choices of the priros:
@@ -20,20 +20,33 @@ The priors for the signal parameters are defined via the `parameters` dictionary
     === "Uniform Priors"
 
         ``` py
-        parameters = {'a' : parameter.Uniform(0,1), 'b' : parameter.Uniform(0,1)} # (1)!
+        parameters = {'a' : parameter.Uniform(0, 1), 'b' : parameter.Uniform(0, 1)} # (1)!
         ```
 
         1.  In this case we have chosen uniform priors in the range [0,1] for both
             parameters.
 
-    === "Normal Priors"
+    === "1D Normal Priors"
 
         ``` py
-        parameters = {'a' : parameter.Normal(1,1), 'b' : parameter.Normal(1,1)} # (1)!
+        parameters = {'a' : parameter.Normal(1, 1), 'b' : parameter.Normal(1, 1)} # (1)!
         ```
         
-        1.  In this case we have chosen normal priors with unit mean and variance for
+        1.  In this case we have chosen 1D normal priors with unit mean and variance for
             both parameters.
+
+    === "2D Normal Priors"
+
+        ``` py 
+        mu = [1, 1]
+        cov = [[1, 0.1],[0.1, 1]]
+
+        parameters = {'a_b' : parameter.Normal(mu, cov, size=2)} # (1)!
+        ```
+        
+        1.  In this case we have chosen a joint 2D normal prior for the model parameters
+        which are grouped in a single two dimensional parameter called `a_b`.
+
     === "Exponential Priors"
 
         ``` py
@@ -43,27 +56,27 @@ The priors for the signal parameters are defined via the `parameters` dictionary
         1.  In this case we have assumed 
 
 ## Stochastic signals
-Stochastic signals are defined via the `spectrum` function in the model file. Its first parameter should be named `f` and it's supposed to be a [NumPy array][numpy] containing the frequencies (in unit of Hz) at which the spectrum is evaluated. The remaining parameters should match the ones defined in the `parameters` dictionary. The `spectrum` function should return a [NumPy array][numpy] with the same dimensions of `f` containing the value of $h^2\Omega_{\scriptscriptstyle\mathrm{GW}}$ at each of the frequencies contained in `f`.
+Stochastic signals are defined via the `spectrum` function. The first parameter of this function should be named `f` and it's supposed to be a [NumPy array][numpy] containing the frequencies (in unit of Hz) at which the spectrum will be evaluated. The names of the remaining parameters should match the keys of the `parameters` dictionary. The `spectrum` function should return a [NumPy array][numpy] containing the value of $h^2\Omega_{\mathrm{GW}}$ at each of the frequencies given in `f`.
 
 ??? example "Stochastic signal example"
     For example, the `spectrum` function for a model with 
 
     $$
-    h^2\Omega_{\rm GW}(f) = 
+    h^2\Omega_{\rm GW}(f) = \frac{a}{1+b/f}
     $$
 
     is given by
 
     ``` py
     def spectrum(f, a, b):
-
-        return 
+            
+        return a * 1 / (1 + b/f)
     ```
   
   [numpy]: https://numpy.org/doc/stable/reference/generated/numpy.array.html
 
 ## Deterministic signals
-Deterministic signals are defined via the `signal` function in the model file. The first parameter of this function should be named `toas` and it's supposed to be a [NumPy array][numpy] containing the time of arrivals (TOAs) (in units of seconds) at which the deterministic signal will be evaluated. The remaining parameters should match the ones defined in the `parameters` dictionary. The `signal` function should return a [NumPy array][numpy] with the same dimensions of `toas` containing the value of the induced  shift for each TOA contained in `toas`.
+Deterministic signals are defined via the `signal` function. The first parameter of this function should be named `toas` and it's supposed to be a [NumPy array][numpy] containing the time of arrivals (TOAs) (in units of seconds) at which the deterministic signal will be evaluated. The name of the remaining parameters should match the keys of the `parameters` dictionary. The `signal` function should return a [NumPy array][numpy] with the same dimensions of `toas` containing the value of the induced  shift for each TOA contained in `toas`.
 
 ??? example "Deterministic signal example"
     For example, the `signal` for a deterministic signal given by
@@ -77,6 +90,8 @@ Deterministic signals are defined via the `signal` function in the model file. T
 
         return a * numpy.sin(b * toas)
     ```
+
+---
 
 ???+ example "Model file example"
     Here we give examples of model files for both stochastic and deterministic signals.
@@ -95,8 +110,8 @@ Deterministic signals are defined via the `signal` function in the model file. T
         from ptarcade import parameter
 
         parameters = {
-                    'log_A_star' : parameter.Uniform(-14, -6, True),
-                    'log_f_star' : parameter.Uniform(-10, -6, True)
+                    'log_A_star' : parameter.Uniform(-14, -6),
+                    'log_f_star' : parameter.Uniform(-10, -6)
                     }
 
         def S(x):
@@ -125,8 +140,8 @@ Deterministic signals are defined via the `signal` function in the model file. T
 
 
         parameters = {
-                    'log_A' : parameter.Uniform(-14, -6, True),
-                    'log_k' : parameter.Uniform(-10, -6, True)
+                    'log_A' : parameter.Uniform(-14, -6),
+                    'log_k' : parameter.Uniform(-10, -6)
                     }
 
         def signal(toas, log_A, log_k):
@@ -135,17 +150,20 @@ Deterministic signals are defined via the `signal` function in the model file. T
             
             return A *  numpy.sin(k * toas)
         ```
+!!! tip "Model file flexibility"
+
+    Mention flexibility provided by the model file being a python file
 
 ## Additional settings 
 The model file can also contain additional (optional) variables that can be used to control in more details the new-physics signal. Specifically, the following 
 
 <figure markdown>
 
-| Variable name| Variable type | What it is doing                                                                         | Default        |
-| :---------:  | :------------:| :------------:                                                                           | :------------:           |
-| `name`       | string       | Sets the model name. It used to [name the output directory][out_name].                   | `False`    |
-| `smbhb`      | boolean      | If set to `True` the expected signal from SMBHB will be added to the new-physic signal.  | `"np_model"` |
-| `goup`       | list         |                                                                                          |         | 
+| Variable name| Variable type | What it does                                                                             | Default        |
+| :---------:  | :------------:| :------------:                                                                           | :------------: |
+| `name`       | string       | Sets the model name. It used to [name the output directory][out_name].                    | `"np_model"`   |
+| `smbhb`      | boolean      | If set to `True` the expected signal from SMBHB will be added to the new-physic signal.   | `False`        |
+| `goup`       | list         |                                                                                           |                | 
 
 </figure>
 

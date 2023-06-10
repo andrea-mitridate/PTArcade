@@ -1,23 +1,11 @@
-# Getting started  
-PTArcade is a wrapper of [ENTERPRISE] that allows for easy implementation of 
-new physics searches in PTAs data. If you're familiar with Python, you
-can install PTArcade with [`pip`][pip] or ['conda'][conda], the Python package manager.
-If not, we recommend using [`docker`][docker].
+If you're familiar with Python, you
+can install PTArcade with [`pip`][pip] or [`conda`][conda], the Python package manager.
+If not, we recommend using a [`docker`][docker] or [`singularity`][singularity] virtual environment.
 
-!!! warning
-    Add more details about what PTArcade does
-
-    * dfad
-    * df
-
-    Us this part as index and move the installation page to an independent page...
-
-  [ENTERPRISE]: https://github.com/nanograv/enterprise
   [pip]: #with-pip
   [conda]: #with-conda
   [docker]: #with-docker
-
-## Installation
+  [singularity]: #with-singularity
 
 ### with pip 
 PTArcade is published as a [Python package] and can be installed with

@@ -185,14 +185,15 @@ extra_javascript:
 nav:
   - Home: index.md
   - Getting started:
-    - Installation: getting-started.md
-    - Run PTArcade: run.md
-    - Set up on HPCs: hpc-setup.md
-    - Troubleshooting: trouble.md
+    - getting_started/index.md
+    - Installation: getting_started/install.md
+    - Run PTArcade: getting_started/run.md
+    - Set up on HPCs: getting_started/hpc-setup.md
+    - Troubleshooting: getting_started/trouble.md
   - Inputs:
     - inputs/index.md
     - Model file: inputs/model.md
-    - Config file: inputs/config.md
+    - Configuration file: inputs/config.md
     - Auxiliary functions: utils.md
   - Outputs: outputs.md
   - Utilities: utils.md

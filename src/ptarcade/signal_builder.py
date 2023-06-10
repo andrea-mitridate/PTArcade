@@ -173,7 +173,7 @@ def builder(
             print('WARNING: Theory motivated priors for the SMBHB singal parameters are available only for NG15 and IPTA2. Reverting back to log uniform prior for A and uniform prior for gamma.\n')
             s += common_red_noise_block(
                     psd='powerlaw', 
-                    prior='log-uniform', 
+                    prior='log-uniform',
                     Tspan=Tspan, 
                     components=gwb_components,
                     orf=orf, 
