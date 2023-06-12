@@ -186,15 +186,18 @@ nav:
   - Home: index.md
   - Getting started:
     - getting_started/index.md
-    - Installation: getting_started/install.md
+    - Installation: getting_started/local_install.md
     - Run PTArcade: getting_started/run.md
-    - Set up on HPCs: getting_started/hpc-setup.md
+    - Set up on HPCs: getting_started/hpc_install.md
     - Troubleshooting: getting_started/trouble.md
   - Inputs:
     - inputs/index.md
     - Model file: inputs/model.md
     - Configuration file: inputs/config.md
-    - Auxiliary functions: utils.md
   - Outputs: outputs.md
-  - Utilities: utils.md
+  - Utilities:
+    - utils/index.md
+    - Model utilities: utils/model_utils.md
+    - Chains utilities: utils/chain_utils.md
+    - Plotting utilities: utils/plot_utils.md
   - Reference: reference/
