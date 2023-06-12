@@ -152,20 +152,23 @@ Deterministic signals are defined via the `signal` function. The first parameter
         ```
 !!! tip "Model file flexibility"
 
-    Mention flexibility provided by the model file being a python file
+    In defining the `spectrum` or `signal` functions in the model file you have all the 
+    flexibility of a normal Python file. You can, for example, define auxiliary functions,
+    import and interpolate tabulated data ecc...
 
 ## Additional settings 
 The model file can also contain additional (optional) variables that can be used to control in more details the new-physics signal. Specifically, the following 
 
-<figure markdown>
+[`name`](#+model.name){ #+model.name }
 
-| Variable name| Variable type | What it does                                                                             | Default        |
-| :---------:  | :------------:| :------------:                                                                           | :------------: |
-| `name`       | string       | Sets the model name. It used to [name the output directory][out_name].                    | `"np_model"`   |
-| `smbhb`      | boolean      | If set to `True` the expected signal from SMBHB will be added to the new-physic signal.   | `False`        |
-| `goup`       | list         |                                                                                           |                | 
+:   :octicons-milestone-24: Default: _`"np_model"`_ – 
+    This variable can be assigned to a string to specify the model name. This will be used 
+    [name the output directory][out_name].
 
-</figure>
+[`smbhb`](#+model.smbhb){ #+model.smbhb }
+
+:   :octicons-milestone-24: Default: _`False`_ – 
+    If set to `True` the expected signal from SMBHB will be added to the new-physic signal.
 
 !!! info "NG15 model files"
     The model files used in the [NANOGrav 15-year new-physics search][ng15_np] can be found [here][ng15_models].

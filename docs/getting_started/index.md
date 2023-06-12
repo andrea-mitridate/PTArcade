@@ -11,7 +11,7 @@ experiments[^1], or that are excluded by PTA data. PTArcade will allow you to an
 question in under 10 minutes (plus computation time) by using real PTA data, and the same
 statistical tools used by PTAs collaborations.
 
-[^1]: See [here][NG15] for more details about the signal.
+[^1]: See [here][NG15] for more details about the PTA signal.
 
 The only thing that is asked to the user is to define the GWB produced by their model, 
 and the prior distribution of the model parameters. This is done via what we call a
@@ -70,6 +70,10 @@ This will implement and run the analysis whose results are Monte Carlo chains th
 can be used to derive posterior distributions for the parameters of our model. For
 the example taht we are considering here this is the result:
 
+!!! info "Deterministic signals"
+    PTArcade can also be used with deterministic signals. In this case, the user will
+    have to specify the signal timeseries instead of the signal power-spectrum in the
+    model file. See [here][model] for more details. 
 
 After this high level summary of what PTArcade can do, in the next sections we will
 discuss:
@@ -81,6 +85,23 @@ using a [configuration file][config]
 - the structure of the [PTArcade outptut][output]
 - PTArcade utilities that can [help in constructing model files][model_utils] or
  [analyzing][chain_utils] and [plotting][plot_utils] the MC chains.
+
+!!! note "How to cite PTArcade"
+
+    If you use PTArcade in your work, please cite
+
+    ```
+    @article{andrea mitridate_2023,
+        title={PTArcade},
+        DOI={10.5281/zenodo.7876430},
+        publisher={Zenodo},
+        author={Andrea Mitridate}, 
+        year={2023}, 
+        month={Apr},
+        copyright = {Open Access}}
+
+    @article{mitridate...}    
+    ```
 
   [ENTERPRISE]: https://github.com/nanograv/enterprise
   [local_install]: local_install.md
