@@ -40,9 +40,12 @@ theme:
     # - toc.integrate
   language: en
   palette:
-    - media: "(prefers-color-scheme)"
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: deep purple
       toggle:
-        icon: material/brightness-auto
+        icon: material/brightness-4
         name: Switch to light mode
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -51,13 +54,8 @@ theme:
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: deep purple
-      accent: deep purple
-      toggle:
-        icon: material/brightness-4
-        name: Switch to system preference
+    
+
 
 extra_css:
   - stylesheets/extra.css

@@ -41,7 +41,8 @@ file are:
 :   :octicons-milestone-24: Default: `False` · :octicons-plus-16: __Optional__ –
     If `resume = True`, the code will look for MCMC chains in the output directory
     and if it finds some it will restart sampling from those instead of starting
-    from scratch. 
+    from scratch. If no `resume = True` and no chains are found in the output 
+    directory, the sampler will start from scratch.
 
     ??? warning 
 
@@ -107,13 +108,24 @@ file are:
 !!! example "Configuration file example"
 
     ``` py
-    pta_data = 'NG15'
+    pta_data = 'IPTA2' # (1)!
 
-    N_samples = int(2e6) # (1)!
+    N_samples = int(5e6) # (2)!
+
+    gwb_components = 13 # (3)!
+
+    resume = True # (4)!
     ```
 
-    1. A few million samples are usually enough to produce reasonably converged MCMC
-     chains.
+    1. Selecting the IPTA DR2 dataset. 
+
+    2. Asking for 5 millions MCMC iterations.
+
+    3. Fixing the number of frequency components for the GWB signal to 13.
+
+    4. Asking to resume sampling from chains already present in the ouptut 
+    directory.
+
 
 <script>
         var buttons = document.querySelectorAll("button[data-md-color-scheme]")
