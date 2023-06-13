@@ -3,6 +3,7 @@ import sys
 import inspect
 import optparse
 import numpy as np
+from importlib.resources import files
 from enterprise_extensions import model_utils
 
 
@@ -36,10 +37,12 @@ def get_cmdline_arguments():
         Returns dictionary of command line arguments supplied to PhonoDark.
     """
 
+    default_config = files('ptarcade.data').joinpath('default_config.py')
+
     parser = optparse.OptionParser()
     parser.add_option('-m', action="store", default="",
             help="Path to models file. Sets the details of the new physics signal.")
-    parser.add_option('-c', action="store", default="",
+    parser.add_option('-c', action="store", default=default_config,
             help="Path to configuration file. Sets details of the monte carlo run.")
     parser.add_option('-n', action="store", default="0",
             help="Specifies the number of the chain.")  
@@ -49,7 +52,7 @@ def get_cmdline_arguments():
     options = vars(options_in)
 
     cmd_input_okay = False
-    if options['m'] != '' and options['n'] != '' and  options['c'] != '':
+    if options['m'] != '':
         cmd_input_okay = True
 
     return options, cmd_input_okay
@@ -61,41 +64,25 @@ def load_inputs(input_options):
     """
 
     models_input = input_options['m']
-    num_input = input_options['c']
+    config_input = input_options['c']
 
     model_input_mod_name = os.path.splitext(os.path.basename(models_input))[0]
     model_mod = import_file(model_input_mod_name, os.path.abspath(models_input))
 
-    num_input_mod_name = os.path.splitext(os.path.basename(num_input))[0]
-    num_mod = import_file(num_input_mod_name, os.path.abspath(num_input))
+    config_input_mod_name = os.path.splitext(os.path.basename(config_input))[0]
+    config_mod = import_file(config_input_mod_name, os.path.abspath(config_input))
 
     return {
             "model": model_mod,
-            "config": num_mod
+            "config": config_mod
             }
 
 
 def check_config(config):
-    # checks that all the parameters are present in the config file
-    must = ["pta_data", "N_samples"]
-
-    optional = [
-        "mod_sel",
-        "out_dir",
-        "resume",
-        "scam_weight",
-        "am_weight",
-        "de_weight",
-        "red_components",
-        "corr",
-        "gwb_components",
-        "bhb_th_prior",
-        "A_bhb_logmin",
-        "A_bhb_logmax",
-        "gamma_bhb",
-    ]
-
-    optional_default = {
+    
+    default = {
+        "pta_data" : 'NG15',
+        "N_samples" : int(2e6),
         "mod_sel" : False,
         "out_dir" : './chains/',
         "resume" : False,
@@ -111,18 +98,11 @@ def check_config(config):
         "gamma_bhb" : None,
     }
 
-    
-    for par in must:
+    for par in default.keys():
         if not hasattr(config, par):
-            error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
-                    f"{par} not found in the configuration file.")
-            sys.exit(error)
-
-    for par in optional:
-        if not hasattr(config, par):
-            setattr(config, par, optional_default[par])
-            message = ( f"\t{par} not found in the configuration file, " + 
-                        f"it will be set to {optional_default[par]}.\n")
+            setattr(config, par, default[par])
+            message = ( f"\t{par} not found in the configuration file, " +
+                        f"it will be set to {default[par]}.\n")
             print(message)
 
     # checks PTA data 
@@ -150,7 +130,7 @@ def check_config(config):
     else:
         error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: " +
                  "The 'pta_data' variable in the configuration file needs to be " +
-                 "eithera string between 'NG15', 'NG12', 'IPTA2', " + 
+                 "either a string between 'NG15', 'NG12', 'IPTA2', " + 
                  "or a dictionary pointing to a set of PTA data.")
         sys.exit(error)
 

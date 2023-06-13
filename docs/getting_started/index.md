@@ -70,6 +70,10 @@ This will implement and run the analysis whose results are Monte Carlo chains th
 can be used to derive posterior distributions for the parameters of our model. For
 the example taht we are considering here this is the result:
 
+
+Mention that PTArcade can also be used to derive BF and set constraints,
+
+
 !!! info "Deterministic signals"
     PTArcade can also be used with deterministic signals. In this case, the user will
     have to specify the signal timeseries instead of the signal power-spectrum in the

@@ -19,6 +19,6 @@ When [running PTArcade][run] the user can provide two input files:
 
 In the following we will discuss the details of both these inputs files. 
 
-  [run]: ../run.md
+  [run]: ../getting_started/run.md
   [model]: model.md
   [config]: config.md

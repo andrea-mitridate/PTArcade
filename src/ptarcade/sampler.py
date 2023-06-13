@@ -39,14 +39,14 @@ input_options, cmd_input_okay = input_handler.get_cmdline_arguments()
 if not cmd_input_okay:
 
     print('ERROR:')
-    print("\t- Model and configuration files must be present\n"+
-    "\t- These are added with the -m, -c input flags. Add -h (--help) flags for more help.")
+    print("\t- Model file must be provided via the -m input flag.\n"+
+    "\t Add -h (--help) flags for more help.")
 
     sys.exit()
 
 inputs = input_handler.load_inputs(input_options)
 
-input_handler.check_config(inputs['config'])
+inputs['config'] = input_handler.check_config(inputs['config'])
 
 ###############################################################################
 # load pulsars and noise parameters
