@@ -80,7 +80,12 @@ plugins:
           paths: [src]
           import:
           - https://enterprise.readthedocs.io/en/latest/objects.inv
+          - https://docs.python.org/3/objects.inv
+          - https://numpy.org/doc/stable/objects.inv
           - http://jellis18.github.io/PTMCMCSampler/objects.inv
+          - https://getdist.readthedocs.io/en/latest/objects.inv
+          - https://matplotlib.org/stable/objects.inv
+          - https://enterprise-extensions.readthedocs.io/en/latest/objects.inv
           options:
             selection:
               members: yes
