@@ -25,11 +25,11 @@ def get_ephem_conv(par_file: str) -> str:
         The ephemeris convention used in the par file.
 
     """
-    f = open(par_file, "r")
+    f = open(par_file)
     lines = f.readlines()
 
     for line in lines:
-        line = line.split()
+        line = line.split() # type: ignore
         if line[0] == "EPHEM":
             ephem = line[-1]
 
@@ -38,7 +38,7 @@ def get_ephem_conv(par_file: str) -> str:
     return ephem
 
 
-def get_pulsars(pta_data: str, filters: list[str] = None) -> list[Pulsar]:
+def get_pulsars(pta_data: str, filters: list[str] | None = None) -> list[Pulsar]:
     """Get Pulsar data.
 
     If `pta_data` is a file, attempt to load it as a pickle. If it is a
@@ -55,6 +55,11 @@ def get_pulsars(pta_data: str, filters: list[str] = None) -> list[Pulsar]:
     -------
     psrs : list[Pulsar]
         List containing pulsar data from `pta_data`.
+
+    Raises
+    ------
+    SystemExit
+        If `pta_data` is not a file or directory.
 
     """
     if os.path.isfile(pta_data):
@@ -81,6 +86,9 @@ def get_pulsars(pta_data: str, filters: list[str] = None) -> list[Pulsar]:
             psrs.append(psr)
 
         return psrs
+    else:
+        err = f"ERROR: `pta_data` is not correct. Must be path or file. Current value is {pta_data=}."
+        raise SystemExit(err)
 
 
 def get_wn(wn_data: str | None) -> dict | None :
@@ -98,25 +106,29 @@ def get_wn(wn_data: str | None) -> dict | None :
         `dict`
 
     """
+    params = {}
     if wn_data is None:
         return None
 
-    params = {}
-
-    if os.path.isfile(wn_data):
-        with open(wn_data, 'r') as fp:
+    elif os.path.isfile(wn_data):
+        with open(wn_data) as fp:
             params.update(json.load(fp))
 
         return params
 
     elif os.path.isdir(wn_data):
         for filename in os.listdir(wn_data):
-            with open(os.path.join(wn_data, filename), 'r') as f:
+            with open(os.path.join(wn_data, filename)) as f:
                 data = json.load(f)
                 for key, value in data.items():
                     params.update({key: value})
 
         return params
+
+    else:
+        err = f"ERROR: `wn_data` is not correct. Must be path, file, or None. Current value is {wn_data=}."
+        raise SystemExit(err)
+
 
 def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, array_like | None]:
     """Import PTA pulsars objects, white noise parameters, and empirical distributions.
@@ -181,8 +193,13 @@ def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, 
         params = get_wn(ipta2_dic["noise_data"])
         emp_dist = ipta2_dic["emp_dist"]
 
+    elif isinstance(pta_data, dict):
+        psrs = get_pulsars(pta_data["psrs_data"])
+        params = get_wn(pta_data["noise_data"])
+        emp_dist = pta_data["emp_dist"]
 
-    if emp_dist is not None:
-        emp_dist = os.path.join(pta_dat_dir, emp_dist)
+    else:
+        err = f"ERROR: `pta_data` is not correct. Current value is {pta_data=}."
+        raise SystemExit(err)
 
     return psrs, params, emp_dist
