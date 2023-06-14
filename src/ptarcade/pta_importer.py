@@ -118,27 +118,69 @@ def get_wn(wn_data: str | None) -> dict | None :
 
         return params
 
+def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, array_like | None]:
+    """Import PTA pulsars objects, white noise parameters, and empirical distributions.
 
-def pta_data_importer(pta_data):
+    Parameters
+    ----------
+    pta_data : str | dict
+        * If string, must be one of ["NG15", "NG12", "IPTA2"].
+        * If dict, must have keys ["psrs_data", "noise_data", "emp_dist"]
+
+    Returns
+    -------
+    psrs : list[Pulsar]
+        List of Pulsar objects
+    params : dict | None
+        Dictionary containing noise data
+    emp_dist : array_like | None
+        The empirical distribution to use for sampling
+
+    Raises
+    ------
+    SystemExit
+        If `pta_data` is not str or dict.
+
     """
-    Import pta pulsars objects, white noise parameters, and empirical distributions.
-    """
-    if pta_data == 'NG15':
-        psrs = get_pulsars(ng15_dic['psrs_data'])
-        params = get_wn(ng15_dic['noise_data'])
-        emp_dist = ng15_dic['emp_dist']
-    elif pta_data == 'NG12':
-        psrs = get_pulsars(ng12_dic['psrs_data'])
-        params = get_wn(ng12_dic['noise_data'])
-        emp_dist = ng12_dic['emp_dist']
-    elif pta_data == 'IPTA2':
-        psrs = get_pulsars(ipta2_dic['psrs_data'])
-        params = get_wn(ipta2_dic['noise_data'])
-        emp_dist = ipta2_dic['emp_dist']
-    else:
-        psrs = get_pulsars(pta_data['psrs_data'])
-        params = get_wn(pta_data['noise_data'])
-        emp_dist = pta_data['emp_dist']
+    if pta_data == "NG15":
+        # This returns a path in the astropy cache that points to these files, otherwise
+        # it downloads them there and returns the path
+        ng15_dic = {
+            "psrs_data": download_file("https://data.nanograv.org/ng15_psrs_v1p1.pkl", cache=True, pkgname="ptarcade"),
+            "noise_data": download_file("https://data.nanograv.org/ng15_wn_v1p1.json", cache=True, pkgname="ptarcade"),
+            "emp_dist": download_file("https://data.nanograv.org/ng15_emp_v1p1.pkl", cache=True, pkgname="ptarcade"),
+        }
+
+        psrs = get_pulsars(ng15_dic["psrs_data"])
+        params = get_wn(ng15_dic["noise_data"])
+        emp_dist = ng15_dic["emp_dist"]
+
+    elif pta_data == "NG12":
+        ng12_dic = {
+            "psrs_data": download_file("https://data.nanograv.org/ng12_psrs_v4.pkl", cache=True, pkgname="ptarcade"),
+            "noise_data": download_file("https://data.nanograv.org/ng12_wn_v4.json", cache=True, pkgname="ptarcade"),
+            "emp_dist": None,
+        }
+
+        psrs = get_pulsars(ng12_dic["psrs_data"])
+        params = get_wn(ng12_dic["noise_data"])
+        emp_dist = ng12_dic["emp_dist"]
+
+    elif pta_data == "IPTA2":
+        ipta2_dic = {
+            "psrs_data": download_file(
+                "https://data.nanograv.org/ipta2_psrs_de438.pkl", cache=True, pkgname="ptarcade",
+            ),
+            "noise_data": download_file(
+                "https://data.nanograv.org/ipta2_wn_de438.json", cache=True, pkgname="ptarcade",
+            ),
+            "emp_dist": None,
+        }
+
+        psrs = get_pulsars(ipta2_dic["psrs_data"])
+        params = get_wn(ipta2_dic["noise_data"])
+        emp_dist = ipta2_dic["emp_dist"]
+
 
     if emp_dist is not None:
         emp_dist = os.path.join(pta_dat_dir, emp_dist)
