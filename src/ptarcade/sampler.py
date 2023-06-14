@@ -12,6 +12,7 @@ import platform
 import time
 from types import ModuleType
 from typing import Any
+import shutil
 
 from enterprise.pulsar import Pulsar
 from enterprise.signals.signal_base import PTA
@@ -60,7 +61,7 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
         raise SystemExit(error)
 
     inputs = input_handler.load_inputs(input_options)
-    inputs['config'] = input_handler.check_config(inputs['config'])
+    input_handler.check_config(inputs['config'])
 
     return inputs, input_options
 
@@ -93,6 +94,7 @@ def get_user_pta_data(inputs: dict[str, Any]) -> tuple[list[Pulsar], dict | None
         psrs=psrs,
         red_components=inputs['config'].red_components,
         gwb_components=inputs['config'].gwb_components)
+    
     return psrs, noise_params, emp_dist
 
 
@@ -176,6 +178,9 @@ def setup_sampler(
     """
     out_dir = os.path.join(
         inputs["config"].out_dir, inputs["model"].name, f'chain_{input_options["n"]}')
+    
+    if not input["config"].resume:
+        shutil.rmtree(out_dir)
 
     super_model = hypermodel.HyperModel(pta)
 
