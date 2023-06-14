@@ -1,17 +1,45 @@
-import sys
+"""Utilities for plotting.
+
+Attributes
+----------
+colors : list[str]
+    list of colors used in plotting
+plt_params : dict[str, Any]
+    Plotting parameters to use in plotting functions
+
+"""
+from __future__ import annotations
+
 import math
-import numpy as np
-from scipy.stats import norm
+import warnings
+from dataclasses import dataclass
+
+import ptarcade.chains_utils as utils
+import matplotlib
 import matplotlib.pyplot as plt
-from getdist import plots, MCSamples
+import numpy as np
+from getdist import plots
+from getdist.mcsamples import MCSamples
+from numpy._typing import _ArrayLikeFloat_co as array_like
+from numpy.typing import NDArray
+from scipy.stats import norm
 
-import chains_utils as utils
 
-
+@dataclass(frozen=True)
 class bcolors:
-    WARNING = "\033[0;33m"
-    FAIL = '\033[0;31m'
-    ENDC = '\033[0m'
+    """Class to hold ANSI escape sequences.
+
+    Attributes
+    ----------
+    WARNING : str
+    FAIL : str
+    ENDC : str
+
+    """
+
+    WARNING: str = "\033[0;33m"
+    FAIL: str = '\033[0;31m'
+    ENDC: str = '\033[0m'
 
 colors = [
         '#E03424',
@@ -31,9 +59,11 @@ plt_params = {
         }
 
 
-def set_size(width, fraction=1, ratio=None, subplots=(1, 1)):
-    """
-    Set figure dimensions to avoid scaling in LaTeX.
+def set_size(width: float,
+             fraction: int = 1,
+             ratio: float | None = None,
+             subplots: tuple[int, int] = (1, 1)) -> tuple[int, int]:
+    """Set figure dimensions to avoid scaling in LaTeX.
 
     Parameters
     ----------
@@ -42,23 +72,25 @@ def set_size(width, fraction=1, ratio=None, subplots=(1, 1)):
     fraction : float, optional
         Fraction of the width which you wish the figure to occupy, by default 1
     ratio : float, optional
-        Ratio of the height to width of the figure. If None, the golden ratio (sqrt(5)-1)/2 is used, by default None
-    subplots : tuple of int, optional
+        Ratio of the height to width of the figure. If None, the golden ratio (sqrt(5)-1)/2 is used,
+        by default None
+    subplots : tuple[int], optional
         The number of rows and columns of subplots in the figure, by default (1, 1)
 
     Returns
     -------
     fig_dim : tuple
-        Dimensions of figure in inches. The dimensions are calculated based on the parameters, and the height is further adjusted based on the number of subplots.
+        Dimensions of figure in inches. The dimensions are calculated based on the parameters, and
+        the height is further adjusted based on the number of subplots.
+
     """
-        
     fig_width_pt = width * fraction
 
     inches_per_pt = 1 / 72.27
 
     fig_width_in = fig_width_pt * inches_per_pt
-    if not ratio :
-        ratio = (5**.5 - 1) / 2
+    if not ratio:
+        ratio = (5**0.5 - 1) / 2
 
     fig_height_in = fig_width_in * ratio * (subplots[0] / subplots[1])
 
@@ -68,13 +100,21 @@ def set_size(width, fraction=1, ratio=None, subplots=(1, 1)):
 
 
 def set_custom_tick_options(
-    ax, left=True, right=True, bottom=True, top=True, label_size=8, width=0.5, length=3.5):
+    ax: plt.axis,
+    left: bool = True,
+    right: bool = True,
+    bottom: bool = True,
+    top: bool = True,
+    label_size: int = 8,
+    width: float = 0.5,
+    length: float = 3.5,
+):
     """
     Sets custom tick options for a matplotlib axis.
 
     Parameters
     ----------
-    ax : matplotlib axis
+    ax : matplotlib.pyplot.axis
         The axis to which the tick options will be applied.
     left : bool, optional
         If True, left ticks will be visible. Default is True.
@@ -93,7 +133,8 @@ def set_custom_tick_options(
 
     Returns
     -------
-        None
+    None
+
     """
 
     ax.minorticks_on()
@@ -108,7 +149,7 @@ def set_custom_tick_options(
         left=left,
         right=right,
         labelsize=label_size,
-        pad=2
+        pad=2,
     )
     ax.tick_params(
         which="minor",
@@ -120,14 +161,20 @@ def set_custom_tick_options(
         left=left,
         right=right,
         labelsize=label_size,
-        pad=2
+        pad=2,
     )
 
     return
 
 
 def plot_chains(
-    chain, params, params_name=None, label_size=13, save=False, model_name=None):
+    chain: NDArray,
+    params: list[str],
+    params_name: dict[str, str] = None,
+    label_size: int = 13,
+    save: bool = False,
+    model_name: str | None = None,
+) -> None:
     """
     Plot the MCMC (Markov chain Monte Carlo) chain for the parameters specified by params.
 
@@ -139,7 +186,7 @@ def plot_chains(
     params : list of str
         A list with the names of the parameters appearing in the chain.
     params_name : dict, optional
-        A dictionary with keys being the names of the parameters in the params list to be plotted, 
+        A dictionary with keys being the names of the parameters in the params list to be plotted,
         and values being the formatted parameters name to be shown in the plots.
         Default is None, which plots all the common parameters + the MCMC parameters without any formatting.
     label_size : int, optional
@@ -157,6 +204,7 @@ def plot_chains(
     ------
     Warning
         If some of the requested parameters do not appear in the parameter list.
+
     """
 
     plt.rcParams.update(plt_params)
@@ -170,7 +218,7 @@ def plot_chains(
                 params_dic[formatted_name] = idx
 
         if len(params_dic) != len(params_name):
-            print(
+            warnings.warn(
                 f"{bcolors.WARNING}WARNING{bcolors.ENDC}: some of the requested parameters does not appear in the parameter list"
             )
 
@@ -180,7 +228,6 @@ def plot_chains(
                 key = par.replace("_", "\_")
                 key = rf"$\mathrm{{{key}}}$"
                 params_dic[key] = idx
-            
 
     n_par = len(params_dic)
     n_row = int(n_par**0.5)
@@ -197,10 +244,9 @@ def plot_chains(
         set_custom_tick_options(ax, label_size=label_size)
 
         ax.set_ylabel(f"{key}", fontsize=label_size)
-    
+
     for ax in axs[-1]:
         ax.set_xlabel("$\mathrm{MCMC\;sample}$", fontsize=label_size)
-            
 
     plt.tight_layout()
     plt.show()
@@ -214,16 +260,15 @@ def plot_chains(
     return
 
 
-def create_ax_labels(par_names, labelsize=8):
-    """
-    Formats the axes for posterior plots
+def create_ax_labels(par_names: list[str], labelsize: int = 8) -> None:
+    """Format the axes for posterior plots.
 
-    This function fetches the current figure and all its axes, sets custom tick options 
-    and labels for all axes according to the names of the parameters. 
+    This function fetches the current figure and all its axes, sets custom tick options
+    and labels for all axes according to the names of the parameters.
 
     Parameters
     ----------
-    par_names : list of str
+    par_names : list[str]
         A list of names of the parameters for each of the axes.
     labelsize : int, optional
         The font size of the labels. Default is 8. If there is only one parameter,
@@ -235,12 +280,13 @@ def create_ax_labels(par_names, labelsize=8):
 
     Notes
     -----
-    - The function assumes that the number of axes in the current figure matches the 
+    - The function assumes that the number of axes in the current figure matches the
       number of parameter names provided. If this is not the case, the behavior is undefined.
-    - A label with the name 'A' and alpha=0 is set for the y-axis in the case of a single parameter 
+    - A label with the name 'A' and alpha=0 is set for the y-axis in the case of a single parameter
       to prevent padding issues.
+
     """
-    #small_font = 5
+    # small_font = 5
 
     N_params = len(par_names)
 
@@ -252,44 +298,42 @@ def create_ax_labels(par_names, labelsize=8):
 
         set_custom_tick_options(axs[0], width=0.5, length=5, label_size=labelsize)
         axs[0].set_xlabel(par_names[0], fontsize=labelsize, labelpad=10)
-        axs[0].set_ylabel('A', alpha=0) # here just ot prevent padding issues
+        axs[0].set_ylabel("A", alpha=0)  # here just ot prevent padding issues
 
         return
-    
-    # do this loop using combinations_with_replacement from itertools 
-    for idx in range(N_params):
-            for idy in range(N_params - idx):
-                id = int(N_params * idx + idy - max(idx * (idx - 1) /2, 0))
-                set_custom_tick_options(axs[id], width=0.5, label_size=labelsize)
 
-                if idx == 0 and idy == 0:
-                    set_custom_tick_options(axs[id], width=0.5)
-                    axs[id].set_xlabel(par_names[idx], fontsize=labelsize, labelpad=7)
-                    axs[id].set_ylabel(par_names[N_params - idy - 1], fontsize=labelsize)
-                elif idx == N_params - 1:
-                    set_custom_tick_options(axs[id], left=False, right=False, width=0.5)
-                    axs[id].set_xlabel(par_names[idx], fontsize=labelsize, labelpad=7)
-                elif idy == N_params - idx - 1:
-                    set_custom_tick_options(axs[id], left=False, right=False, width=0.5)
-                elif idx == 0:
-                    set_custom_tick_options(axs[id], width=0.5)
-                    axs[id].set_ylabel(par_names[N_params - idy - 1],
-                                fontsize=labelsize)
-                elif idy == 0:
-                    set_custom_tick_options(axs[id], width=0.5)
-                    axs[id].set_xlabel(par_names[idx], fontsize=labelsize, labelpad=7)
-                else:
-                    set_custom_tick_options(axs[id], width=0.5)
-    
+    # do this loop using combinations_with_replacement from itertools
+    for idx in range(N_params):
+        for idy in range(N_params - idx):
+            id = int(N_params * idx + idy - max(idx * (idx - 1) / 2, 0))
+            set_custom_tick_options(axs[id], width=0.5, label_size=labelsize)
+
+            if idx == 0 and idy == 0:
+                set_custom_tick_options(axs[id], width=0.5)
+                axs[id].set_xlabel(par_names[idx], fontsize=labelsize, labelpad=7)
+                axs[id].set_ylabel(par_names[N_params - idy - 1], fontsize=labelsize)
+            elif idx == N_params - 1:
+                set_custom_tick_options(axs[id], left=False, right=False, width=0.5)
+                axs[id].set_xlabel(par_names[idx], fontsize=labelsize, labelpad=7)
+            elif idy == N_params - idx - 1:
+                set_custom_tick_options(axs[id], left=False, right=False, width=0.5)
+            elif idx == 0:
+                set_custom_tick_options(axs[id], width=0.5)
+                axs[id].set_ylabel(par_names[N_params - idy - 1], fontsize=labelsize)
+            elif idy == 0:
+                set_custom_tick_options(axs[id], width=0.5)
+                axs[id].set_xlabel(par_names[idx], fontsize=labelsize, labelpad=7)
+            else:
+                set_custom_tick_options(axs[id], width=0.5)
+
     return
 
 
-def level_to_sigma(level):
-    """
-    Converts confidence level to standard deviation (sigma).
+def level_to_sigma(level: float) -> None:
+    """Convert confidence level to standard deviation (sigma).
 
-    This function uses the inverse of the cumulative distribution function (CDF) for a 
-    normal distribution to convert a confidence level to the equivalent number of 
+    This function uses the inverse of the cumulative distribution function (CDF) for a
+    normal distribution to convert a confidence level to the equivalent number of
     standard deviations (sigma).
 
     Parameters
@@ -306,24 +350,25 @@ def level_to_sigma(level):
     ------
     SystemExit
         If the provided level is not between 0 and 1.
+
     """
     if 0 < level < 1:
         return np.sqrt(-2 * np.log(1-level))
     else:
-        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:" +
+        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:"
                  "The level value needs to be between 0 and 1.")
-        sys.exit(error)
+        raise ValueError(error)
 
 
-def plot_bhb_prior(plot, bhb_prior, levels):
-    """
-    Plot the prior distribution for SMBHB signal.
+def plot_bhb_prior(plot: matplotlib.figure.Figure, bhb_prior: str, levels: list[float]) -> None:
+    """Plot the prior distribution for SMBHB signal.
 
     Parameters
     ----------
-    plot : object
-        The plot object to which the priors will be added. 
-        This object should have methods `get_axes_for_params(param1, param2)` that return the Axes object for the given parameters.
+    plot : matplotlib.figure.Figure
+        The plot object to which the priors will be added.
+        This object should have methods `get_axes_for_params(param1, param2)` that return the Axes
+        object for the given parameters.
     bhb_prior : str
         The specific BHB prior to be used, choices are "NG15" and "IPTA2".
     levels : list of float
@@ -364,19 +409,9 @@ def plot_bhb_prior(plot, bhb_prior, levels):
     if ax_0 and ax_1:
         A_pts = np.arange(-17, -13, 0.001)
         g_pts = np.arange(2, 6, 0.001)
-        ax_0.plot(
-            A_pts,
-            norm.pdf(A_pts, mu[0], cov[0, 0] ** (1 / 2)),
-            color="black",
-            linestyle="dashed",
-            linewidth=lw)
-        
-        ax_1.plot(
-            g_pts,
-            norm.pdf(g_pts, mu[1], cov[1, 1] ** (1 / 2)),
-            color="black",
-            linestyle="dashed",
-            linewidth=lw)
+        ax_0.plot(A_pts, norm.pdf(A_pts, mu[0], cov[0, 0] ** (1 / 2)), color="black", linestyle="dashed", linewidth=lw)
+
+        ax_1.plot(g_pts, norm.pdf(g_pts, mu[1], cov[1, 1] ** (1 / 2)), color="black", linestyle="dashed", linewidth=lw)
 
     for idx in range(len(sigmas)):
         ax = plot.get_axes_for_params("gw-bhb-0", "gw-bhb-1")
@@ -388,7 +423,8 @@ def plot_bhb_prior(plot, bhb_prior, levels):
                 color="black",
                 linestyle="dashed",
                 linewidth=lw,
-                alpha=0.9)
+                alpha=0.9,
+            )
 
         ax = plot.get_axes_for_params("gw-bhb-1", "gw-bhb-0")
 
@@ -399,27 +435,32 @@ def plot_bhb_prior(plot, bhb_prior, levels):
                 "black",
                 linestyle="dashed",
                 linewidth=lw,
-                alpha=0.9)
+                alpha=0.9,
+            )
     return
 
 
 def corner_plot_settings(
-    levels, samples, one_column, legend_size=12, fig_width_pt=None):
-    """
-    Configures the settings for corner plots.
+    levels: list[float] | None,
+    samples: list[MCSamples],
+    one_column: bool,
+    legend_size: int = 12,
+    fig_width_pt: float = None,
+) -> plots.GetDistPlotSettings:
+    """Configure the settings for corner plots.
 
     Parameters
     ----------
-    levels : list of float, optional
+    levels : list[float], optional
         The list of confidence levels for which the HPI should be computed.
         Each value in the list should be between 0 and 1. Default is None.
-    samples : list of MCSamples
+    samples : list[MCSamples]
         A list of instances of the MCSamples class, each containing
         multivariate Monte Carlo samples on which the function is operating.
     one_column : bool
         Whether to set the figure width for a one-column format. If False,
         a wider format is used.
-    fig_width_pt : float, optional
+    legend_size : int, optional
         Sets the font size of the legend captions.
         Default is 12.
     fig_width_pt : float, optional
@@ -429,15 +470,10 @@ def corner_plot_settings(
 
     Returns
     -------
-    GetDistPlotSettings
+    plots.GetDistPlotSettings
         An instance of the GetDistPlotSettings class, with the corner plot
         settings configured as specified.
 
-    Returns
-    -------
-    GetDistPlotSettings
-        An instance of the GetDistPlotSettings class, with the corner plot
-        settings configured as specified.
     """
 
     sets = plots.GetDistPlotSettings()
@@ -463,15 +499,20 @@ def corner_plot_settings(
 
 
 
-def oned_plot_settings(legend_size=9):
-    """
-    Configures the settings for one-dimensional (1D) plots.
+def oned_plot_settings(legend_size: int = 9) -> plots.GetDistPlotSettings:
+    """Configure the settings for one-dimensional (1D) plots.
+
+    Parameters
+    ----------
+    legend_size : int, optional
+        The size for the legend font.
 
     Returns
     -------
-    GetDistPlotSettings
-        An instance of the GetDistPlotSettings class, with the 1D plot 
+    plots.GetDistPlotSettings
+        An instance of the GetDistPlotSettings class, with the 1D plot
         settings configured as specified.
+
     """
 
     sets = plots.GetDistPlotSettings()
@@ -479,27 +520,30 @@ def oned_plot_settings(legend_size=9):
     sets.legend_fontsize = legend_size
     sets.prob_y_ticks = False
     sets.linewidth = 1.1
-    sets.figure_legend_loc = 'upper right'
-    sets.norm_1d_density = 'integral'
+    sets.figure_legend_loc = "upper right"
+    sets.norm_1d_density = "integral"
     sets.line_styles = colors
 
     return sets
 
 
-def plot_k_bounds(plot, samples, k_levels):
-    """
-    Add the k-ratio bounds to an existing plot.
+def plot_k_bounds(
+        plot: plots.GetDistPlotter.triangle_plot,
+        samples: list[MCSamples],
+        k_levels: list[NDArray],
+) -> None:
+    """Add the k-ratio bounds to an existing plot.
 
     Parameters
     ----------
-    plot : TrianglePlot instance
+    plot : plots.GetDistPlotter.triangle_plot
         The plot to which the k-ratio bounds should be added.
-    samples : list of MCSamples
-        A list of instances of the MCSamples class, each containing 
+    samples : list[MCSamples]
+        A list of instances of the MCSamples class, each containing
         multivariate Monte Carlo samples on which the function is operating.
-    k_levels : list of array
-        A list of 1D or 2D arrays representing the K-ratio bounds for 
-        each sample. Each array should contain the parameter names and 
+    k_levels : list[array_like]
+        A list of 1D or 2D arrays representing the K-ratio bounds for
+        each sample. Each array should contain the parameter names and
         corresponding K-ratio bound.
 
     Returns
@@ -507,7 +551,6 @@ def plot_k_bounds(plot, samples, k_levels):
     None
 
     """
-
     for idx, sample in enumerate(samples):
         if k_levels[idx]:
             for x in k_levels[idx][0]:
@@ -544,7 +587,7 @@ def plot_k_bounds(plot, samples, k_levels):
                     colors="#ffffff00",
                     alpha=0.14,
                     extend="both")
-                
+
                 cs.cmap.set_over("#ffffff00")
                 cs.cmap.set_under("gray")
                 cs.changed()
@@ -562,19 +605,22 @@ def plot_k_bounds(plot, samples, k_levels):
     return
 
 
-def plot_hpi(plot, samples, hpi_points):
-    """
-    Add the highest posterior interval (HPI) to an existing plot.
+def plot_hpi(
+        plot: plots.GetDistPlotter.triangle_plot,
+        samples: list[MCSamples],
+        hpi_points: list[array_like],
+) -> None:
+    """Add the highest posterior interval (HPI) to an existing plot.
 
     Parameters
     ----------
-    plot : TrianglePlot instance
+    plot : plots.GetDistPlotter.triangle_plot
         The plot to which the HPI should be added.
-    samples : list of MCSamples
-        A list of instances of the MCSamples class, each containing 
+    samples : list[MCSamples]
+        A list of instances of the MCSamples class, each containing
         multivariate Monte Carlo samples on which the function is operating.
-    hpi_points : list of array
-        A list of arrays representing the HPI for each sample. Each array 
+    hpi_points : list[array_like]
+        A list of arrays representing the HPI for each sample. Each array
         should contain the parameter name and corresponding HPI.
 
     Returns
@@ -582,7 +628,6 @@ def plot_hpi(plot, samples, hpi_points):
     None
 
     """
-
     lw=0.6
 
     for idx, sample in enumerate(samples):
@@ -611,24 +656,29 @@ def plot_hpi(plot, samples, hpi_points):
     return
 
 
-def print_stats(k_levels, hpi_points, bayes_est, max_pos, levels):
-    """
-    Print the statistical summary for each sample.
+def print_stats(
+        k_levels: list[array_like],
+        hpi_points: list[array_like],
+        bayes_est: list[dict],
+        max_pos:list[dict],
+        levels:list[float],
+) -> None:
+    """Print the statistical summary for each sample.
 
     Parameters
     ----------
-    k_levels : list of array
-        A list of arrays representing the K-ratio bounds for each sample. Each array 
+    k_levels : list[array_like]
+        A list of arrays representing the K-ratio bounds for each sample. Each array
         should contain the parameter name and corresponding K-ratio bound.
-    hpi_points : list of array
-        A list of arrays representing the highest posterior interval (HPI) for each sample. 
+    hpi_points : list[array_like]
+        A list of arrays representing the highest posterior interval (HPI) for each sample.
         Each array should contain the parameter name and corresponding HPI.
-    bayes_est : list of dict
+    bayes_est : list[dict]
         A list of dictionaries, each containing the Bayes estimator for each parameter in the sample.
-    max_pos : list of dict
+    max_pos : list[dict]
         A list of dictionaries, each containing the maximum posterior value for each parameter in the sample.
-    levels : list of float
-        The list of confidence levels for which the HPI should be computed. Each value 
+    levels : list[float]
+        The list of confidence levels for which the HPI should be computed. Each value
         in the list should be between 0 and 1.
 
     Returns
@@ -636,10 +686,9 @@ def print_stats(k_levels, hpi_points, bayes_est, max_pos, levels):
     None
 
     """
-
     for idx in np.arange(len(k_levels)):
         print(f'----- Stats for sample #{idx}-----')
-        
+
         if k_levels[idx] and any(x != [] for x in k_levels[idx]):
             k_level = k_levels[idx][0]
 
@@ -648,7 +697,7 @@ def print_stats(k_levels, hpi_points, bayes_est, max_pos, levels):
                     print(f'k-ratio limit = is reached for {par} = {level}')
                 else:
                     print(f'k-ratio limit is not reached for {par}')
-        
+
         else:
             print(f'No 1D k-bounds available for this sample\n')
 
@@ -659,7 +708,7 @@ def print_stats(k_levels, hpi_points, bayes_est, max_pos, levels):
                 par = x[0]
                 x1 = level[0]
                 x2 = level[1]
-                
+
                 if x1:
                     print(f'Lower {100*levels[idy]}%-HPDI limit is reached for {par} = {10**x1}')
                 else:
@@ -681,59 +730,59 @@ def print_stats(k_levels, hpi_points, bayes_est, max_pos, levels):
 
 
 def plot_posteriors(
-    chains,
-    params,
-    par_to_plot=None,
-    par_names=None,
-    model_id=None,
-    samples_name=None,
-    hpi_levels=[0.68, 0.95],
-    k_ratio=None,
-    bf=None,
-    ranges={},
-    levels=None,
-    bhb_prior=False,
-    one_column=False,
-    fig_width_pt=None,
-    labelsize=8,
-    legend_size=12,
-    verbose=False,
-    save=False,
-    model_name=None):
+    chains: list[array_like],
+    params: list[list[str]],
+    par_to_plot: list[list[str]] | None =None,
+    par_names: list[list[str]] | None  =None,
+    model_id: list[int] | None =None,
+    samples_name: list[str] | None =None,
+    hpi_levels: list[float]=[0.68, 0.95],
+    k_ratio: list[float] | None =None,
+    bf: list[float] | None =None,
+    ranges: dict[str, array_like] ={},
+    levels: list[float] | None =None,
+    bhb_prior: str | bool =False,
+    one_column: bool=False,
+    fig_width_pt: float| None =None,
+    labelsize: float=8,
+    legend_size: float=12,
+    verbose: bool=False,
+    save:bool=False,
+    model_name: str | None=None) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Plot posterior distributions for the chosen parameters in the chains.
 
     Parameters
     ----------
-    chains : list of lists
-        Contains all the chains to be plotted.
-    params : list of lists
-        Contains the name of the parameters appearing in the chains.
-    par_to_plot : list of lists, optional
-        Contains the parameter to plot from each chain.
-    par_names : lists of list, optional
+    chains : list[array_like]
+        list of array_like's. Contains all the chains to be plotted.
+    params : list[list[str]]
+        list of lists[str]. Contains the name of the parameters appearing in the chains.
+    par_to_plot : list[list[str]], optional
+        list of lists[str]. Contains the parameter to plot from each chain.
+    par_names : lists[list[str]], optional
         Contains the LaTeX formatted names for the plotted parameters of each model.
         If not specified the name in the par files will be used.
-    model_id : list of int, optional
-        Assuming that the data are generated using hypermodels, specifies the model for 
+    model_id : list[int], optional
+        Assuming that the data are generated using hypermodels, specifies the model for
         which to plot the posteriors (default is None and in this case nmodel is taken to be 0).
-    samples_name : list of strings, optional
+    samples_name : list[str], optional
         Contains the name of the models associated to each chain, and it's used to
         create the legend. If not specified, the labels in the legend will be Sample 1, Sample 2, etc.
-    hpi_levels : list of float, optional
-        The list of confidence levels for which the highest posterior interval (HPI) 
+    hpi_levels : list[float], optional
+        The list of confidence levels for which the highest posterior interval (HPI)
         should be computed. Each value in the list should be between 0 and 1.
-    k_ratio : list of float, optional
+    k_ratio : list[float], optional
         The list of K-ratio bounds for each chain. Each value in the list should be between 0 and 1.
-    bf : list of float, optional
+    bf : list[float], optional
         Bayes factor for each chain, used to calculate K-ratio bounds.
     ranges : dict, optional
-        The parameter ranges to display on the plot. Keys should be parameter names, and values should be tuples 
+        The parameter ranges to display on the plot. Keys should be parameter names, and values should be tuples
         or lists specifying the lower and upper bounds of the range.
-    levels : list of float, optional
-        The list of confidence levels for which the contour should be computed. Each value 
+    levels : list[float], optional
+        The list of confidence levels for which the contour should be computed. Each value
         in the list should be between 0 and 1.
-    bhb_prior : string, optional
+    bhb_prior : str, optional
         String indicating the bhb prior to plot (possible choiches are NG15 and IPTA2.
     one_column : bool, optional
         Whether to display the plot in one column format.
@@ -755,10 +804,10 @@ def plot_posteriors(
     -------
     fig : matplotlib.figure.Figure
         The figure containing the plot.
-    axs : list of matplotlib.axes.Axes
+    axs : list[matplotlib.axes.Axes]
         The axes of the figure.
-    """
 
+    """
     plt.rcParams.update(plt_params)
 
     N_chains = len(chains)
@@ -839,7 +888,7 @@ def plot_posteriors(
             sharey=True,
             diag1d_kwargs={"normalized": True},
             param_limits=ranges)
-        
+
         if bhb_prior:
             plot_bhb_prior(g, bhb_prior, levels)
 
