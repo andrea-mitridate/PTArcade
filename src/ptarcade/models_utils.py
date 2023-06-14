@@ -44,7 +44,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from functools import cache
 from importlib.resources import files
-from typing import ParamSpec, TypeVar
+from typing import Any
 
 import natpy as nat
 import numpy as np
@@ -58,9 +58,6 @@ from ptarcade import fast_interpolate
 
 nat.set_active_units("HEP")
 
-
-P = ParamSpec('P')
-T = TypeVar('T')
 
 G : np.float64 = 6.67430 * 10**-11 * nat.convert(nat.m**3 * nat.kg**-1 * nat.s**-2, nat.GeV**-2) # Newton constant (GeV**-2)
 M_pl : np.float64 = (8 * np.pi *G)**(-1/2) # reduced plank mass (GeV)
@@ -340,7 +337,7 @@ def prep_data(path: str) -> tuple[list[NDArray], NDArray, NDArray]:
     return grids, omega_grid, par_names
 
 
-def spec_importer(path: str) -> Callable[[NDArray, P],  NDArray]:
+def spec_importer(path: str) -> Callable[[NDArray, Any],  NDArray]:
     """Import data and create a fast interpolation function.
 
     Interpolate the GWB power spectrum from tabulated data. Return a function that interpolates
@@ -360,13 +357,13 @@ def spec_importer(path: str) -> Callable[[NDArray, P],  NDArray]:
     info, data = fast_interpolate.load_data(path)
     # info is a list of (name, start, step)
 
-    def spectrum(f: NDArray, **kwargs: P.kwargs) -> NDArray:
+    def spectrum(f: NDArray, **kwargs: Any) -> NDArray:
 
         # Construct right information format for interpolation
         return fast_interpolate.interp([(start, step, f if name == 'f' else kwargs[name])
                                          for (name, start, step) in info],
                                         data)
-    return spectrum
+    return spectrum # type: ignore
 
 
 def freq_at_temp(T: array_like) -> array_like:
