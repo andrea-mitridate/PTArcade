@@ -1,27 +1,61 @@
-# Read data from an HDF5 file and use it for interpolation of the spectrum.
-# The file must have the following data sets:
-# 'parameter_names': array of strings giving the names of the parameters in order.
-# The last parameter must be the gravitational wave frequency 'f'.
-# Each parameter name: array giving start and step values.
-# 'spectrum': array indexed by parameters in order, giving omega_GW for these parameters.
+"""Utilities for fast interpolation of spectra."""
+from __future__ import annotations
 
-import numpy as np
 import h5py
+import numpy as np
+from numpy.typing import NDArray
 
-# Load HDF5 file.  Returns info: list of (name, start, step)
-# and multidimensional array of data points
-def load_data(file):
+
+def load_data(file: str) -> tuple[list[tuple[str, float, float]], NDArray]:
+    """Load HDF5 file.
+
+    Read data from an HDF5 file and use it for interpolation of the spectrum.
+    The file must have the following data sets:
+
+    `parameter_names`: array of strings giving the names of the parameters in order.
+    The last parameter must be the gravitational wave frequency `f`.
+    Each parameter name: array giving start and step values.
+
+    `spectrum`: array indexed by parameters in order, giving omega_GW for these parameters.
+
+
+    Parameters
+    ----------
+    file : str
+
+    Returns
+    -------
+    tuple(list[tuple[str, float, float]], NDArray)
+        Returns info: list of (name, start, step) and multidimensional array of data points
+
+    """
     with h5py.File(file) as h5:
         info = [(par, h5[par][0], h5[par][1]) for par in h5['parameter_names'].asstr()]
         spectrum = np.array(h5['spectrum'])
         return (info, spectrum)
 
-# Do interpolation
-# Called with info: list of (start, step, value)
-# and multidimensional array of data points
-# Multiple values (in an np.array) are OK for the last value, but not earlier ones
-# or else we will get confusion about array indexes.
-def interp(info, data):
+
+def interp(info: list[tuple[float, float, float]], data: NDArray) -> NDArray:
+    """Do interpolation.
+
+    Called with info: list of (start, step, value) and multidimensional array of data points. Multiple values
+    (in an np.array) are OK for the last value, but not earlier ones or else we will get confusion about
+    array indexes.
+
+    Parameters
+    ----------
+    info : list[tuple[float, float, float]]
+        list of (start, step, value)
+    data : NDArray
+        Multidimensional array of data points. Multiple values (in an np.array) are OK for the last value, but
+        not earlier ones or else we will get confusion about array indexes.
+
+    Returns
+    -------
+    NDArray
+        Interpolated values
+
+    """
     if len(info) == 0:       # Nothing to do: just return element
         return data
     x0, dx, x = info[0]
@@ -32,14 +66,37 @@ def interp(info, data):
     return (interp(info[1:], data[index]) * (1-fract)
             + interp(info[1:], data[index+1]) * fract)
 
-# Convert an old-style file to our HDF5 format.
-# The old-style has a header giving the parameter names including 'spectrum', then
-# on each line the parameter values and the resulting omega_GW.
-# The last parameter must vary fastest, and for each earlier parameter, the later parameters
-# must go through precisely the same values.  The values must be evenly spaced
-# and in ascending order.
-# There is no error checking in this code!
-def reformat(infile, outfile):
+
+def reformat(infile: str, outfile: str) -> None:
+    """Convert an old-style file to our HDF5 format.
+
+    Parameters
+    ----------
+    infile : str
+        The input file.
+    outfile : str
+        The output file where the reformatted `infile` will be saved.
+
+    Raises
+    ------
+    Exception
+        Raised if frequency is not last parameter
+
+    Returns
+    -------
+    None
+        No explicit return value. The function creates `outfile`
+
+    Notes
+    -----
+    The old-style has a header giving the parameter names including `spectrum`,
+    then on each line the parameter values and the resulting omega_GW. The
+    last parameter must vary fastest, and for each earlier parameter,
+    the later parameters must go through precisely the same values. The values
+    must be evenly spaced and in ascending order. There is no error checking
+    in this code!
+
+    """
     par_names = np.loadtxt(infile, max_rows=1, dtype='str') # Parameter names
     data = np.loadtxt(infile, skiprows=1)
     spec_col = np.where(par_names=='spectrum')[0] # Index of spectrum
