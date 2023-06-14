@@ -45,14 +45,14 @@ theme:
       primary: deep purple
       accent: deep purple
       toggle:
-        icon: material/brightness-4
+        icon: material/weather-sunny
         name: Switch to light mode
     - media: "(prefers-color-scheme: light)"
       scheme: default
       primary: deep purple
       accent: deep purple
       toggle:
-        icon: material/brightness-7
+        icon: material/weather-night
         name: Switch to dark mode
     
 
