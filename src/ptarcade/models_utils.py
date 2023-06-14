@@ -1,52 +1,104 @@
-import os
-from functools import cache
+"""Module providing physical constants and useful cosmological functions.
 
-import enterprise.signals.parameter as parameter
+All the constants are expressed in GeV, unless differently stated.
+The values are taken from the Particle Data Group (PDG).
+
+Attributes
+----------
+G : np.float64
+    Newton constant (GeV$^{-2}$)
+M_pl : np.float64
+    Reduced Planck mass (GeV)
+T_0 : np.float64
+    Present day temperature of the Universe (GeV)
+z_eq : int
+    Redshift of matter-radiation equality
+T_eq : np.float64
+    Temperature of matter-radiation equality (GeV)
+h : float
+    Scaling factor for Hubble expansion rate
+H_0 : np.float64
+    Hubble constant (GeV)
+H_0_Hz : np.float64
+    Hubble constant (Hz)
+omega_v : float
+    Dark energy density today (Planck 2018)
+omega_m : float
+    Matter density today (Planck 2018)
+omega_r : float
+    Radiation density today (Planck 2018)
+A_s : np.float64
+    Planck 2018 amplitude of primordial scalar power spectrum
+f_cmb : float
+    CMB pivot scale (Hz)
+gev_to_hz : np.float64
+    Conversion from GeV to Hz
+g_rho_0 : np.float64
+    Relativistic degrees of freedom today
+g_s_0 : np.float64
+    Entropic relativistic degrees of freedom today
+
+"""
+from __future__ import annotations
+
+from collections.abc import Callable
+from functools import cache
+from importlib.resources import files
+from typing import ParamSpec, TypeVar
+
 import natpy as nat
 import numpy as np
 import scipy.stats as ss
+from enterprise.signals import parameter
 from enterprise.signals.parameter import function
-from src import fast_interpolate
-from importlib.resources import files
+from numpy._typing import _ArrayLikeFloat_co as array_like
+from numpy.typing import NDArray
 
+from ptarcade import fast_interpolate
 
-# -----------------------------------------------------------
-# Physical constants and useful cosmological functions
-# all the constants are expressed in GeV
-# unless differently stated, the values are taken from the PDG
-# -----------------------------------------------------------
 nat.set_active_units("HEP")
 
-G = 6.67430 * 10**-11 * nat.convert(nat.m**3 * nat.kg**-1 * nat.s**-2, nat.GeV**-2) # Newton constant (GeV**-2)
-M_pl = (8 * np.pi *G)**(-1/2) # reduced plank mass (GeV)
-T_0 = 2.7255 * nat.convert(nat.K, nat.GeV) # present day temperature of the Universe (GeV)
-z_eq = 3402 # redshift of  matter-radiation equality
-T_eq = T_0 * (1 + z_eq) # temperature of matter-radiation equality (GeV)
-h = 0.674 # scaling factor for Hubble expansion rate 
-H_0 = h * 100 * nat.convert(nat.km * nat.s**-1 * nat.Mpc**-1, nat.GeV) # Hubble constant (GeV)
-H_0_Hz = H_0 * nat.convert(nat.GeV, nat.Hz) # Hubble constant (Hz)
-omega_v = 0.6847 # DE density today Planck 2018
-omega_m = 0.3153 # matter density today Planck 2018
-omega_r = 9.2188e-5 # radiation density today Planck 2018
-A_s = np.exp(3.044)*10**-10 # Planck 2018 amplitude of primordial scalar power spectrum
-f_cmb = 7.7314e-17 # CMB pivot scale (Hz)
-gev_to_hz = nat.convert(nat.GeV, nat.Hz) # conversion from gev to Hz
+
+P = ParamSpec('P')
+T = TypeVar('T')
+
+G : np.float64 = 6.67430 * 10**-11 * nat.convert(nat.m**3 * nat.kg**-1 * nat.s**-2, nat.GeV**-2) # Newton constant (GeV**-2)
+M_pl : np.float64 = (8 * np.pi *G)**(-1/2) # reduced plank mass (GeV)
+T_0 : np.float64 = 2.7255 * nat.convert(nat.K, nat.GeV) # present day temperature of the Universe (GeV)
+z_eq : int = 3402 # redshift of  matter-radiation equality
+T_eq : np.float64 = T_0 * (1 + z_eq) # temperature of matter-radiation equality (GeV)
+h : float = 0.674 # scaling factor for Hubble expansion rate
+H_0 : np.float64 = h * 100 * nat.convert(nat.km * nat.s**-1 * nat.Mpc**-1, nat.GeV) # Hubble constant (GeV)
+H_0_Hz : np.float64 = H_0 * nat.convert(nat.GeV, nat.Hz) # Hubble constant (Hz)
+omega_v : float = 0.6847 # DE density today Planck 2018
+omega_m : float = 0.3153 # matter density today Planck 2018
+omega_r : float = 9.2188e-5 # radiation density today Planck 2018
+A_s : np.float64 = np.exp(3.044)*10**-10 # Planck 2018 amplitude of primordial scalar power spectrum
+f_cmb : float = 7.7314e-17 # CMB pivot scale (Hz)
+gev_to_hz : np.float64 = nat.convert(nat.GeV, nat.Hz) # conversion from gev to Hz
 
 # tabulated values for the number of relativistic degrees of
 # freedom from reference 1803.01038
-gs = np.loadtxt(files('ptarcade.data').joinpath('g_star.dat'))
+gs = np.loadtxt(files('ptarcade.data').joinpath('g_star.dat')) # type: ignore
 
 
-def g_rho(x, is_freq=False):
+def g_rho(x: array_like, is_freq: bool = False) -> array_like:  # noqa: FBT001, FBT002
+    """Return the number of relativistic degrees of freedom as a function of T/GeV or f/Hz.
+
+    Parameters
+    ----------
+    x : array_like
+        The temperature(s) [GeV] or frequency/frequencies [Hz].
+    is_freq : bool, optional
+        True if `x` is a frequency/frequencies, False if temperature(s).
+        Defaults to False.
+
+    Returns
+    -------
+    dof : array_like
+        The relativistic degrees of freedom at `x`.
+
     """
-    | Returns the number of relativistic degrees of 
-    | freedom as a function of T/GeV or f/Hz.
-
-    :param x: The temperature(s) [GeV] or frequency/frequencies [Hz]
-    :param is_freq: True if `x` is a frequency/frequencies, False if temperature(s)
-    :return: the relativistic degrees of freedom at `x`
-    """
-
     if is_freq:
         dof = np.interp(x, gs[:, 1], gs[:, 3])
 
@@ -56,16 +108,23 @@ def g_rho(x, is_freq=False):
     return dof
 
 
-def g_s(x, is_freq=False):
-    """
-    | Returns the number of entropic relativistic degrees of
-    | freedom as a function of T/GeV or f/Hz.
+def g_s(x: array_like, is_freq: bool = False) -> array_like:  # noqa: FBT001, FBT002
+    """Return the number of entropic relativistic degrees of freedom as a function of T/GeV or f/Hz.
 
-    :param x: The temperature(s) [GeV] or frequency/frequencies [Hz]
-    :param is_freq: True if `x` is a frequency/frequencies, False if temperature(s)
-    :return: the entropic relativistic degrees of freedom at `x`
-    """
+    Parameters
+    ----------
+    x : array_like
+        The temperature(s) [GeV] or frequency/frequencies [Hz].
+    is_freq : bool, optional
+        True if `x` is a frequency/frequencies, False if temperature(s).
+        Defaults to False.
 
+    Returns
+    -------
+    dof : array_like
+        The entropic relativistic degrees of freedom at `x`.
+
+    """
     if is_freq:
         dof = np.interp(x, gs[:, 1], gs[:, 2])
 
@@ -78,54 +137,122 @@ def g_s(x, is_freq=False):
 # We cache the following functions so that they only run once and then cache the result
 # They are never called with a different argument, so they only have to be computed once
 @cache
-def __g_s_0(T_0):
+def __g_s_0(T_0: float) -> np.float64:
     """Calculate the entropic relativistic degrees of freedom today.
 
-    This function is cached because it only needs to be ran once. It is a function instead of a constant so that if
-    the g_star.dat file changes, this value will update as well.
+    This function is cached because it only needs to be ran once. It is a function instead of a constant so that
+    if the `g_star.dat` file changes, this value will update as well.
 
-    :param float T_0: The universe's temperature today [GeV].
-    :return: The entropic relativistic degrees of greedom today.
-    :rtype: float."""
-    return g_s(T_0)
+    Parameters
+    ----------
+    T_0 : float
+        The universe's temperature today [GeV].
 
+    Returns
+    -------
+    float
+        The entropic relativistic degrees of freedom today.
+
+    """
+    return g_s(T_0) # type: ignore
 
 @cache
-def __g_rho_0(T_0):
+def __g_rho_0(T_0: float) -> np.float64:
     """Calculate the relativistic degrees of freedom today.
 
-    This function is cached because it only needs to be ran once. It is a function instead of a constant so that if
-    the g_star.dat file changes, this value will update as well.
+    This function is cached because it only needs to be ran once. It is a function instead of a constant so that
+    if the `g_star.dat` file changes, this value will update as well.
 
-    :param float T_0: The universe's temperature today [GeV].
-    :return: The relativistic degrees of greedom today.
-    :rtype: float."""
+    Parameters
+    ----------
+    T_0 : float
+        The universe's temperature today [GeV].
 
-    return g_rho(T_0)
+    Returns
+    -------
+    float
+        The relativistic degrees of freedom today.
 
+    """
+    return g_rho(T_0) # type: ignore
 
-g_rho_0 = __g_rho_0(T_0)  # relativistic degrees of freedom today
-g_s_0 = __g_s_0(T_0)  # entropic relativistic degrees of freedom today
+g_rho_0: np.float64 = __g_rho_0(T_0)  # relativistic degrees of freedom today
+g_s_0: np.float64 = __g_s_0(T_0)  # entropic relativistic degrees of freedom today
 
 # -----------------------------------------------------------
-# Additional priors not included in the standard 
-# enterprise package. 
+# Additional priors not included in the standard
+# enterprise package.
 # -----------------------------------------------------------
 
 
-def GammaPrior(value, a, loc, scale):
-    """Prior function for Uniform parameters."""
+def GammaPrior(value: float, a: float, loc: float, scale: float) -> float:
+    """Prior function for Gamma parameters.
+
+    Parameters
+    ----------
+    value : float
+        The value of the parameter.
+    a : float
+        The shape parameter of the Gamma distribution.
+    loc : float
+        The location parameter of the Gamma distribution.
+    scale : float
+        The scale parameter of the Gamma distribution.
+
+    Returns
+    -------
+    float
+        The probability density of the Gamma distribution at `value`.
+
+    """
     return ss.gamma.pdf(value, a, loc, scale)
 
+def GammaSampler(a: float, loc: float, scale: float, size: int | None  = None) -> NDArray:
+    """Sampling function for Gamma parameters.
 
-def GammaSampler(a, loc, scale, size=None):
-    """Sampling function for Uniform parameters."""
+    Parameters
+    ----------
+    a : float
+        The shape parameter of the Gamma distribution.
+    loc : float
+        The location parameter of the Gamma distribution.
+    scale : float
+        The scale parameter of the Gamma distribution.
+    size : int, optional
+        The number of samples to draw.
+
+    Returns
+    -------
+    NDArray
+        A NumPy array of size `size` containing samples from the Gamma distribution.
+
+    """
     return ss.gamma.rvs(a, loc, scale, size=size)
 
 
-def Gamma(a, loc, scale, size=None):
+def Gamma(a: float, loc: float, scale: float, size: int | None = None):
+    """Class factory for Gamma parameters.
 
+    Parameters
+    ----------
+    a : float
+        The shape parameter of the Gamma distribution.
+    loc : float
+        The location parameter of the Gamma distribution.
+    scale : float
+        The scale parameter of the Gamma distribution.
+    size : int, optional
+        The number of samples to draw.
+
+    Returns
+    -------
+    Gamma : parameter.Parameter
+        Child class of [enterprise.signals.parameter.Parameter][] for Gamma distribution
+
+    """
     class Gamma(parameter.Parameter):
+        """Child class of enterprise.signals.parameter.Parameter."""
+
         _size = size
         _prior = parameter.Function(GammaPrior, a=a, loc=loc, scale=scale)
         _sampler = staticmethod(GammaSampler)
@@ -138,15 +265,26 @@ def Gamma(a, loc, scale, size=None):
 # Helper functions.
 # -----------------------------------------------------------
 
-def omega2cross(omega_hh):
-    """
-    | Converts the GW energy density as a fraction of the 
-    | closure density into the cross-power spectral density
-    | as a funtion of the frequency in Hz.
-    """
+def omega2cross(omega_hh: Callable[..., NDArray]) -> Callable[..., NDArray]:
+    """Convert GW energy density.
 
+    Converts the GW energy density as a fraction of the closure density into the cross-power spectral density
+    as a function of the frequency in Hz. This is intended to be used as a decorator on a function that returns
+    the GW energy density as a fraction of the closure density.
+
+    Parameters
+    ----------
+    omega_hh : Callable[..., NDArray]
+        The function that returns the GW energy density as a fraction of the closure density.
+
+    Returns
+    -------
+    Callable[..., NDArray]
+        A function that returns the cross-power spectral density as a function of the frequency in Hz.
+
+    """
     @function
-    def cross(f, components=2, **kwargs):
+    def cross(f: NDArray, components: int = 2, **kwargs):
 
         df = np.diff(np.concatenate((np.array([0]), f[::components])))
 
@@ -164,11 +302,23 @@ def omega2cross(omega_hh):
     return cross
 
 
-def prep_data(path):
-    """
-    Shapes tabulated data in a form that can be handled by interpn.
-    """
+def prep_data(path: str) -> tuple[list[NDArray], NDArray, NDArray]:
+    """Shape tabulated data into a form that can be handled by `interpn`.
 
+    Parameters
+    ----------
+    path : str
+        Path to the tabulated data file.
+
+    Returns
+    -------
+    grids : list[NDArray]
+        The grids of the tabulated data.
+    omega_grid : NDArray
+        The omega grid of the tabulated data.
+    par_names : NDArray
+        The names of the parameters in the tabulated data.
+    """
     par_names = np.loadtxt(path, max_rows=1, dtype='str')
     data = np.loadtxt(path, skiprows=1)
 
@@ -179,7 +329,7 @@ def prep_data(path):
     par_names = np.delete(par_names, spec_col)
 
     grids = [np.unique(row) for row in data.T]
-    
+
     for idx, par in enumerate(par_names):
         omega_grid = omega_grid[data[:, -idx -1].argsort(kind="mergesort")]
         data = data[data[:, -idx -1].argsort(kind="mergesort")]
@@ -187,18 +337,30 @@ def prep_data(path):
     grid_size = [len(x) for x in grids]
     omega_grid = omega_grid.reshape(tuple(grid_size))
 
-    return grids, omega_grid, par_names 
+    return grids, omega_grid, par_names
 
 
-def spec_importer(path):
+def spec_importer(path: str) -> Callable[[NDArray, P],  NDArray]:
+    """Import data and create a fast interpolation function.
+
+    Interpolate the GWB power spectrum from tabulated data. Return a function that interpolates
+    over frequency.
+
+    Parameters
+    ----------
+    path : str
+        Path to the tabulated data file.
+
+    Returns
+    -------
+    Callable[[NDArray, P], NDArray]
+        A callable object that interpolates the GWB power spectrum at a given frequency `f` and with given
+        parameters `kwargs`.
     """
-    Interpolate the GWB power spectrum from tabulated data. 
-    """
-
     info, data = fast_interpolate.load_data(path)
     # info is a list of (name, start, step)
 
-    def spectrum(f, **kwargs):
+    def spectrum(f: NDArray, **kwargs: P.kwargs) -> NDArray:
 
         # Construct right information format for interpolation
         return fast_interpolate.interp([(start, step, f if name == 'f' else kwargs[name])
@@ -207,20 +369,27 @@ def spec_importer(path):
     return spectrum
 
 
-def freq_at_temp(T):
-    """Calculate GW frequency [Hz] today as function of universe temperature [GeV]
+def freq_at_temp(T: array_like) -> array_like:
+    """Find frequency today as function of temperature when GW was horizon size.
+
+    Calculates the GW frequency [Hz] today as a function of the universe temperature [GeV]
     when the GW was of horizon size.
 
-    :param Union[NDArray, float] T: Universe temperature [GeV] at time when GW was of horizon size
-    :return: GW of frequency f [Hz] today that was of horizon size when universe was at temperature `T` [GeV]
-    :rtype: Union[NDArray, float]
-    """
+    Parameters
+    ----------
+    T : array_like
+        The universe temperature [GeV] at the time when the GW was of horizon size.
 
+    Returns
+    -------
+    NDArray
+        The GW frequency [Hz] today that was of horizon size when the universe was at temperature `T` [GeV].
+    """
     f_0 = H_0_Hz / (2 * np.pi)
 
-    T_ratio = T_0 / T
-    g_ratio = g_rho_0 / g_rho(T)
-    gs_ratio = g_s_0 / g_s(T)
+    T_ratio = T_0 / T # type: ignore
+    g_ratio = g_rho_0 / g_rho(T) # type: ignore
+    gs_ratio = g_s_0 / g_s(T) # type: ignore
 
     prefactor = f_0 * (gs_ratio) ** (1 / 3) * T_ratio
     sqr_term = np.sqrt(
@@ -232,13 +401,19 @@ def freq_at_temp(T):
     return prefactor * sqr_term
 
 
-def temp_at_freq(f):
+def temp_at_freq(f: array_like) -> NDArray:
     """Get the temperature [GeV] of the universe when a gravitational wave of a
     certain frequency [Hz] today was of horizon size.
 
-    :param Union[NDArray, float] f: Frequency in Hz today
-    :return: Temperature [GeV] when GW at frequency `f` [Hz] was of horizon size
-    :rtype: Union[NDArray, float]
-    """
+    Parameters
+    ----------
+    f : array_like
+        The frequency in Hz today.
 
+    Returns
+    -------
+    NDArray
+        The temperature [GeV] when the GW at frequency `f` [Hz] was of horizon size.
+
+    """
     return np.interp(f, gs[:, 1], gs[:, 0], left=np.nan, right=np.nan)
