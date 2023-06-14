@@ -1,88 +1,117 @@
+"""Import PTA data."""
+from __future__ import annotations
+
+import glob
+import json
 import os
 import pickle
-import glob, json
+
+from astropy.utils.data import download_file
 from enterprise.pulsar import Pulsar
-
-cwd = os.getcwd()
-pta_dat_dir = os.path.join(cwd, 'inputs/pta_data/')
-
-ng15_dic = {
-    'psrs_data': 'ng15_psrs_v1p1.pkl',
-    'noise_data': 'ng15_wn_v1p1.json',
-    'emp_dist': 'ng15_emp_v1p1.pkl'}
-
-ng12_dic = {
-    'psrs_data': 'ng12_psrs_v4.pkl',
-    'noise_data': 'ng12_wn_v4.json',
-    'emp_dist': None}
-
-ipta2_dic = {
-    'psrs_data': 'ipta2_psrs_de438.pkl',
-    'noise_data': 'ipta2_wn_de438.json',
-    'emp_dist': None}
+from numpy._typing import _ArrayLikeFloat_co as array_like
 
 
-def get_ephem_conv(par_file):
+def get_ephem_conv(par_file: str) -> str:
+    """Get the ephemeris convention used in par files.
+
+    Parameters
+    ----------
+    par_file : str
+        Path to the par file.
+
+    Returns
+    -------
+    ephem : str
+        The ephemeris convention used in the par file.
+
     """
-    get the ephemeris convention used in par files.
-    """
-    f = open(par_file, 'r')
+    f = open(par_file, "r")
     lines = f.readlines()
 
     for line in lines:
         line = line.split()
-        if line[0] == 'EPHEM':
+        if line[0] == "EPHEM":
             ephem = line[-1]
-    
+
     f.close()
 
     return ephem
 
 
-def get_pulsars(pta_data, filter=None):
+def get_pulsars(pta_data: str, filters: list[str] = None) -> list[Pulsar]:
+    """Get Pulsar data.
 
-    pta_data = os.path.join(pta_dat_dir, pta_data)
+    If `pta_data` is a file, attempt to load it as a pickle. If it is a
+    directory, read in the par and tim files within.
 
+    Parameters
+    ----------
+    pta_data : str
+        Filename for pickle or directory containing par and tim files.
+    filters : list[str]
+        Selective filter for par and tim files.
+
+    Returns
+    -------
+    psrs : list[Pulsar]
+        List containing pulsar data from `pta_data`.
+
+    """
     if os.path.isfile(pta_data):
-        with open(pta_data, 'rb') as handle:
+        with open(pta_data, "rb") as handle:
             psrs = pickle.load(handle)
 
         return psrs
 
     elif os.path.isdir(pta_data):
-        parfiles = sorted(glob.glob(os.path.join(pta_data, '*.par')))
-        timfiles = sorted(glob.glob(os.path.join(pta_data, '*.tim')))
+        parfiles = sorted(glob.glob(os.path.join(pta_data, "*.par")))
+        timfiles = sorted(glob.glob(os.path.join(pta_data, "*.tim")))
 
         # filter
-        if filter is not None:
-            parfiles = [x for x in parfiles if x.split('/')[-1].split('.')[0] in filter]
-            timfiles = [x for x in timfiles if x.split('/')[-1].split('.')[0] in filter]
+        if filters is not None:
+            parfiles = [x for x in parfiles if x.split("/")[-1].split(".")[0] in filters]
+            timfiles = [x for x in timfiles if x.split("/")[-1].split(".")[0] in filters]
+        # TODO Need to check that all tim and par files have matches!
 
-        # load the pulsars into enterprise 
+        # load the pulsars into enterprise
         psrs = []
         for p, t in zip(parfiles, timfiles):
             ephemeris = get_ephem_conv(p)
             psr = Pulsar(p, t, ephem=ephemeris)
             psrs.append(psr)
-    
+
         return psrs
 
 
-def get_wn(wn_data):
+def get_wn(wn_data: str | None) -> dict | None :
+    """Get whitenoise data.
+
+    Parameters
+    ----------
+    wn_data : str, optional
+        File or directory containing whitenoise data.
+
+    Returns
+    -------
+    dict | None
+        If `wn_data` isn't `None`, then the whitenoise data is returned as a
+        `dict`
+
+    """
     if wn_data is None:
         return None
-    
+
     params = {}
 
-    if os.path.isfile(pta_dat_dir + wn_data):
-        with open(pta_dat_dir + wn_data, 'r') as fp:
+    if os.path.isfile(wn_data):
+        with open(wn_data, 'r') as fp:
             params.update(json.load(fp))
 
         return params
 
-    elif os.path.isdir(pta_dat_dir + wn_data):
-        for filename in os.listdir(pta_dat_dir + wn_data):
-            with open(os.path.join(pta_dat_dir + wn_data, filename), 'r') as f:
+    elif os.path.isdir(wn_data):
+        for filename in os.listdir(wn_data):
+            with open(os.path.join(wn_data, filename), 'r') as f:
                 data = json.load(f)
                 for key, value in data.items():
                     params.update({key: value})
