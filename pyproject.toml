@@ -137,6 +137,7 @@ astroml = "^1.0.2.post1"
 scipy = "^1.10.1"
 setuptools = "^67.8.0"
 acor = {git = "https://github.com/davecwright3/acor.git", rev = "main"}
+ceffyl = {git = "https://github.com/davecwright3/ceffyl.git", rev="fix-install-requirements"}
 
 
 [tool.poetry.group.dev.dependencies]
