@@ -1,7 +1,7 @@
 The model file is a simple Python file that, at minimum, needs to contain the following information:
 
-* [Names and prior distributions][priors] of the new physics signal parameters.
-* Parametrized form of the new physics signal, which can either be [stochastic][spectrum]
+* [Names and prior distributions][priors] of the signal parameters.
+* Parametrized form of the signal, which can either be [stochastic][spectrum]
     (and parametrized via its power spectrum), or [deterministic][signal] (and parametrized
     as a timeseries).
 
@@ -54,6 +54,10 @@ The priors for the signal parameters are defined via the `parameters` dictionary
         ```
 
         1.  In this case we have assumed 
+
+!!! danger
+
+    add example for pulsar dependent parameter
 
 ## Stochastic signals
 Stochastic signals are defined via the `spectrum` function. The first parameter of this function should be named `f` and it's supposed to be a [NumPy array][numpy] containing the frequencies (in unit of Hz) at which the spectrum will be evaluated. The names of the remaining parameters should match the keys of the `parameters` dictionary. The `spectrum` function should return a [NumPy array][numpy] containing the value of $h^2\Omega_{\mathrm{GW}}$ at each of the frequencies given in `f`.

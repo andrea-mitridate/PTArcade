@@ -7,9 +7,9 @@ that produces a gravitational background with a relic abundance given by
 $\Omega_{\textrm{GW}}(f;\,\vec{\theta})$, where $\vec{\theta}$ is a set of parameters
 describing the signal. You might now be interested in konwing if there are regions in 
 the $\vec{\theta}$ parameter space that could reproduced the signal observed in PTA
-experiments[^1], or that are excluded by PTA data. PTArcade will allow you to answer these
-question in under 10 minutes (plus computation time) by using real PTA data, and the same
-statistical tools used by PTAs collaborations.
+data[^1]. PTArcade will allow you to answer this question in under 10 minutes
+(plus computation time) by using real PTA data, and the same statistical tools
+used by PTAs collaborations.
 
 [^1]: See [here][NG15] for more details about the PTA signal.
 
