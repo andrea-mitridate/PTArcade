@@ -1,5 +1,7 @@
 pta_data = 'NG15' # PTA dataset to use in the analysis, available options are NG15, NG12, IPTA2
 
+mode = 'enterprise'
+
 mod_sel = False # set to True if you want to compare the new-physics signal to the SMBHB signal
 
 out_dir = './chains/'

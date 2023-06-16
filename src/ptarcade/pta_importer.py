@@ -157,10 +157,16 @@ def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, 
     if pta_data == "NG15":
         # This returns a path in the astropy cache that points to these files, otherwise
         # it downloads them there and returns the path
+        #ng15_dic = {
+        #    "psrs_data": download_file("https://data.nanograv.org/ng15_psrs_v1p1.pkl", cache=True, pkgname="ptarcade"),
+        #    "noise_data": download_file("https://data.nanograv.org/ng15_wn_v1p1.json", cache=True, pkgname="ptarcade"),
+        #    "emp_dist": download_file("https://data.nanograv.org/ng15_emp_v1p1.pkl", cache=True, pkgname="ptarcade"),
+        #}
+
         ng15_dic = {
-            "psrs_data": download_file("https://data.nanograv.org/ng15_psrs_v1p1.pkl", cache=True, pkgname="ptarcade"),
-            "noise_data": download_file("https://data.nanograv.org/ng15_wn_v1p1.json", cache=True, pkgname="ptarcade"),
-            "emp_dist": download_file("https://data.nanograv.org/ng15_emp_v1p1.pkl", cache=True, pkgname="ptarcade"),
+            "psrs_data": "/Users/andreamitridate/code/pta/nanograv/15yr/data/ng15_psrs_v1p1.pkl",
+            "noise_data": "/Users/andreamitridate/code/pta/nanograv/15yr/data/ng15_wn_v1p1.json",
+            "emp_dist": "/Users/andreamitridate/code/pta/nanograv/15yr/data/ng15_emp_v1p1.pkl",
         }
 
         psrs = get_pulsars(ng15_dic["psrs_data"])

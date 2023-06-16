@@ -262,7 +262,7 @@ def Gamma(a: float, loc: float, scale: float, size: int | None = None):
 # Helper functions.
 # -----------------------------------------------------------
 
-def omega2cross(omega_hh: Callable[..., NDArray]) -> Callable[..., NDArray]:
+def omega2cross(omega_hh: Callable[..., NDArray], ceffyl : bool = False) -> Callable[..., NDArray]:
     """Convert GW energy density.
 
     Converts the GW energy density as a fraction of the closure density into the cross-power spectral density
@@ -280,21 +280,37 @@ def omega2cross(omega_hh: Callable[..., NDArray]) -> Callable[..., NDArray]:
         A function that returns the cross-power spectral density as a function of the frequency in Hz.
 
     """
-    @function
-    def cross(f: NDArray, components: int = 2, **kwargs):
+    if ceffyl:
+        @function
+        def cross(f: NDArray, Tspan: float, **kwargs):
 
-        df = np.diff(np.concatenate((np.array([0]), f[::components])))
+            # fraction of the critical density in GWs
+            h2_omega = omega_hh(f, **kwargs)
 
-        # fraction of the critical density in GWs
-        h2_omega = omega_hh(f, **kwargs)
+            # characteristic strain spectrum h_c(f)
+            hcf = H_0_Hz / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f)
 
-        # characteristic strain spectrum h_c(f)
-        hcf = H_0_Hz / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f)
+            # cross-power spectral density S(f) (s^3)
+            sf = (hcf**2 / (12 * np.pi**2 * f**3)) / Tspan
 
-        # cross-power spectral density S(f) (s^3)
-        sf = (hcf**2 / (12 * np.pi**2 * f**3)) * np.repeat(df, components)
+            return sf
 
-        return sf
+    else:
+        @function
+        def cross(f: NDArray, components: int = 2, **kwargs):
+
+            df = np.diff(np.concatenate((np.array([0]), f[::components])))
+
+            # fraction of the critical density in GWs
+            h2_omega = omega_hh(f, **kwargs)
+
+            # characteristic strain spectrum h_c(f)
+            hcf = H_0_Hz / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f)
+
+            # cross-power spectral density S(f) (s^3)
+            sf = (hcf**2 / (12 * np.pi**2 * f**3)) * np.repeat(df, components)
+
+            return sf
 
     return cross
 

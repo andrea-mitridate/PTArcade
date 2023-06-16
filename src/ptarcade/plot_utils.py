@@ -823,7 +823,7 @@ def plot_posteriors(
         k_ratio = [None] * N_chains
     if bf is None:
         bf = [
-            utils.compute_bf(chain, params[idx])[0] for idx, chain in enumerate(chains)]
+            utils.compute_bf(chain, params[idx])[0] for idx, chain in enumerate(chains) if k_ratio[idx]]
     if not samples_name:
         samples_name = [f"Sample {idx+1}" for idx in range(N_chains)]
 

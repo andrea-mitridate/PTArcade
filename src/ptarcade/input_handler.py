@@ -156,6 +156,7 @@ def check_config(config: ModuleType) -> None:
     default = {
            "pta_data" : 'NG15',
            "N_samples" : int(2e6),
+           "mod" : 'enterprise',
            "mod_sel" : False,
            "out_dir" : './chains/',
            "resume" : False,
@@ -214,6 +215,20 @@ def check_config(config: ModuleType) -> None:
             "or a dictionary pointing to a set of PTA data."
         )
         raise SystemExit(error)
+            
+    # checks mod
+    if isinstance(config.pta_data, str):
+        if config.mode in ["enterprise", "ceffyl"]:
+            pass
+        else:
+            error = (
+                f"{bcolors.FAIL}ERROR{bcolors.ENDC}: "
+                f"{config.mode} is not a valid run mode for PTArcade"
+                "PTArcade cen be run in two modes: 'enterprise' "
+                "or 'ceffyl'. Please select one of these two for the 'mode' "
+                "parameter in the configuration file."
+            )
+            raise SystemExit(error)
 
     # checks booleans variables
     bools = {

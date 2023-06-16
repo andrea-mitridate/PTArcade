@@ -21,6 +21,7 @@ from ptarcade.input_handler import bcolors
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
 from PTMCMCSampler.PTMCMCSampler import PTSampler
+from ceffyl import Sampler
 
 from ptarcade import input_handler, pta_importer, signal_builder
 
@@ -98,7 +99,7 @@ def get_user_pta_data(inputs: dict[str, Any]) -> tuple[list[Pulsar], dict | None
     return psrs, noise_params, emp_dist
 
 
-def initialize_pta(psrs: list[Pulsar], inputs: dict[str, Any], noise_params : dict | None ) -> dict[int, PTA]:
+def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_params : dict | None ) -> dict[int, PTA]:
     """Initialize the PTA with the user input
 
     Parameters
@@ -116,27 +117,12 @@ def initialize_pta(psrs: list[Pulsar], inputs: dict[str, Any], noise_params : di
         Dictionary of [enterprise.signals.signal_base.PTA][] objects configured with user inputs
 
     """
-    pta = {}
+    if inputs["config"].mode == "enterprise":
+        pta = {}
 
-    pta[0] = signal_builder.builder(
-        psrs=psrs,
-        model=inputs['model'],
-        noisedict=noise_params,
-        pta_dataset=inputs['config'].pta_data,
-        bhb_th_prior=inputs['config'].bhb_th_prior,
-        gamma_bhb=inputs['config'].gamma_bhb,
-        A_bhb_logmin=inputs['config'].A_bhb_logmin,
-        A_bhb_logmax=inputs['config'].A_bhb_logmax,
-        corr=inputs['config'].corr,
-        red_components=inputs["config"].red_components,
-        gwb_components=inputs["config"].gwb_components)
-
-    if inputs["config"].mod_sel:
-        pta[1] = pta[0]
-
-        pta[0] = signal_builder.builder(
+        pta[0] = signal_builder.ent_builder(
             psrs=psrs,
-            model=None,
+            model=inputs['model'],
             noisedict=noise_params,
             pta_dataset=inputs['config'].pta_data,
             bhb_th_prior=inputs['config'].bhb_th_prior,
@@ -146,13 +132,34 @@ def initialize_pta(psrs: list[Pulsar], inputs: dict[str, Any], noise_params : di
             corr=inputs['config'].corr,
             red_components=inputs["config"].red_components,
             gwb_components=inputs["config"].gwb_components)
+
+        if inputs["config"].mod_sel:
+            pta[1] = pta[0]
+
+            pta[0] = signal_builder.ent_builder(
+                psrs=psrs,
+                model=None,
+                noisedict=noise_params,
+                pta_dataset=inputs['config'].pta_data,
+                bhb_th_prior=inputs['config'].bhb_th_prior,
+                gamma_bhb=inputs['config'].gamma_bhb,
+                A_bhb_logmin=inputs['config'].A_bhb_logmin,
+                A_bhb_logmax=inputs['config'].A_bhb_logmax,
+                corr=inputs['config'].corr,
+                red_components=inputs["config"].red_components,
+                gwb_components=inputs["config"].gwb_components)
+            
+    elif inputs["config"].mode == "ceffyl":
+
+        pta = signal_builder.ceffyl_builder(inputs)
+        
     return pta
 
 
 def setup_sampler(
         inputs: dict[str, ModuleType],
         input_options: dict[str, Any],
-        pta: dict[int, PTA],
+        pta: dict[int, PTA] | None,
         emp_dist: array_like | None,
 ) -> tuple[PTSampler, NDArray]:
     """Setup the PTMCMC sampler
@@ -179,30 +186,39 @@ def setup_sampler(
     out_dir = os.path.join(
         inputs["config"].out_dir, inputs["model"].name, f'chain_{input_options["n"]}')
     
-    if not input["config"].resume:
+    if not inputs["config"].resume and os.path.exists(out_dir):
         shutil.rmtree(out_dir)
 
-    super_model = hypermodel.HyperModel(pta)
+    if inputs['config'].mode == "enterprise":
+        super_model = hypermodel.HyperModel(pta)
 
-    groups = signal_builder.unique_sampling_groups(super_model)
+        groups = signal_builder.unique_sampling_groups(super_model)
 
-    if inputs["model"].group:
-        idx_params = [super_model.param_names.index(pp) for pp in inputs["model"].group]
-        [groups.append(idx_params) for _ in range(5)] # type: ignore
+        if inputs["model"].group:
+            idx_params = [super_model.param_names.index(pp) for pp in inputs["model"].group]
+            [groups.append(idx_params) for _ in range(5)] # type: ignore
 
-    # add nmodel index to group structure
-    groups.extend([[len(super_model.param_names)-1]])
+        # add nmodel index to group structure
+        groups.extend([[len(super_model.param_names)-1]])
 
-    sampler = super_model.setup_sampler(
-        resume=inputs["config"].resume,
-        outdir=out_dir,
-        sample_nmodel=inputs["config"].mod_sel,
-        groups=groups,
-        empirical_distr=emp_dist)
+        sampler = super_model.setup_sampler(
+            resume=inputs["config"].resume,
+            outdir=out_dir,
+            sample_nmodel=inputs["config"].mod_sel,
+            groups=groups,
+            empirical_distr=emp_dist)
 
-    x0 = super_model.initial_sample()
+        x0 = super_model.initial_sample()
 
-    super_model.get_lnlikelihood(x0) # Cache now to make timing more accurate
+        super_model.get_lnlikelihood(x0) # Cache now to make timing more accurate
+
+    elif inputs["config"].mode == "ceffyl":
+        sampler = Sampler.setup_sampler(pta,
+            outdir=out_dir,
+            logL=pta.ln_likelihood,
+            logp=pta.ln_prior)
+
+        x0 = pta.initial_samples()
 
     return sampler, x0
 
@@ -243,37 +259,28 @@ def main():
     start_cpu = time.process_time()
     start_real = time.perf_counter()
 
-    ###############################################################################
-    # load inputs
-    ###############################################################################
-
-    # parse command line inputs
     inputs, input_options = get_user_args()
 
-    ###############################################################################
-    # load pulsars and noise parameters
-    ###############################################################################
-    print('--- Loading Pulsars and noise data ... ---\n')
+    psrs = None
+    noise_params = None
+    emp_dist = None
 
-    # import pta data
-    psrs, noise_params, emp_dist = get_user_pta_data(inputs)
+    if inputs["config"].mode == "enterprise":
+        print('--- Loading Pulsars and noise data ... ---\n')
 
-    print('--- Done loading Pulsars and noise data. ---\n')
+        # import pta data
+        psrs, noise_params, emp_dist = get_user_pta_data(inputs)
 
-    ###############################################################################
-    # define models and initialize PTA
-    ###############################################################################
+        print('--- Done loading Pulsars and noise data. ---\n')
+
+
     print('--- Initializing PTA ... ---\n')
 
-    pta = initialize_pta(psrs, inputs, noise_params)
+    pta = initialize_pta(inputs, psrs, noise_params)
 
     print('--- Done initializing PTA. ---\n\n')
 
-    ###############################################################################
-    # define sampler and sample
-    ###############################################################################
-
-    sampler, x0 = setup_sampler(inputs, input_options, pta, emp_dist) # Cache now to make timing more accurate
+    sampler, x0 = setup_sampler(inputs, input_options, pta, emp_dist)
 
     print("Setup times (including first sample) {:.2f} seconds real, {:.2f} seconds CPU\n".format(
         time.perf_counter()-start_real, time.process_time()-start_cpu));
@@ -282,7 +289,6 @@ def main():
     start_real = time.perf_counter()
 
     do_sample(inputs, sampler, x0)
-
 
     real_time = time.perf_counter()-start_real
     cpu_time = time.process_time()-start_cpu

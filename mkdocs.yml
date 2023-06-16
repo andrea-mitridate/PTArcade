@@ -202,5 +202,5 @@ nav:
     - utils/index.md
     - Model utilities: utils/model_utils.md
     - Chains utilities: utils/chain_utils.md
-    - Plotting utilities: utils/plot_utils.md
+    - Plot utilities: utils/plot_utils.md
   - Reference: reference/

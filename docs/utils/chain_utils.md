@@ -1,5 +1,5 @@
 The [`chains_utils`][ptarcade.chains_utils] module contains several functions 
-that can be used to handle the MCMC chains produced by PTAracade. In this page
+that can be used to analyze the MCMC chains produced by PTAracade. In this page
 we just highlight some of its functionalities, a more detailed discussion of 
 this module can be found in its [reference page][ptarcade.chains_utils].
 

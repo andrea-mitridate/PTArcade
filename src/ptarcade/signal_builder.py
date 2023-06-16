@@ -14,8 +14,14 @@ from enterprise_extensions import hypermodel, model_utils
 from enterprise_extensions.blocks import common_red_noise_block, dm_noise_block, red_noise_block, white_noise_block
 from enterprise_extensions.sampler import get_parameter_groups
 from numpy.typing import NDArray
+from ceffyl import Ceffyl
+from importlib.resources import files
 
 import ptarcade.models_utils as aux
+
+# gaussian parameters extracted from the holodeck library astro-02-gw
+bhb_priors = {"NG15" : [np.array([-15.61492963, 4.70709637]), np.array([[0.27871359, -0.00263617], [-0.00263617, 0.12415383]])],
+              "IPTA2" : [np.array([-15.02928454, 4.14290127]), np.array([[0.06869369, 0.00017051], [0.00017051, 0.04681747]])]}
 
 
 def unique_sampling_groups(super_model: hypermodel.Hypermodel) -> list[list[int]]:
@@ -59,7 +65,7 @@ def powerlaw2(f: NDArray, log10_Agamma: NDArray, components: int = 2) -> NDArray
     log10_Agamma : NDArray
         Two component NDArray of [Log10(amplitude), spectral index].
     components : int
-        Count by this number in `f`.
+        Number of components for each frequency.
 
     Returns
     -------
@@ -67,6 +73,7 @@ def powerlaw2(f: NDArray, log10_Agamma: NDArray, components: int = 2) -> NDArray
         The modified powerlaw.
 
     """
+
     df = np.diff(np.concatenate((np.array([0]), f[::components])))
     return (
         (10 ** log10_Agamma[0]) ** 2
@@ -75,6 +82,73 @@ def powerlaw2(f: NDArray, log10_Agamma: NDArray, components: int = 2) -> NDArray
         * const.fyr ** (log10_Agamma[1] - 3)
         * f ** (-log10_Agamma[1])
         * np.repeat(df, components)
+    )
+
+
+@parameter.function
+def powerlaw(f, Tspan, log10_A, gamma):
+    
+    """Modified powerlaw function.
+
+    Powerlaw function modified to work with ceffyl.
+
+    Parameters
+    ----------
+    f : NDArray
+        Frequency array.
+    Tspan: fload
+        Observation time.
+    log10_A : float
+        Log10(amplitude)
+    gamma : float
+        Spectral index
+    components : int
+        Number of components for each frequency.
+
+    Returns
+    -------
+    NDArray
+        The modified powerlaw.
+
+    """
+    
+    return (
+        (10**log10_A) ** 2 / 12.0 / np.pi**2 * const.fyr ** (gamma - 3) * f ** (-gamma) / Tspan  # divide by Tspan here
+    )
+
+
+@parameter.function
+def powerlaw2_ceffyl(f: NDArray, Tspan: float, log10_Agamma: NDArray, components: int = 2) -> NDArray:
+    """Modified powerlaw function.
+
+    Defines a modified powerlaw function that takes as input an
+    array containing the values of the amplitude and spectral index.
+    This version is compatible with ceffyl.
+
+    Parameters
+    ----------
+    f : NDArray
+        Frequency array.
+    Tspan: fload
+        Observation time.
+    log10_Agamma : NDArray
+        Two component NDArray of [Log10(amplitude), spectral index].
+    components : int
+        Count by this number in `f`.
+
+    Returns
+    -------
+    NDArray
+        The modified powerlaw.
+
+    """
+    return (
+        (10 ** log10_Agamma[0]) ** 2
+        / 12.0
+        / np.pi**2
+        * const.fyr ** (log10_Agamma[1] - 3)
+        * f ** (-log10_Agamma[1])
+        / Tspan
     )
 
 
@@ -114,7 +188,7 @@ def tnequad_conv(noisedict: dict) -> bool:
 
     return tnequad
 
-def builder(
+def ent_builder(
     psrs: list[Pulsar],
     model: ModuleType | None = None,
     noisedict: dict | None = None,
@@ -189,13 +263,8 @@ def builder(
             orf = None
 
         if bhb_th_prior and (pta_dataset == "NG15" or pta_dataset == "IPTA2"):
-            # gaussian parameters extracted from the holodeck library astro-02-gw
-            if pta_dataset == "NG15":
-                mu = np.array([-15.61492963, 4.70709637])
-                sigma = np.array([[0.27871359, -0.00263617], [-0.00263617, 0.12415383]])
-            elif pta_dataset == "IPTA2":
-                mu = np.array([-15.02928454, 4.14290127])
-                sigma = np.array([[0.06869369, 0.00017051], [0.00017051, 0.04681747]])
+
+            mu, sigma = bhb_priors[pta_dataset]            
 
             if model is None:
                 log10_Agamma_gw = parameter.Normal(mu=mu, sigma=sigma, size=2)("gw_bhb")
@@ -311,3 +380,65 @@ def builder(
         pta.set_default_params(noisedict)
 
     return pta
+
+
+def ceffyl_builder(inputs):
+
+    if inputs["config"].corr:
+        datadir = files('ptarcade.data').joinpath('free_spectrum/data/30f_fs{hd}_ceffyl/')
+    else:
+        datadir = files('ptarcade.data').joinpath('free_spectrum/data/30f_fs{cp}_ceffyl/')
+
+    ceffyl_pta = Ceffyl.ceffyl(datadir)
+
+    params = list(inputs["model"].parameters.values())
+
+    model = []
+
+    model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
+                          psd=aux.omega2cross(inputs["model"].spectrum, ceffyl=True),  
+                          params=params))
+    
+    
+    if inputs["model"].smbhb or inputs["config"].mod_sel:
+        mu, sigma = bhb_priors.get(inputs["config"].pta_data, [False, False])
+
+        if mu.all() and inputs["config"].bhb_th_prior:
+            bhb_params = [parameter.Normal(mu=mu, sigma=sigma, size=2)("log10_Agamma")]
+            bhb_signal = powerlaw2_ceffyl
+
+        else:
+            if inputs["config"].A_bhb_logmin:
+                A_bhb_logmin = inputs["config"].A_bhb_logmin
+            else:
+                A_bhb_logmin = -18
+
+            if inputs["config"].A_bhb_logmax:
+                A_bhb_logmax = inputs["config"].A_bhb_logmax
+            else:
+                A_bhb_logmax = -14
+
+            log10_A_bhb = parameter.Uniform(A_bhb_logmin, A_bhb_logmax)("log10_A")
+
+            if inputs["config"].gamma_bhb:
+                gamma_bhb = parameter.Constant(inputs["config"].gamma_bhb)('gamma')
+            else:
+                gamma_bhb = parameter.Uniform(0, 7)("gamma")
+
+            bhb_params = [log10_A_bhb, gamma_bhb]
+            bhb_signal = powerlaw
+
+    # create your signal model
+    model = []
+
+    model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
+                          psd=aux.omega2cross(inputs["model"].spectrum, ceffyl=True),  
+                          params=params))
+    
+    if inputs["model"].smbhb:
+        model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
+                          psd=bhb_signal,  
+                          params=bhb_params,
+                          name='gw_bhb'))
+
+    return ceffyl_pta.add_signals(model)

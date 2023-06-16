@@ -108,14 +108,25 @@ def import_chains(chains_dir: str,
             err = f" ERROR: chains have different parameters. {temp_par=} != {params=}"
             raise SystemExit(err)
 
+
+    n_pars = len(np.loadtxt(os.path.join(chains_dir, directories[0], 'chain_1.txt'), max_rows=1))
+
     # add name for sampler parameters
-    params.update({
-        'nmodel' : None,
-        'log_posterior' : None,
-        'log_likelihood' : None,
-        'acceptance_rate' : None,
-        'n_parall' : None
-        })
+    if n_pars - len(params) == 5:
+        params.update({
+            'nmodel' : None,
+            'log_posterior' : None,
+            'log_likelihood' : None,
+            'acceptance_rate' : None,
+            'n_parall' : None
+            })
+    elif n_pars - len(params) == 4:
+        params.update({
+            'log_posterior' : None,
+            'log_likelihood' : None,
+            'acceptance_rate' : None,
+            'n_parall' : None
+            })
 
     # import and merge all the chains removing the burn-in
     name_list = list(params.keys())
@@ -218,20 +229,23 @@ def chain_filter(
     This function filters the chain in-place, meaning that the original chain will be modified.
 
     """
-    nmodel_idx = list(params).index('nmodel')
+    if 'nmodel' in list(params):
+        nmodel_idx = list(params).index('nmodel')
 
-    if model_id is None:
-        print("No model ID specified, posteriors are plotted for model 0")
-        filter_model = chain[:, nmodel_idx] < 0.5
-    elif model_id == 0:
-        filter_model = chain[:, nmodel_idx] < 0.5
-    elif model_id == 1:
-        filter_model = chain[:, nmodel_idx] > 0.5
+        if model_id is None:
+            print("No model ID specified, posteriors are plotted for model 0")
+            filter_model = chain[:, nmodel_idx] < 0.5
+        elif model_id == 0:
+            filter_model = chain[:, nmodel_idx] < 0.5
+        elif model_id == 1:
+            filter_model = chain[:, nmodel_idx] > 0.5
+        else:
+            err = f" ERROR: model_idx can only be an integer equal to 0 or 1. I got {model_id=}."
+            raise SystemExit(err)
+
+        chain = chain[filter_model]
     else:
-        err = f" ERROR: model_idx can only be an integer equal to 0 or 1. I got {model_id=}."
-        raise SystemExit(err)
-
-    chain = chain[filter_model]
+        pass
 
     if par_to_plot:
         filter_par = [list(params).index(x) for x in par_to_plot if x in params]

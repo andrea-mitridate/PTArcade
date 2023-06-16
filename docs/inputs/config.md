@@ -69,10 +69,12 @@ file are:
 :   :octicons-milestone-24: Default: `False` –
     If set to `False`, 
 
-    !!! warning 
+    !!! warning "title (1)"
         When `mod = enterprise`, running with `corr = True` is appriximately one order
         or magnitude slower than running with `corr = False`. If you want to run with 
         `corr = True` we suggest to either use `mod = ceffyl` or run on a cluster.
+
+    1.  bla
     
 
 [`red_components`](#+config.red_components){ #+config.red_components }
@@ -140,7 +142,7 @@ with the following parameters in the configuration file:
     Can be assigned to a floating point or integer number to set the value of $\gamma_{\textrm BHB}$.
     If `gamma_bhb = None`, a uniform prior between $0$ and $7$ will be used.
 
-!!! example "Configuration file example"
+!!! example "Configuration file example" 
 
     ``` py
     pta_data = 'IPTA2' # (1)!
