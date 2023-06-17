@@ -11,31 +11,7 @@
       </header>
       <div class="mdx-spotlight">
         <figure class="mdx-spotlight__feature" hidden>
-          <a href="/getting_started/local_install/" title="Installation" tabindex="-1">
-            <img src="assets/images/spotlight/conda_install.png" alt="Install" loading="lazy" width="500" height="327">
-          </a>
-          <figcaption class="md-typeset">
-            <h2>Install</h2>
-            <p>
-              PTArcade is published as a <a href="https://pypi.org/project/PTArcade/">Python package</a> 
-              and <strong>can be installed with <tt>pip</tt> or <tt>conda</tt></strong>.
-            </p>
-            <p>
-              The installation will also take care of downloading the latest
-              NANOGrav and IPTA dataset so you don't have to worry about any of that.
-            </p>
-            <p>
-              <a href="/getting-started/local_install/" aria-label="Built-in search">
-                <span class="twemoji">
-                  {% include ".icons/octicons/arrow-right-24.svg" %}
-                </span>
-                Learn more
-              </a>
-            </p>
-          </figcaption>
-        </figure>
-        <figure class="mdx-spotlight__feature" hidden>
-          <a href="/inputs/models/" title="Define signal" tabindex="-1">
+          <a href="inputs/model/" title="Define signal" tabindex="-1">
             <img src="assets/images/spotlight/model.png" alt="Defin signal" loading="lazy" width="500" height="327">
           </a>
           <figcaption class="md-typeset">
@@ -44,9 +20,9 @@
               Defining your signal is as <strong>easy as defining a Python function</strong>. 
             </p>
             <p>
-              You can either search for stochastic signals, defined by their power spectrum;
-               or deterministic signals, defined by timed series giving the induced perturbations
-               in pulses times of arrivals.
+              Just define the power spectrum, if you are considering a stochastic signal; or the 
+              signal timeseries, if you are considering a deterministic signal. PTArcade will take
+              care of the rest.
             <p>
               <a href="inputs/" aria-label="Inputs">
                 <span class="twemoji">
@@ -58,22 +34,47 @@
           </figcaption>
         </figure>
         <figure class="mdx-spotlight__feature" hidden>
-          <a href="/docs/getting_started/run/" title="Run" tabindex="-1">
+          <a href="getting_started/run/" title="Run" tabindex="-1">
             <img src="assets/images/spotlight/run.png" alt="Run" loading="lazy" width="500" height="327">
           </a>
           <figcaption class="md-typeset">
             <h2>
-              Run
+              Run it 
               <span class="twemoji">
                 {% include ".icons/material/run.svg" %} 
               </span>
               
             </h2>
             <p>
-              PTArcade comes with several utilities to analyze and plot your results. 
+              <strong>Run</strong> the code <strong>locally or on a HPC</strong>. 
             </p>
             <p>
-              Load...
+              PTArcade can run in various configuration modes to adapt to the available computational resources.
+            </p>
+              <a href="getting_started/run/" aria-label="Utilities">
+                <span class="twemoji">
+                  {% include ".icons/octicons/arrow-right-24.svg" %}
+                </span>
+                Learn more
+              </a>
+            </p>
+          </figcaption>
+        </figure>
+        <figure class="mdx-spotlight__feature" hidden>
+          <a href="utils/plot_utils/" title="Analyze the results" tabindex="-1">
+            <img src="assets/images/spotlight/ex_post.png" alt="Example posterior" loading="lazy" style="width:450px">
+          </a>
+          <figcaption class="md-typeset">
+            <h2>
+              Analyze the results              
+            </h2>
+            <p>
+              Can your model <strong>fit the observed PTA signal?</strong> Can your model be <strong>constrained by PTA
+              data?</strong>
+            </p>
+            <p>
+              Several utilities will help you answer these questions and much more (easy handling of 
+              multiple MCMC chains, easy plotting routings, etc...).
             </p>
               <a href="utils/" aria-label="Utilities">
                 <span class="twemoji">
