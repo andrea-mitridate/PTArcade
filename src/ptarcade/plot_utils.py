@@ -630,6 +630,11 @@ def plot_hpi(
     """
     lw=0.6
 
+    if len(samples) == 1:
+        c_adjust = 1
+    else:
+        c_adjust = 0
+
     for idx, sample in enumerate(samples):
         hpi = hpi_points[idx]
 
@@ -648,10 +653,10 @@ def plot_hpi(
 
                 if x1:
                     p1 = density(x1)[0]
-                    ax.plot([x1, x1], [0, p1], ls = 'dashed', color = colors[idx], lw=lw)
+                    ax.plot([x1, x1], [0, p1], ls = 'dashed', color = colors[idx+c_adjust], lw=lw)
                 if x2:
                     p2 = density(x2)[0]
-                    ax.plot([x2, x2], [0, p2], ls = 'dashed', color = colors[idx], lw=lw)
+                    ax.plot([x2, x2], [0, p2], ls = 'dashed', color = colors[idx+c_adjust], lw=lw)
 
     return
 

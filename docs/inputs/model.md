@@ -158,7 +158,7 @@ Deterministic signals are defined via the `signal` function. The first parameter
 
     In defining the `spectrum` or `signal` functions in the model file you have all the 
     flexibility of a normal Python file. You can, for example, define auxiliary functions,
-    import and interpolate tabulated data ecc...
+    import and interpolate tabulated data etc...
 
 ## Additional settings 
 The model file can also contain additional (optional) variables that can be used to control in more details the new-physics signal. Specifically, the following 

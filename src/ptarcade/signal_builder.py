@@ -118,7 +118,7 @@ def powerlaw(f, Tspan, log10_A, gamma):
 
 
 @parameter.function
-def powerlaw2_ceffyl(f: NDArray, Tspan: float, log10_Agamma: NDArray, components: int = 2) -> NDArray:
+def powerlaw2_ceffyl(f: NDArray, Tspan: float, gw_bhb: NDArray, components: int = 2) -> NDArray:
     """Modified powerlaw function.
 
     Defines a modified powerlaw function that takes as input an
@@ -131,7 +131,7 @@ def powerlaw2_ceffyl(f: NDArray, Tspan: float, log10_Agamma: NDArray, components
         Frequency array.
     Tspan: fload
         Observation time.
-    log10_Agamma : NDArray
+    gw_bhb : NDArray
         Two component NDArray of [Log10(amplitude), spectral index].
     components : int
         Count by this number in `f`.
@@ -143,11 +143,11 @@ def powerlaw2_ceffyl(f: NDArray, Tspan: float, log10_Agamma: NDArray, components
 
     """
     return (
-        (10 ** log10_Agamma[0]) ** 2
+        (10 ** gw_bhb[0]) ** 2
         / 12.0
         / np.pi**2
-        * const.fyr ** (log10_Agamma[1] - 3)
-        * f ** (-log10_Agamma[1])
+        * const.fyr ** (gw_bhb[1] - 3)
+        * f ** (-gw_bhb[1])
         / Tspan
     )
 
@@ -385,9 +385,9 @@ def ent_builder(
 def ceffyl_builder(inputs):
 
     if inputs["config"].corr:
-        datadir = files('ptarcade.data').joinpath('free_spectrum/data/30f_fs{hd}_ceffyl/')
+        datadir = files('ptarcade.data').joinpath('30f_fs{hd}_ceffyl/')
     else:
-        datadir = files('ptarcade.data').joinpath('free_spectrum/data/30f_fs{cp}_ceffyl/')
+        datadir = files('ptarcade.data').joinpath('30f_fs{cp}_ceffyl/')
 
     ceffyl_pta = Ceffyl.ceffyl(datadir)
 
@@ -404,7 +404,7 @@ def ceffyl_builder(inputs):
         mu, sigma = bhb_priors.get(inputs["config"].pta_data, [False, False])
 
         if mu.all() and inputs["config"].bhb_th_prior:
-            bhb_params = [parameter.Normal(mu=mu, sigma=sigma, size=2)("log10_Agamma")]
+            bhb_params = [parameter.Normal(mu=mu, sigma=sigma, size=2)("gw_bhb")]
             bhb_signal = powerlaw2_ceffyl
 
         else:
@@ -438,7 +438,7 @@ def ceffyl_builder(inputs):
     if inputs["model"].smbhb:
         model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
                           psd=bhb_signal,  
-                          params=bhb_params,
-                          name='gw_bhb'))
+                          params=bhb_params))
+        
 
     return ceffyl_pta.add_signals(model)

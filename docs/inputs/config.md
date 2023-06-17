@@ -29,7 +29,13 @@ file are:
         thinned by a factor of 10. Therefore, the number of MC samples that will be 
         saved is given by `N_samples`/10.
 
+[`mode`](#+config.mode){ #+config.mode }
 
+:   :octicons-milestone-24: Default: `enterprise` – 
+    
+
+    !!! note "Please, add relevant citations"
+        
 
 [`out_dir`](#+config.out_dir){ #+config.out_dir }
 

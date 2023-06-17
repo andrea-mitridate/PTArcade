@@ -13,6 +13,7 @@ import time
 from types import ModuleType
 from typing import Any
 import shutil
+import numpy as np
 
 from enterprise.pulsar import Pulsar
 from enterprise.signals.signal_base import PTA
@@ -213,12 +214,20 @@ def setup_sampler(
         super_model.get_lnlikelihood(x0) # Cache now to make timing more accurate
 
     elif inputs["config"].mode == "ceffyl":
+
         sampler = Sampler.setup_sampler(pta,
             outdir=out_dir,
             logL=pta.ln_likelihood,
             logp=pta.ln_prior)
 
         x0 = pta.initial_samples()
+
+        params = np.concatenate(
+            [signal.params for signal in pta.signals], axis=-1)
+    
+        with open(os.path.join(out_dir, "priors.txt"), "w+") as fout:
+            for pp in params:
+                fout.write(pp.__repr__() + "\n")
 
     return sampler, x0
 
@@ -282,7 +291,7 @@ def main():
 
     sampler, x0 = setup_sampler(inputs, input_options, pta, emp_dist)
 
-    print("Setup times (including first sample) {:.2f} seconds real, {:.2f} seconds CPU\n".format(
+    print("\tSetup times (including first sample) {:.2f} seconds real, {:.2f} seconds CPU\n".format(
         time.perf_counter()-start_real, time.process_time()-start_cpu));
 
     start_cpu = time.process_time()
@@ -294,7 +303,7 @@ def main():
     cpu_time = time.process_time()-start_cpu
 
     N_samples = inputs["config"].N_samples
-    print("Sampling times {:.2f} seconds real =  {:.4f} s/sample, {:.2f} seconds CPU =  {:.4f} s/sample\n".format(
+    print("\tSampling times {:.2f} seconds real =  {:.4f} s/sample, {:.2f} seconds CPU =  {:.4f} s/sample\n".format(
         real_time, real_time/N_samples, cpu_time, cpu_time/N_samples))
 
 
