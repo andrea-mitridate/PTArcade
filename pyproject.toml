@@ -136,8 +136,9 @@ getdist = "^1.4.3"
 astroml = "^1.0.2.post1"
 scipy = "^1.10.1"
 setuptools = "^67.8.0"
-acor = {git = "https://github.com/davecwright3/acor.git", rev = "main"}
-ceffyl = {git = "https://github.com/davecwright3/ceffyl.git", rev="fix-install-requirements"}
+ceffyl = "^1.25"
+encor = "^1.1.2"
+llvmlite = "^0.40.0"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -290,7 +290,6 @@ def omega2cross(omega_hh: Callable[..., NDArray], ceffyl : bool = False) -> Call
 
     """
     if ceffyl:
-        print('A')
         @function
         def cross(f: NDArray, Tspan: float, **kwargs):
 
