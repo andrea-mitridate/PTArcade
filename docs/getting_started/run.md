@@ -5,8 +5,15 @@ run PTArcade with
 ptarcade -m model.py -c config.py # (1)!
 ```
 
-1. The optional flag `-n` can be used 
+1. The optional flag `-n` can be used to specify the chain number
 
-## using a docker env
-
-## using a singularity env
+## using a docker container
+Just prepend `ptarcade` with `docker run`
+``` sh
+docker run ptarcade -m model.py -c config.py
+```
+## using a singularity container
+Just prepend `ptarcade` with `singularity run`
+``` sh
+singularity run ptarcade -m model.py -c config.py 
+```

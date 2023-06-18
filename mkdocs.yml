@@ -54,8 +54,8 @@ theme:
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
-    
-
+watch:
+- src/ptarcade
 
 extra_css:
   - stylesheets/extra.css
@@ -73,8 +73,6 @@ plugins:
   - literate-nav:
       nav_file: SUMMARY.md
   - mkdocstrings:
-      watch:
-        - src/ptarcade
       handlers:
         python:
           paths: [src]
