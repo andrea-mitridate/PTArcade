@@ -441,6 +441,4 @@ def ceffyl_builder(inputs):
                           params=bhb_params))
         
 
-    ceffyl_pta.params = list(np.hstack([m.params for m in model]))
-
     return ceffyl_pta.add_signals(model)
