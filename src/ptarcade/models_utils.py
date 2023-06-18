@@ -37,7 +37,8 @@ g_rho_0 : np.float64
     Relativistic degrees of freedom today
 g_s_0 : np.float64
     Entropic relativistic degrees of freedom today
-
+priors_type : typing.Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "Constant", "Gamma"]
+    Type for parameter priors.
 """
 from __future__ import annotations
 
@@ -470,7 +471,7 @@ class ParamDict(UserDict):
             super().__setitem__(key, prior)
 
 
-def prior(name: priors_type, *args, **kwargs) -> parameter.Parameter:
+def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
     """Wrap enterprise prior creation.
 
     This function wraps the class factories in [enterprise.signals.parameter][].
