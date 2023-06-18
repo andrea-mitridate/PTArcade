@@ -41,10 +41,11 @@ g_s_0 : np.float64
 """
 from __future__ import annotations
 
+from collections import UserDict
 from collections.abc import Callable
 from functools import cache
 from importlib.resources import files
-from typing import Any
+from typing import Any, Literal
 
 import natpy as nat
 import numpy as np
@@ -77,6 +78,9 @@ gev_to_hz : np.float64 = nat.convert(nat.GeV, nat.Hz) # conversion from gev to H
 # tabulated values for the number of relativistic degrees of
 # freedom from reference 1803.01038
 gs = np.loadtxt(files('ptarcade.data').joinpath('g_star.dat')) # type: ignore
+
+# type to use for priors-building functions
+priors_type = Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "Constant", "Gamma"]
 
 
 def g_rho(x: array_like, is_freq: bool = False) -> array_like:  # noqa: FBT001, FBT002
@@ -430,3 +434,93 @@ def temp_at_freq(f: array_like) -> NDArray:
 
     """
     return np.interp(f, gs[:, 1], gs[:, 0], left=np.nan, right=np.nan)
+
+
+class ParamDict(UserDict):
+    """UserDict child class that instantiates common or uncommon parameter priors.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from ptarcade.models_utils import ParamDict, prior
+    >>> from pprint import pprint
+    >>> parameters = ParamDict(
+    ...     {
+    ...     "log10_A_dm" : prior("Uniform", -9, -4),
+    ...     "log10_f_dm" : prior("Uniform", -10, -5.5),
+    ...     "gamma_p" : prior("Uniform", 0, 2 * np.pi, common=False),
+    ...     "gamma_e" : prior("Uniform", 0, 2 * np.pi),
+    ...     "phi_hat_sq_e" : prior("Gamma", 1,0,1, common=False),
+    ...     "phi_hat_sq_e" : prior("Gamma", 1,0,1),
+    ...     }
+    ... )
+    >>> pprint(parameters)
+    {'gamma_e': gamma_e:Uniform(pmin=0, pmax=6.283185307179586),
+     'gamma_p': <class 'enterprise.signals.parameter.Uniform.<locals>.Uniform'>,
+     'log10_A_dm': log10_A_dm:Uniform(pmin=-9, pmax=-4),
+     'log10_f_dm': log10_f_dm:Uniform(pmin=-10, pmax=-5.5),
+     'phi_hat_sq_e': phi_hat_sq_e:Gamma(a=1, loc=0, scale=1)}
+
+    """
+
+    def __setitem__(self, key: str, prior: parameter.Parameter):
+        if prior.common:
+            super().__setitem__(key, prior(key))
+        else:
+            super().__setitem__(key, prior)
+
+
+def prior(name: priors_type, *args, **kwargs) -> parameter.Parameter:
+    """Wrap enterprise prior creation.
+
+    This function wraps the class factories in [enterprise.signals.parameter][].
+    It functions exactly the same as the original, except that it accepts additional
+    `kwargs` and sets an additional attribute `common`. This attribute refers to
+    whether the parameter this prior corresponds to is common to all pulsars. In the
+    original implementation in enterprise, the way that this works is ambiguous. With
+    this function, it is explicit. If the user does not pass `common=False` as a `kwarg`,
+    then `common` defaults to `True`. This attribute will be used by
+    [ptarcade.models_utils.ParamDict][] objects in the model files.
+
+    Parameters
+    ----------
+    name : priors_type
+        The prior to use.
+    *args
+        Positional arguments passed to the prior factory.
+    **kwargs
+        kwargs passed to the prior factory.
+
+    Returns
+    -------
+    prior : parameter.Parameter
+        The configured prior.
+
+    Raises
+    ------
+    ValueError
+        If the prior name passed does not exist within [enterprise.signals.parameter]
+
+    """
+    # If "common" is passed as kwarg, remove it from the kwarg dictionary and store it.
+    # If it wasn't passed, set it to True
+    common = kwargs.pop("common", True)
+
+    # Check if the user passed a correct prior name.
+    # If they didn't, print an informative message
+    try:
+        prior_factory = getattr(parameter, name)
+    except AttributeError:
+        try:
+            prior_factory = globals()[name]
+        except KeyError:
+            err = f"ERROR: the `name` must be one of {priors_type=}, but you entered {name=}."
+            raise ValueError(err) from None
+
+    # Use enterprise's class factory
+    prior = prior_factory(*args, **kwargs)
+
+    # Store the `common` arg for later use
+    prior.common = common
+
+    return prior
