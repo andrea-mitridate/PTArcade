@@ -32,9 +32,45 @@ file are:
 [`mode`](#+config.mode){ #+config.mode }
 
 :   :octicons-milestone-24: Default: `enterprise` – 
+    PTArcade can be run in two modes: 
     
 
-    !!! note "Please, add relevant citations"
+    ??? note "Please, add relevant citations"
+        Please, if you use PTArcade in ENTERPRISE mode, add the following 
+        citations
+
+        ```
+        @misc{enterprise,
+            author       = {Justin A. Ellis and Michele Vallisneri and Stephen R. Taylor and Paul T. Baker},
+            title        = {ENTERPRISE: Enhanced Numerical Toolbox Enabling a Robust PulsaR Inference SuitE},
+            month        = sep,
+            year         = 2020,
+            howpublished = {Zenodo},
+            doi          = {10.5281/zenodo.4059815},
+            url          = {https://doi.org/10.5281/zenodo.4059815}
+            }
+
+        @misc{enterprise,
+            author       = {Stephen R. Taylor and Paul T. Baker and Jeffrey S. Hazboun and Joseph Simon and Sarah J. Vigeland},
+            title        = {enterprise_extensions},
+            year         = {2021},
+            url          = {https://github.com/nanograv/enterprise_extensions},
+            note         = {v2.3.3}
+            }
+        ```
+
+        If you use PTArcade in Ceffy mode, please cite 
+
+        ```
+        @misc{lamb2023need,
+            title={The Need For Speed: Rapid Refitting Techniques for Bayesian Spectral Characterization of the Gravitational Wave Background Using PTAs}, 
+            author={William G. Lamb and Stephen R. Taylor and Rutger van Haasteren},
+            year={2023},
+            eprint={2303.15442},
+            archivePrefix={arXiv},
+            primaryClass={astro-ph.HE}
+            }
+        ```
         
 
 [`out_dir`](#+config.out_dir){ #+config.out_dir }
@@ -75,12 +111,10 @@ file are:
 :   :octicons-milestone-24: Default: `False` –
     If set to `False`, 
 
-    !!! warning "title (1)"
+    !!! warning "title"
         When `mod = enterprise`, running with `corr = True` is appriximately one order
         or magnitude slower than running with `corr = False`. If you want to run with 
-        `corr = True` we suggest to either use `mod = ceffyl` or run on a cluster.
-
-    1.  bla
+        `corr = True` we suggest to either use `mode = ceffyl` or run on a cluster.
     
 
 [`red_components`](#+config.red_components){ #+config.red_components }
@@ -120,10 +154,14 @@ with the following parameters in the configuration file:
 
 :   :octicons-milestone-24: Default: `True` –
     If `bhb_th_prior = True` the prior for the SMBHB signal parameters will be chosen to 
-    reflect predictions from astrophysical models[^1] (this is only relevant if you
+    reflect predictions from astrophysical models (this is only relevant if you
     have selected `smbhb = True` in the [model file][model] or 
     [`mod_sel = True`](#+config.mod_sel)
-    in the configuration file). 
+    in the configuration file). (1)
+    { .annotate }
+
+    1.  For more info on the astrophysical models used to derived these priors see 
+        [here][NG15newphys] and [here][NG15astro]
 
 [`A_bhb_logmin`](#+config.A_bhb_logmin){ #+config.A_bhb_logmin }
 
@@ -180,18 +218,11 @@ with the following parameters in the configuration file:
         })
         })
 
-    </script>
+</script>
 
-{ .annotate }
-
-[^1]: See the discussion in [here][NG15newphys] and [here][NG15astro] for more
-details on the theoretical expectations for the SMBHB signal.
 
 [model]: model.md
 [bf]: https://en.wikipedia.org/wiki/Bayes_factor
 [chains_utils]: ../utils/chain_utils.md
 [NG15newphys]: https://en.wikipedia.org/wiki/Bayes_factor
 [NG15astro]: https://en.wikipedia.org/wiki/Bayes_factor
-
-
-1.  No idea of what this means? No worries, have a look here for more details.

@@ -279,6 +279,10 @@ def omega2cross(omega_hh: Callable[..., NDArray], ceffyl : bool = False) -> Call
     omega_hh : Callable[..., NDArray]
         The function that returns the GW energy density as a fraction of the closure density.
 
+    ceffyl: bool
+        If set to tru use a version compatible with ceffyl, if set to false a version compatible with 
+        ENTERPRISE
+
     Returns
     -------
     Callable[..., NDArray]
@@ -286,6 +290,7 @@ def omega2cross(omega_hh: Callable[..., NDArray], ceffyl : bool = False) -> Call
 
     """
     if ceffyl:
+        print('A')
         @function
         def cross(f: NDArray, Tspan: float, **kwargs):
 

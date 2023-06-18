@@ -8,7 +8,7 @@ When [running PTArcade][run] the user can provide two input files:
     h^2\Omega_{\textrm{GW}}(f;\,\vec{\theta}) \equiv \frac{h^2}{\rho_c}\frac{d\rho_{\textrm{GW}}(f;\,\vec{\theta})}{d\ln f}\,.
     $$
 
-    where $\vec{\theta}$ is the set of new physics parameters describing the signals. In case of deterministic signals, the user should define the timeseris of induced timing delays $h(t;\,\vec{\theta})$ in units of seconds.
+    where $\vec{\theta}$ is the set of new physics parameters describing the signals. In case of deterministic signals, the user should define the timeseris of induced timing delays $s(t;\,\vec{\theta})$ in units of seconds.
 
 
     !!! note "TOAs reference time"

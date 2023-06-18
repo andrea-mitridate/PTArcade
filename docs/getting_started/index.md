@@ -1,8 +1,8 @@
 # Getting started  
-PTArcade is a wrapper of [ENTERPRISE] that streamlines the implementation of
-Bayesian inference analyes for new physics models using PTA data.
+PTArcade streamlines the implementation of Bayesian inference analyes for new physics
+models using PTA data by providing an easy to use wrapper of [ENTERPRISE] and [Ceffyl].
 
-Confused already? Let's try to be more concrete. Say you have a new physics model 
+Already confused? Let's try to be more concrete. Say you have a new physics model 
 that produces a gravitational background with a relic abundance given by
 $\Omega_{\textrm{GW}}(f;\,\vec{\theta})$, where $\vec{\theta}$ is a set of parameters
 describing the signal. You might now be interested in konwing if there are regions in 
@@ -66,18 +66,27 @@ ptarcade -m ./model_file.py # (1)!
 Here we are assuming that the model file is named `model_file.py` and is located in
 the folder from which we are running PTArcade. 
 
-This will implement and run the analysis whose results are Monte Carlo chains that
-can be used to derive posterior distributions for the parameters of our model. For
-the example taht we are considering here this is the result:
+This will implement and run the analysis whose results are [Markov chains][MC] that
+can be used to derive [posterior distributions][posterior] for the parameters of
+our model. For the example taht we are considering, this is the result:
+
+![Example posteriors](../assets/images/ex_post.png){: align=left  style="height:380px;width:380px"}
 
 
-Mention that PTArcade can also be used to derive BF and set constraints,
+  [Example posteriors]: ../assets/images/ex_post.png
+
+<sub> Where on the lower left panel we are showing the 68% and 95% levels of the 2D posterior
+distributoin for the $\log_{10}A_*$ and $\log_{10}(f/{\rm Hz})$ parameters. While the 
+other two panels report 1D marginalized posterior distributions. The dashed vertical
+lines in the plots for the 1D distributions indicate the 68% confidence intervals.</sub>
 
 
 !!! info "Deterministic signals"
     PTArcade can also be used with deterministic signals. In this case, the user will
     have to specify the signal timeseries instead of the signal power-spectrum in the
     model file. See [here][model] for more details. 
+
+Mention that PTArcade can also be used to derive BF and set constraints,
 
 After this high level summary of what PTArcade can do, in the next sections we will
 discuss:
@@ -90,7 +99,7 @@ using a [configuration file][config]
 - PTArcade utilities that can [help in constructing model files][model_utils] or
  [analyzing][chain_utils] and [plotting][plot_utils] the MC chains.
 
-!!! note "How to cite PTArcade"
+??? note "How to cite PTArcade"
 
     If you use PTArcade in your work, please cite
 
@@ -108,6 +117,7 @@ using a [configuration file][config]
     ```
 
   [ENTERPRISE]: https://github.com/nanograv/enterprise
+  [Ceffyl]: https://github.com/astrolamb/ceffyl
   [local_install]: local_install.md
   [hpc_install]: hpc_install.md
   [model]: ../inputs/model.md
@@ -117,3 +127,5 @@ using a [configuration file][config]
   [chain_utils]: ../utils/chain_utils.md
   [plot_utils]: ../utils/plot_utils.md
   [NG15]: https://aas.com
+  [MC]: https://en.wikipedia.org/wiki/Markov_chain#:~:text=A%20Markov%20chain%20or%20Markov,attained%20in%20the%20previous%20event.
+  [posterior]: https://en.wikipedia.org/wiki/Posterior_probability#:~:text=In%20the%20context%20of%20Bayesian,a%20collection%20of%20observed%20data.

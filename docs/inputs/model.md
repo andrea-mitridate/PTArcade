@@ -86,7 +86,7 @@ Deterministic signals are defined via the `signal` function. The first parameter
     For example, the `signal` for a deterministic signal given by
 
     $$
-    h(t) = a\sin(b t)
+    s(t) = a\sin(b t)
     $$
 
     ``` py
@@ -132,7 +132,7 @@ Deterministic signals are defined via the `signal` function. The first parameter
         Model file for a deterministic signal given by 
 
         $$
-        h(t) = A\sin(k t)
+        s(t) = A\sin(k t)
         $$
 
         and where we assumed log-uniform between  $[10^{-14},10^{-6}]$ and $[10^{-10},10^{-6}]$

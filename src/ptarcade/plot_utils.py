@@ -309,22 +309,22 @@ def create_ax_labels(par_names: list[str], labelsize: int = 8) -> None:
             set_custom_tick_options(axs[id], width=0.5, label_size=labelsize)
 
             if idx == 0 and idy == 0:
-                set_custom_tick_options(axs[id], width=0.5)
+                set_custom_tick_options(axs[id], width=0.5, label_size=labelsize)
                 axs[id].set_xlabel(par_names[idx], fontsize=labelsize, labelpad=7)
                 axs[id].set_ylabel(par_names[N_params - idy - 1], fontsize=labelsize)
             elif idx == N_params - 1:
-                set_custom_tick_options(axs[id], left=False, right=False, width=0.5)
+                set_custom_tick_options(axs[id], left=False, right=False, width=0.5, label_size=labelsize)
                 axs[id].set_xlabel(par_names[idx], fontsize=labelsize, labelpad=7)
             elif idy == N_params - idx - 1:
-                set_custom_tick_options(axs[id], left=False, right=False, width=0.5)
+                set_custom_tick_options(axs[id], left=False, right=False, width=0.5, label_size=labelsize)
             elif idx == 0:
-                set_custom_tick_options(axs[id], width=0.5)
+                set_custom_tick_options(axs[id], width=0.5, label_size=labelsize)
                 axs[id].set_ylabel(par_names[N_params - idy - 1], fontsize=labelsize)
             elif idy == 0:
-                set_custom_tick_options(axs[id], width=0.5)
+                set_custom_tick_options(axs[id], width=0.5, label_size=labelsize)
                 axs[id].set_xlabel(par_names[idx], fontsize=labelsize, labelpad=7)
             else:
-                set_custom_tick_options(axs[id], width=0.5)
+                set_custom_tick_options(axs[id], width=0.5, label_size=labelsize)
 
     return
 

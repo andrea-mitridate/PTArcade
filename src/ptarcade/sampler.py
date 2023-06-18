@@ -25,6 +25,7 @@ from PTMCMCSampler.PTMCMCSampler import PTSampler
 from ceffyl import Sampler
 
 from ptarcade import input_handler, pta_importer, signal_builder
+from ptarcade.models_utils import ParamDict
 
 
 def cpu_model() -> str:
@@ -64,6 +65,8 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
 
     inputs = input_handler.load_inputs(input_options)
     input_handler.check_config(inputs['config'])
+
+    inputs["model"].parameters = ParamDict(inputs["model"].parameters)
 
     return inputs, input_options
 
