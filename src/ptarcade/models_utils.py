@@ -448,19 +448,18 @@ class ParamDict(UserDict):
     >>> parameters = ParamDict(
     ...     {
     ...     "log10_A_dm" : prior("Uniform", -9, -4),
-    ...     "log10_f_dm" : prior("Uniform", -10, -5.5),
+    ...     "log10_f_dm" : prior("Uniform", pmin=-10, pmax=-5.5), # kwargs also work
     ...     "gamma_p" : prior("Uniform", 0, 2 * np.pi, common=False),
     ...     "gamma_e" : prior("Uniform", 0, 2 * np.pi),
-    ...     "phi_hat_sq_e" : prior("Gamma", 1,0,1, common=False),
-    ...     "phi_hat_sq_e" : prior("Gamma", 1,0,1),
+    ...     "phi_hat_sq_e" : prior("Gamma", a=1, loc=0, scale=1, common=False),
     ...     }
     ... )
-    >>> pprint(parameters)
-    {'gamma_e': gamma_e:Uniform(pmin=0, pmax=6.283185307179586),
-     'gamma_p': <class 'enterprise.signals.parameter.Uniform.<locals>.Uniform'>,
-     'log10_A_dm': log10_A_dm:Uniform(pmin=-9, pmax=-4),
+    >>> pprint(parameters, sort_dicts=False)
+    {'log10_A_dm': log10_A_dm:Uniform(pmin=-9, pmax=-4),
      'log10_f_dm': log10_f_dm:Uniform(pmin=-10, pmax=-5.5),
-     'phi_hat_sq_e': phi_hat_sq_e:Gamma(a=1, loc=0, scale=1)}
+     'gamma_p': <class 'enterprise.signals.parameter.Uniform.<locals>.Uniform'>,
+     'gamma_e': gamma_e:Uniform(pmin=0, pmax=6.283185307179586),
+     'phi_hat_sq_e': <class 'ptarcade.models_utils.Gamma.<locals>.Gamma'>}
 
     """
 
