@@ -293,7 +293,7 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
     model : ModuleType
         Loaded user configuration as python module.
     psrs : list[Pulsar]
-        List of [enterprise.puslar.Pulsar][] objects.
+        List of [enterprise.pulsar.Pulsar][] objects.
     red_components : int
         Number of red components.
     gwb_components : int
