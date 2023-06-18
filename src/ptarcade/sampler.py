@@ -227,10 +227,6 @@ def setup_sampler(
 
         params = np.concatenate(
             [signal.params for signal in pta.signals], axis=-1)
-    
-        with open(os.path.join(out_dir, "priors.txt"), "w+") as fout:
-            for pp in params:
-                fout.write(pp.__repr__() + "\n")
 
     return sampler, x0
 
