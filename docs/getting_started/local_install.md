@@ -30,7 +30,6 @@ as well as download the following PTA datasets: [NANOGrav 12.5-year][NG12], [NAN
 !!! danger "Non-Python Dependencies"
 
     If you choose to install from PyPI, you'll need to get the Non-Python dependencies yourself.
-    They are
 
     - `libstempo` needs [tempo2](https://github.com/vallis/libstempo#pip-install)
     - `sckit-sparse` needs [suitesparse](https://github.com/scikit-sparse/scikit-sparse#with-pip)
@@ -42,7 +41,7 @@ as well as download the following PTA datasets: [NANOGrav 12.5-year][NG12], [NAN
   [IPTA2]: https://gitlab.com/IPTA/DR2/tree/master/release
 
 ### with conda 
-PTArcade is also published as a [Conda package] that can be installed with
+PTArcade is also published as a [conda-forge package] that can be installed with
 `conda`, ideally by using a [virtual environment]. Open up a terminal
  and install PTArcade with:
 ``` sh
