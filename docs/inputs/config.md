@@ -6,16 +6,9 @@ file are:
 
 :   :octicons-milestone-24: Default: `'NG15'`– 
     This variable needs to be assigned to a string specifying the PTA data
-    set that will be used in the analysis.
-    <div class="mdx-switch">
-    The datasets currently implemented in PTArcade are 
-    NANOGrav 15-year
-    (<button data-md-color-scheme="'NG15'"><code>NG15</code></button>),
-    NANOGrav 12.5-year
-    (<button data-md-color-scheme="'NG12'"><code>NG12</code></button>), 
-    and IPTA DR2
-    (<button data-md-color-scheme="'IPTA2'"><code>IPTA2</code></button>).
-    </div>
+    set that will be used in the analysis. The datasets currently implemented
+    in PTArcade are NANOGrav 15-year (`pta_data = "NG15"`), NANOGrav 12.5-year
+    (`pta_data = "NG12"`), and IPTA DR2 (`pta_data = "IPTA2"`).
 
 
 [`N_samples`](#+config.N_samples){ #+config.N_samples }
@@ -34,6 +27,22 @@ file are:
 :   :octicons-milestone-24: Default: `enterprise` – 
     PTArcade can be run in two modes: 
     
+    * `mode = enterprise`: in this configuration, the code will analyze the full PTA
+    dataset in the time domain by using the numerical techniques implemented in 
+    [ENTERPRISE].
+
+    * `mode = ceffyl`: in this configuration, the code will analyze PTA data at the level
+    of the *Bayesian peridiograms* (1), and fit the user-specified signal to these Bayesian
+    periodograms using the numerical techniques implemented in [Ceffyl].
+    { .annotate }
+
+        1.  Probability density reconstructions of the pulsar timing-residual power spectral
+        density at each frequency (commonly referred to as the "violins plot").
+        See [here][GFL] for more details.
+
+    !!! warning "Ceffyl and deterministic signals"
+        The Ceffyl mode can only be used to analyze stochastic signals. If your 
+        signal is deterministic you have to run in ENTERPRISE mode. 
 
     ??? note "Please, add relevant citations"
         Please, if you use PTArcade in ENTERPRISE mode, add the following 
@@ -50,7 +59,7 @@ file are:
             url          = {https://doi.org/10.5281/zenodo.4059815}
             }
 
-        @misc{enterprise,
+        @misc{enterprise-ext,
             author       = {Stephen R. Taylor and Paul T. Baker and Jeffrey S. Hazboun and Joseph Simon and Sarah J. Vigeland},
             title        = {enterprise_extensions},
             year         = {2021},
@@ -111,7 +120,7 @@ file are:
 :   :octicons-milestone-24: Default: `False` –
     If set to `False`, 
 
-    !!! warning "title"
+    !!! warning "Running time"
         When `mod = enterprise`, running with `corr = True` is appriximately one order
         or magnitude slower than running with `corr = False`. If you want to run with 
         `corr = True` we suggest to either use `mode = ceffyl` or run on a cluster.
@@ -186,39 +195,30 @@ with the following parameters in the configuration file:
     Can be assigned to a floating point or integer number to set the value of $\gamma_{\textrm BHB}$.
     If `gamma_bhb = None`, a uniform prior between $0$ and $7$ will be used.
 
-!!! example "Configuration file example" 
+!!! example "Default configuration file"
+
+    If no configuration file is specified by the user, the following configuration file will be 
+    used
 
     ``` py
-    pta_data = 'IPTA2' # (1)!
+    pta_data = 'NG15'
 
-    N_samples = int(5e6) # (2)!
+    mode = 'ceffyl'
 
-    gwb_components = 13 # (3)!
+    mod_sel = False
 
-    resume = True # (4)!
+    out_dir = './chains/'
+    resume = False 
+    N_samples = int(2e6) 
+
+    # intrinsic red noises parameters
+    red_components = 14 
+
+    # bhbh signal parameters
+    corr = False 
+    gwb_components = 14 
+    bhb_th_prior = True 
     ```
-
-    1. Selecting the IPTA DR2 dataset. 
-
-    2. Asking for 5 millions MCMC iterations.
-
-    3. Fixing the number of frequency components for the GWB signal to 13.
-
-    4. Asking to resume sampling from chains already present in the ouptut 
-    directory.
-
-
-<script>
-        var buttons = document.querySelectorAll("button[data-md-color-scheme]")
-        buttons.forEach(function(button) {
-        button.addEventListener("click", function() {
-            var attr = this.getAttribute("data-md-color-scheme")
-            var name = document.querySelector("#__code_0 code span.s1")
-            name.textContent = attr
-        })
-        })
-
-</script>
 
 
 [model]: model.md
@@ -226,3 +226,6 @@ with the following parameters in the configuration file:
 [chains_utils]: ../utils/chain_utils.md
 [NG15newphys]: https://en.wikipedia.org/wiki/Bayes_factor
 [NG15astro]: https://en.wikipedia.org/wiki/Bayes_factor
+[ENTERPRISE]: https://github.com/nanograv/enterprise
+[GFL]: https://arxiv.org/pdf/2303.15442.pdf
+[Ceffyl]: https://github.com/astrolamb/ceffyl

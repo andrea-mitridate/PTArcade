@@ -26,8 +26,8 @@ in this case the model file will look something like this
 ``` py 
 from ptarcade.models_utils import prior
 
-parameters = {
-            'log_A_star' : prior("Uniform", -14, -6), # (1)!
+parameters = {# (1)! 
+            'log_A_star' : prior("Uniform", -14, -6), # (4)! 
             'log_f_star' : prior("Uniform", -10, -6)
             }
 

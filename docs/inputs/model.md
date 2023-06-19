@@ -73,7 +73,7 @@ The priors for the signal parameters are defined via the `parameters` dictionary
      - [enterprise.signals.parameter.Constant][] 
      - [ptarcade.models_utils.Gamma][].
 
-??? danger "Common parameters vs pulsar-dependent"
+??? warning "Common parameters vs pulsar-dependent"
 
     Parameters are assumed common by default. If pulsar-dependent, you **must** pass `common=False` as a keyword argument to `prior`.
 

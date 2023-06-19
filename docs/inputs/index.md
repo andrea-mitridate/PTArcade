@@ -11,10 +11,6 @@ When [running PTArcade][run] the user can provide two input files:
     where $\vec{\theta}$ is the set of new physics parameters describing the signals. In case of deterministic signals, the user should define the timeseris of induced timing delays $s(t;\,\vec{\theta})$ in units of seconds.
 
 
-    !!! note "TOAs reference time"
-
-        The TOAs are measured with respect to the reference time ...
-
 - [Configuration file][config] · :octicons-plus-16: __Optional__ – In addition to the model file, the user can also pass a configuration file via the input flag `-c`. The configuration file is a simple Python file that allows the user to adjust several parameters of the run.
 
 In the following we will discuss the details of both these inputs files. 
