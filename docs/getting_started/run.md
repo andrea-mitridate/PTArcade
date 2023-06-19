@@ -40,6 +40,6 @@ singularity run ptarcade -m model.py
   
   [model file]: ../inputs/model.md
   [configuration file]: ../inputs/config.md
-  [inputs]: ../inputs.md
+  [inputs]: ../inputs/index.md
   [out]: ../inputs/config.md#+config.out_dir
   [name]: ../inputs/model.md#+model.name
