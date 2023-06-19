@@ -56,6 +56,7 @@ theme:
         name: Switch to dark mode
 watch:
 - src/ptarcade
+- material/
 
 extra_css:
   - stylesheets/extra.css
