@@ -24,14 +24,14 @@ file are:
 
 [`mode`](#+config.mode){ #+config.mode }
 
-:   :octicons-milestone-24: Default: `enterprise` – 
+:   :octicons-milestone-24: Default: `ceffyl` – 
     PTArcade can be run in two modes: 
     
-    * `mode = enterprise`: in this configuration, the code will analyze the full PTA
+    * `mode = "enterprise"`: in this configuration, the code will analyze the full PTA
     dataset in the time domain by using the numerical techniques implemented in 
     [ENTERPRISE].
 
-    * `mode = ceffyl`: in this configuration, the code will analyze PTA data at the level
+    * `mode = "ceffyl"`: in this configuration, the code will analyze PTA data at the level
     of the *Bayesian peridiograms* (1), and fit the user-specified signal to these Bayesian
     periodograms using the numerical techniques implemented in [Ceffyl].
     { .annotate }
@@ -115,6 +115,10 @@ file are:
         using the function [`get_bf`][ptarcade.chains_utils.compute_bf] defined in the 
         PTArcade [`chains_utils`][chains_utils] module.
 
+    !!! Warning "Mod sel and Ceffyl"
+        At the moment `mod_sel` can be used only with `mode="enterprise`. We are currently 
+        working to add the `mod_sel` option to the Ceffyl mode. 
+
 [`corr`](#+config.corr){ #+config.corr }
 
 :   :octicons-milestone-24: Default: `False` –
@@ -123,7 +127,7 @@ file are:
     !!! warning "Running time"
         When `mod = enterprise`, running with `corr = True` is appriximately one order
         or magnitude slower than running with `corr = False`. If you want to run with 
-        `corr = True` we suggest to either use `mode = ceffyl` or run on a cluster.
+        `corr = True` we suggest to either use `mode = "ceffyl"` or run on a cluster.
     
 
 [`red_components`](#+config.red_components){ #+config.red_components }

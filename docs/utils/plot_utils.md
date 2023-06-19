@@ -13,12 +13,15 @@ discussion can be found in its [reference page][ptarcade.plot_utils].
     from ptarcade impor chain_utils as c_utils
     from ptarcade impor plot_utils as p_utils
 
-    params, chain = c_utils.import_chains('./out/model/')
+    params, chain = c_utils.import_chains('./chains/np_model/')
 
     p_utils.plot_chains(chain, params)
 
     ```
-which will produce a plot like this 
+which will produce the following 
+<figure markdown>
+  ![Image title](../assets/images/ex_trace.png){ width="800" }
+</figure>
 
 By default, [`plot_chains`][ptarcade.plot_utils.plot_chains] will olny produce
 trace plots for the user specified parameters which are common across pulsars,
@@ -35,12 +38,16 @@ parameters you can do it by using the `params_name` argument.
     from ptarcade impor chain_utils as c_utils
     from ptarcade impor plot_utils as p_utils
 
-    params, chain = c_utils.import_chains('./out/model/')
+    params, chain = c_utils.import_chains('./chains/np_model/')
 
     p_utils.plot_posteriors(chain, params)
 
     ```
     which will produce a plot like this 
+<figure markdown>
+  ![Image title](../assets/images/ex_post.png){ width="600" }
+</figure>
+
 
     
 

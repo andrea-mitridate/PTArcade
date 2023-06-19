@@ -102,8 +102,6 @@ def powerlaw(f, Tspan, log10_A, gamma):
         Log10(amplitude)
     gamma : float
         Spectral index
-    components : int
-        Number of components for each frequency.
 
     Returns
     -------
