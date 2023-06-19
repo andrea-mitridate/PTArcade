@@ -66,6 +66,14 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
     inputs = input_handler.load_inputs(input_options)
     input_handler.check_config(inputs['config'])
 
+    if not hasattr(inputs["model"], "group"):
+        pars_dic = inputs["model"].parameters
+        group = [par for par in pars_dic.keys() if pars_dic[par].common]
+
+        setattr(inputs["model"], "group", group)
+    
+    print(inputs["model"].group)
+
     inputs["model"].parameters = ParamDict(inputs["model"].parameters)
 
     return inputs, input_options
@@ -205,6 +213,8 @@ def setup_sampler(
         # add nmodel index to group structure
         groups.extend([[len(super_model.param_names)-1]])
 
+        print(groups)
+
         sampler = super_model.setup_sampler(
             resume=inputs["config"].resume,
             outdir=out_dir,
@@ -224,9 +234,6 @@ def setup_sampler(
             logp=pta.ln_prior)
 
         x0 = pta.initial_samples()
-
-        params = np.concatenate(
-            [signal.params for signal in pta.signals], axis=-1)
 
     return sampler, x0
 
