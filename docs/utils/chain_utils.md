@@ -29,7 +29,7 @@ this module can be found in its [reference page][ptarcade.chains_utils].
     
 
 
-[`compute_bf`][ptarcade.chains_utils.compute_bf]
+[`compute_bf`](#+chain_utils.compute_bf){ #+chain_utils.compute_bf }
 
 :   This function can be used to compute Bayes factors from runs where [`mod_sel = True`][mod_sel]
     in the configuration file. You can do this as follows

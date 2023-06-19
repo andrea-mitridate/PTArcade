@@ -97,7 +97,7 @@ Stochastic signals are defined via the `spectrum` function. The first parameter 
   
   [numpy]: https://numpy.org/doc/stable/reference/generated/numpy.array.html
 
-## Deterministic signals
+## Deterministic signals { #+model.deterministic }
 Deterministic signals are defined via the `signal` function. The first parameter of this function should be named `toas` and it's supposed to be a [NumPy array][numpy] containing the time of arrivals (TOAs) (in units of seconds) at which the deterministic signal will be evaluated. The name of the remaining parameters should match the keys of the `parameters` dictionary. The `signal` function should return a [NumPy array][numpy] with the same dimensions of `toas` containing the value of the induced  shift for each TOA contained in `toas`.
 
 ??? example "Deterministic signal example"

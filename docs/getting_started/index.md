@@ -1,6 +1,6 @@
 # Getting started  
-PTArcade streamlines the implementation of Bayesian inference analyes for new physics
-models using PTA data by providing an easy to use wrapper of [ENTERPRISE] and [Ceffyl].
+PTArcade streamlines the implementation of Bayesian inference analyes for PTA data
+by providing an easy to use wrapper of [ENTERPRISE] and [Ceffyl].
 
 Already confused? Let's try to be more concrete. Say you have a new physics model 
 that produces a gravitational background with a relic abundance given by
@@ -26,15 +26,15 @@ in this case the model file will look something like this
 ``` py 
 from ptarcade.models_utils import prior
 
-parameters = { # (1)!
-            'log_A_star' : prior("Uniform", pmin=-14, pmax=-6), # (4)!
-            'log_f_star' : prior("Uniform", pmin=-10, pmax=-6)
-            } 
+parameters = {
+            'log_A_star' : prior("Uniform", -14, -6), # (1)!
+            'log_f_star' : prior("Uniform", -10, -6)
+            }
 
 def S(x):
     return 1 / (1/x + x)
 
-def spectrum(f, log_A_star, log_f_star): # (2)!
+def spectrum(f, log_A_star, log_f_star):  # (2)!
     A_star = 10**log_A_star
     f_star = 10**log_f_star
     
@@ -51,7 +51,7 @@ of this function has to be called `f` and is supposed to be an array of frequenc
 should be named as the keys of the `parameters` dictionary. 
 
 3. For any given set of new-physics parameters (in this example `log_A_star` and 
-`log_f_star`, the `spectrum` function should return an array which contains the value of
+`log_f_star`), the `spectrum` function should return an array which contains the value of
  $h^2\Omega_{\textrm{GW}}$ evaluated at those parameter values and at all the 
  frequencies containes in the `f` list.
  
@@ -88,7 +88,9 @@ lines in the plots for the 1D distributions indicate the 68% confidence interval
     have to specify the signal timeseries instead of the signal power-spectrum in the
     model file. See [here][model] for more details. 
 
-Mention that PTArcade can also be used to derive BF and set constraints,
+The chanins produced by PTArcade can also be used to derive [excluded regions][K_bound] of the 
+parameter space, and to perform [model selection][mod_sel] against the standard astrophysical interpretation
+of the PTA signal in terms of SMBHB.
 
 After this high level summary of what PTArcade can do, in the next sections we will
 discuss:
@@ -101,7 +103,7 @@ using a [configuration file][config]
 - PTArcade utilities that can [help in constructing model files][model_utils] or
  [analyzing][chain_utils] and [plotting][plot_utils] the MC chains.
 
-??? note "How to cite PTArcade"
+!!! note "How to cite PTArcade"
 
     If you use PTArcade in your work, please cite
 
@@ -122,7 +124,7 @@ using a [configuration file][config]
   [Ceffyl]: https://github.com/astrolamb/ceffyl
   [local_install]: local_install.md
   [hpc_install]: hpc_install.md
-  [model]: ../inputs/model.md
+  [model]: ../inputs/model.md#stochastic-signals
   [config]: ../inputs/config.md
   [output]: ../outputs.md
   [model_utils]: ../utils/model_utils.md
@@ -131,3 +133,5 @@ using a [configuration file][config]
   [NG15]: https://aas.com
   [MC]: https://en.wikipedia.org/wiki/Markov_chain#:~:text=A%20Markov%20chain%20or%20Markov,attained%20in%20the%20previous%20event.
   [posterior]: https://en.wikipedia.org/wiki/Posterior_probability#:~:text=In%20the%20context%20of%20Bayesian,a%20collection%20of%20observed%20data.
+  [K_bound]: ../utils/plot_utils.md
+  [mod_sel]: ../utils/chain_utils.md#+compute_bf

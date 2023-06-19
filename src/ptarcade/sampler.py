@@ -58,8 +58,8 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
 
     if not cmd_input_okay:
 
-        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: Model and configuration files must be present\n"
-        "\t- These are added with the -m, -c input flags. Add -h (--help) flags for more help.\n")
+        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: Model file must be present\n"
+        "\t- This is added with the -m input flags. Add -h (--help) flags for more help.\n")
 
         raise SystemExit(error)
 
