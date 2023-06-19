@@ -397,10 +397,11 @@ def ceffyl_builder(inputs):
 
     model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
                           psd=aux.omega2cross(inputs["model"].spectrum, ceffyl=True),  
-                          params=params))
+                          params=params,
+                          name=''))
     
     
-    if inputs["model"].smbhb or inputs["config"].mod_sel:
+    if inputs["model"].smbhb:
         mu, sigma = bhb_priors.get(inputs["config"].pta_data, [False, False])
 
         if mu.all() and inputs["config"].bhb_th_prior:
@@ -428,17 +429,11 @@ def ceffyl_builder(inputs):
             bhb_params = [log10_A_bhb, gamma_bhb]
             bhb_signal = powerlaw
 
-    # create your signal model
-    model = []
-
-    model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
-                          psd=aux.omega2cross(inputs["model"].spectrum, ceffyl=True),  
-                          params=params))
-    
-    if inputs["model"].smbhb:
+            
         model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
                           psd=bhb_signal,  
-                          params=bhb_params))
-        
+                          params=bhb_params,
+                          name=''))
+
 
     return ceffyl_pta.add_signals(model)
