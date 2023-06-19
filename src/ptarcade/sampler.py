@@ -71,8 +71,6 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
         group = [par for par in pars_dic.keys() if pars_dic[par].common]
 
         setattr(inputs["model"], "group", group)
-    
-    print(inputs["model"].group)
 
     inputs["model"].parameters = ParamDict(inputs["model"].parameters)
 
@@ -101,12 +99,6 @@ def get_user_pta_data(inputs: dict[str, Any]) -> tuple[list[Pulsar], dict | None
     psrs, noise_params, emp_dist = pta_importer.pta_data_importer(inputs['config'].pta_data)
 
     print(f"\tloaded {len(psrs)} pulsars\n")
-
-    input_handler.check_model(
-        model=inputs['model'],
-        psrs=psrs,
-        red_components=inputs['config'].red_components,
-        gwb_components=inputs['config'].gwb_components)
     
     return psrs, noise_params, emp_dist
 
@@ -129,6 +121,15 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
         Dictionary of [enterprise.signals.signal_base.PTA][] objects configured with user inputs
 
     """
+
+    input_handler.check_model(
+        model=inputs['model'],
+        psrs=psrs,
+        red_components=inputs['config'].red_components,
+        gwb_components=inputs['config'].gwb_components,
+        mode=inputs["config"].mode)
+
+
     if inputs["config"].mode == "enterprise":
         pta = {}
 
@@ -212,8 +213,6 @@ def setup_sampler(
 
         # add nmodel index to group structure
         groups.extend([[len(super_model.param_names)-1]])
-
-        print(groups)
 
         sampler = super_model.setup_sampler(
             resume=inputs["config"].resume,

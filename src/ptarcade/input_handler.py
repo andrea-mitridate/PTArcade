@@ -285,7 +285,7 @@ def check_config(config: ModuleType) -> None:
         warnings.warn(warning)
 
 
-def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_components: int) -> None:
+def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_components: int, mode: str) -> None:
     """Validate model file.
 
     Parameters
@@ -363,8 +363,11 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
             x0[name] = par.value  # type: ignore
 
     if hasattr(model, "spectrum"):
+        if mode == "enterprise":
+            T = model_utils.get_tspan(psrs)
+        else:
+            T = 3 * 10**7
         N_f = max(red_components, gwb_components)
-        T = model_utils.get_tspan(psrs)
         f_tab = np.linspace(1 / T, N_f / T, N_f)
 
         try:
@@ -390,6 +393,10 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
             )
             raise SystemExit(error)
 
+    elif hasattr(model, "signal") and mode == "ceffyl":
+        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: you cannot use Ceffyl mode"
+                 "for deterministic signals")
+        raise AttributeError(error)
     else:
         tmin = np.min([p.toas.min() for p in psrs])
         tmax = np.max([p.toas.max() for p in psrs])
