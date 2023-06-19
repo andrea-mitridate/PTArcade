@@ -15,3 +15,4 @@ batch_scripts
 inputs/pta_data/*
 
 dist/
+poetry.lock

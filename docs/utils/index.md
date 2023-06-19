@@ -4,6 +4,6 @@ chains produced by PTArcade.
 
 While detailed documentation for the content of these modules can be found in 
 the [Reference][ref] section, in the next sections we give a high-level overview
-of the utility modules.
+of these utility modules.
 
 [ref]: ../reference/ptarcade/__init__
