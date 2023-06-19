@@ -522,9 +522,9 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
             raise ValueError(err) from None
 
     # Use enterprise's class factory
-    prior = prior_factory(*args, **kwargs)
+    prior_obj = prior_factory(*args, **kwargs)
 
     # Store the `common` arg for later use
-    prior.common = common
+    prior_obj.common = common
 
-    return prior
+    return prior_obj
