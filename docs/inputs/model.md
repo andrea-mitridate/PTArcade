@@ -12,15 +12,15 @@ In the following we will explain how these two quantities are defined in the mod
   [signal]: #deterministic-signals
 
 ## Priors
-The priors for the signal parameters are defined via the `parameters` dictionary. The keys of this dictionary must be strings, which will be used as names of the model parameters. The values of this dictionary are `parameter` objects ...
+The priors for the signal parameters are defined via the `parameters` dictionary. The keys of this dictionary must be strings, which will be used as names of the model parameters. The values of this dictionary are [enteprise Parameter][enterprise.signals.parameter.Parameter] objects created with a helper function [ptarcade.models_utils.prior][].
 
 ??? example "Priors example"
-    For example, the `parameters` dictionary of a model described by the parameters $a$ and $b$ which are common among all the pulsars will look like this for different choices of the priros:
+    For example, the `parameters` dictionary of a model described by the parameters $a$ and $b$ which are common among all the pulsars will look like this for different choices of the priors:
 
     === "Uniform Priors"
 
         ``` py
-        parameters = {'a' : parameter.Uniform(0, 1), 'b' : parameter.Uniform(0, 1)} # (1)!
+        parameters = {'a' : prior("Uniform", 0, 1), 'b' : prior("Uniform", 0, 1)} # (1)!
         ```
 
         1.  In this case we have chosen uniform priors in the range [0,1] for both
@@ -29,7 +29,7 @@ The priors for the signal parameters are defined via the `parameters` dictionary
     === "1D Normal Priors"
 
         ``` py
-        parameters = {'a' : parameter.Normal(1, 1), 'b' : parameter.Normal(1, 1)} # (1)!
+        parameters = {'a' : prior("Normal", mu=1, sigma=1), 'b' : prior("Normal", 1, 1)} # (1)!
         ```
         
         1.  In this case we have chosen 1D normal priors with unit mean and variance for
@@ -41,7 +41,7 @@ The priors for the signal parameters are defined via the `parameters` dictionary
         mu = [1, 1]
         cov = [[1, 0.1],[0.1, 1]]
 
-        parameters = {'a_b' : parameter.Normal(mu, cov, size=2)} # (1)!
+        parameters = {'a_b' : prior("Normal", mu, cov, size=2)} # (1)!
         ```
         
         1.  In this case we have chosen a joint 2D normal prior for the model parameters
@@ -50,14 +50,32 @@ The priors for the signal parameters are defined via the `parameters` dictionary
     === "Exponential Priors"
 
         ``` py
-        parameters = {'a' : parameter.Normal(1,1), 'b' : parameter.Normal(1,1)} # (1)!
+        parameters = {'a' : prior("LinearExp", 1, 1), 'b' : prior("LinearExp", 1, 1)} # (1)!
         ```
 
         1.  In this case we have assumed 
 
-!!! danger
+    === "Pulsar-Dependent"
+        ```py
+        parameters = {'a' : prior("Uniform", 0, 1), 'b' : prior("Uniform", 0, 1, common=False)} # (1)!
+        ```
 
-    add example for pulsar dependent parameter
+        1.  In this example, `b` is a pulsar-dependent parameter. By default, the parameters are common to all pulsars in the PTA.
+
+??? info "Constructing priors"
+
+     Notice how we used both positional and keyword arguments: both are allowed. These arguments correspond to the functions defined in either [enterprise.signals.parameter][] or [ptarcade.models_utils][]. Below are links to all parameters supported:
+
+     - [enterprise.signals.parameter.Normal][] 
+     - [enterprise.signals.parameter.Uniform][] 
+     - [enterprise.signals.parameter.TruncNormal][] 
+     - [enterprise.signals.parameter.LinearExp][] 
+     - [enterprise.signals.parameter.Constant][] 
+     - [ptarcade.models_utils.Gamma][].
+
+??? danger "Common parameters vs pulsar-dependent"
+
+    Parameters are assumed common by default. If pulsar-dependent, you **must** pass `common=False` as a keyword argument to `prior`.
 
 ## Stochastic signals
 Stochastic signals are defined via the `spectrum` function. The first parameter of this function should be named `f` and it's supposed to be a [NumPy array][numpy] containing the frequencies (in unit of Hz) at which the spectrum will be evaluated. The names of the remaining parameters should match the keys of the `parameters` dictionary. The `spectrum` function should return a [NumPy array][numpy] containing the value of $h^2\Omega_{\mathrm{GW}}$ at each of the frequencies given in `f`.
@@ -111,11 +129,11 @@ Deterministic signals are defined via the `signal` function. The first parameter
         $[10^{-14},10^{-6}]$ and $[10^{-10},10^{-6}]$ respectively.
 
         ``` py 
-        from ptarcade import parameter
+        from ptarcade.models_utils import prior
 
         parameters = {
-                    'log_A_star' : parameter.Uniform(-14, -6),
-                    'log_f_star' : parameter.Uniform(-10, -6)
+                    'log_A_star' : prior("Uniform", -14, -6),
+                    'log_f_star' : prior("Uniform", -10, -6)
                     }
 
         def S(x):
@@ -140,12 +158,12 @@ Deterministic signals are defined via the `signal` function. The first parameter
 
         ``` py
         import numpy
-        from ptarcade import parameter
+        from ptarcade.models_utils import prior
 
 
         parameters = {
-                    'log_A' : parameter.Uniform(-14, -6),
-                    'log_k' : parameter.Uniform(-10, -6)
+                    'log_A' : prior("Uniform", -14, -6),
+                    'log_k' : prior("Uniform", -10, -6)
                     }
 
         def signal(toas, log_A, log_k):

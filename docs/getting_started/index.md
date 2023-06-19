@@ -24,11 +24,11 @@ $$
 in this case the model file will look something like this
 
 ``` py 
-from ptarcade import parameter
+from ptarcade.models_utils import prior
 
-parameters = {
-            'log_A_star' : parameter.Uniform(-14, -6), # (1)!
-            'log_f_star' : parameter.Uniform(-10, -6) 
+parameters = { # (1)!
+            'log_A_star' : prior("Uniform", pmin=-14, pmax=-6), # (4)!
+            'log_f_star' : prior("Uniform", pmin=-10, pmax=-6)
             } 
 
 def S(x):
@@ -54,6 +54,8 @@ should be named as the keys of the `parameters` dictionary.
 `log_f_star`, the `spectrum` function should return an array which contains the value of
  $h^2\Omega_{\textrm{GW}}$ evaluated at those parameter values and at all the 
  frequencies containes in the `f` list.
+ 
+4. Use any prior from [enterprise.signals.parameter][] or [ptarcade.models_utils][].
 
 Once you have defined the model file, you can feed it to PTArcade by running in a 
 terminal 
