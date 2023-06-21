@@ -2,8 +2,8 @@ If you're familiar with Python, you
 can install PTArcade with [`pip`][pip] or [`conda`][conda], the Python package manager.
 If not, we recommend using a [`docker`][docker] or [`singularity`][singularity] virtual environment.
 
-### with conda <small>recommended</small> { #with-pip data-toc-label="with conda" }
-PTArcade is published as a Conda package [add link] that can be installed with
+### With conda <small>(recommended)</small> { #with-pip data-toc-label="with conda" }
+PTArcade is published as a conda package [add link] that can be installed with
 `conda`, ideally by using a [virtual environment][conda_env]. Open up a terminal
  and install PTArcade with:
 ``` sh
@@ -15,7 +15,7 @@ conda install ptarcade # (1)!
 Conda will also install the non-Python dependencies, as well as download the following PTA datasets:
  [NANOGrav 12.5-year][NG12], [NANOGrav 15-year][NG12], and [IPTA DR2][IPTA2].
 
-### with pip 
+### With pip 
 PTArcade is also published as a [PyPI package](https://pypi.org/project/PTArcade/) and can be installed with
 `pip`, ideally by using a [virtual environment](https://docs.python.org/3/library/venv.html). Open up a terminal
  and install PTArcade with:
@@ -37,13 +37,13 @@ for the conda installation, download the following PTA datasets:
 
 !!! danger "Non-Python Dependencies"
 
-    If you choose to install from PyPI, you'll need to get the Non-Python dependencies yourself.
+    If you choose to install from PyPI, you'll need to get the non-Python dependencies yourself.
 
     - `libstempo` needs [tempo2](https://github.com/vallis/libstempo#pip-install)
     - `sckit-sparse` needs [suitesparse](https://github.com/scikit-sparse/scikit-sparse#with-pip)
 
 
-### with docker 
+### With docker 
 The official [Docker image] is a great way to get up and running in a few
 minutes, as it comes with all dependencies pre-installed. Open up a terminal
 and pull the image with:
@@ -52,7 +52,7 @@ docker pull <path to remote> # TODO
 ```
 
 
-### with singularity 
+### With singularity 
 A singularity environment with all the necessary dependencies already installed can be downloaded by typing 
 ```
 singularity pull oras://ghcr.io/andrea-mitridate/non-bhb-search:latest
