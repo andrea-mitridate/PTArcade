@@ -2,20 +2,20 @@ The model file is a simple Python file that, at minimum, needs to contain the fo
 
 * [Names and prior distributions][priors] of the signal parameters.
 * Parametrized form of the signal, which can either be [stochastic][spectrum]
-    (and parametrized via its power spectrum), or [deterministic][signal] (and parametrized
+    (and parametrized via its power-spectrum), or [deterministic][signal] (and parametrized
     as a timeseries).
 
-In the following we will explain how these two quantities are defined in the model file. 
+In the following, we will explain how these two quantities are defined in the model file. 
 
   [priors]: #priors
   [spectrum]: #stochastic-signals
   [signal]: #deterministic-signals
 
 ## Priors
-The priors for the signal parameters are defined via the `parameters` dictionary. The keys of this dictionary must be strings, which will be used as names of the model parameters. The values of this dictionary are [enteprise Parameter][enterprise.signals.parameter.Parameter] objects created with a helper function [ptarcade.models_utils.prior][].
+The priors for the signal parameters are defined via the `parameters` dictionary. The keys of this dictionary must be strings, which will be used as names for the model parameters. The values of this dictionary are [enterprise Parameter][enterprise.signals.parameter.Parameter] objects created with a helper function [ptarcade.models_utils.prior][].
 
-??? example "Priors example"
-    For example, the `parameters` dictionary of a model described by the parameters $a$ and $b$ which are common among all the pulsars will look like this for different choices of the priors:
+??? example "Priors Example"
+    The `parameters` dictionary of a model described by the parameters $a$ and $b$, which are common among all the pulsars, will look as follows for different choices of the priors:
 
     === "Uniform Priors"
 
@@ -23,7 +23,7 @@ The priors for the signal parameters are defined via the `parameters` dictionary
         parameters = {'a' : prior("Uniform", 0, 1), 'b' : prior("Uniform", 0, 1)} # (1)!
         ```
 
-        1.  In this case we have chosen uniform priors in the range [0,1] for both
+        1.  In this case, we have chosen uniform priors in the range [0,1] for both
             parameters.
 
     === "1D Normal Priors"
@@ -32,7 +32,7 @@ The priors for the signal parameters are defined via the `parameters` dictionary
         parameters = {'a' : prior("Normal", mu=1, sigma=1), 'b' : prior("Normal", 1, 1)} # (1)!
         ```
         
-        1.  In this case we have chosen 1D normal priors with unit mean and variance for
+        1.  In this case, we have chosen 1D normal priors with unit mean and variance for
             both parameters.
 
     === "2D Normal Priors"
@@ -44,7 +44,7 @@ The priors for the signal parameters are defined via the `parameters` dictionary
         parameters = {'a_b' : prior("Normal", mu, cov, size=2)} # (1)!
         ```
         
-        1.  In this case we have chosen a joint 2D normal prior for the model parameters
+        1.  In this case, we have chosen a joint 2D normal prior for the model parameters,
         which are grouped in a single two dimensional parameter called `a_b`.
 
     === "Exponential Priors"
@@ -53,7 +53,7 @@ The priors for the signal parameters are defined via the `parameters` dictionary
         parameters = {'a' : prior("LinearExp", 1, 1), 'b' : prior("LinearExp", 1, 1)} # (1)!
         ```
 
-        1.  In this case we have assumed 
+        1.  In this case, we have assumed 
 
     === "Pulsar-Dependent"
         ```py
@@ -62,9 +62,9 @@ The priors for the signal parameters are defined via the `parameters` dictionary
 
         1.  In this example, `b` is a pulsar-dependent parameter. By default, the parameters are common to all pulsars in the PTA.
 
-??? info "Constructing priors"
+??? info "Constructing Priors"
 
-     Notice how we used both positional and keyword arguments: both are allowed. These arguments correspond to the functions defined in either [enterprise.signals.parameter][] or [ptarcade.models_utils][]. Below are links to all parameters supported:
+     Notice, how we used both positional and keyword arguments: Both are allowed. These arguments correspond to the functions defined in either [enterprise.signals.parameter][] or [ptarcade.models_utils][]. Below are links to all supported parameters:
 
      - [enterprise.signals.parameter.Normal][] 
      - [enterprise.signals.parameter.Uniform][] 
@@ -73,15 +73,15 @@ The priors for the signal parameters are defined via the `parameters` dictionary
      - [enterprise.signals.parameter.Constant][] 
      - [ptarcade.models_utils.Gamma][].
 
-??? warning "Common parameters vs pulsar-dependent"
+??? warning "Common Parameters vs. Pulsar-Dependent"
 
-    Parameters are assumed common by default. If pulsar-dependent, you **must** pass `common=False` as a keyword argument to `prior`.
+    Parameters are assumed to be common by default. If they are pulsar-dependent, you **must** pass `common=False` as a keyword argument to `prior`.
 
-## Stochastic signals
-Stochastic signals are defined via the `spectrum` function. The first parameter of this function should be named `f` and it's supposed to be a [NumPy array][numpy] containing the frequencies (in unit of Hz) at which the spectrum will be evaluated. The names of the remaining parameters should match the keys of the `parameters` dictionary. The `spectrum` function should return a [NumPy array][numpy] containing the value of $h^2\Omega_{\mathrm{GW}}$ at each of the frequencies given in `f`.
+## Stochastic Signals
+Stochastic signals are defined via the `spectrum` function. The first parameter of this function should be named `f` and it is supposed to be a [NumPy array][numpy] containing the frequencies (in units of Hz) at which the spectrum will be evaluated. The names of the remaining parameters should match the keys of the `parameters` dictionary. The `spectrum` function should return a [NumPy array][numpy] containing the value of $h^2\Omega_{\mathrm{GW}}$ at each of the frequencies in `f`.
 
-??? example "Stochastic signal example"
-    For example, the `spectrum` function for a model with 
+??? example "Stochastic Signal Example"
+    The `spectrum` function for a model with 
 
     $$
     h^2\Omega_{\rm GW}(f) = \frac{a}{1+b/f}
@@ -97,16 +97,18 @@ Stochastic signals are defined via the `spectrum` function. The first parameter 
   
   [numpy]: https://numpy.org/doc/stable/reference/generated/numpy.array.html
 
-## Deterministic signals { #+model.deterministic }
-Deterministic signals are defined via the `signal` function. The first parameter of this function should be named `toas` and it's supposed to be a [NumPy array][numpy] containing the time of arrivals (TOAs) (in units of seconds) at which the deterministic signal will be evaluated. The name of the remaining parameters should match the keys of the `parameters` dictionary. The `signal` function should return a [NumPy array][numpy] with the same dimensions of `toas` containing the value of the induced  shift for each TOA contained in `toas`.
+## Deterministic Signals { #+model.deterministic }
+Deterministic signals are defined via the `signal` function. The first parameter of this function should be named `toas` and it is supposed to be a [NumPy array][numpy] containing the time of arrivals (TOAs) (in units of seconds) at which the deterministic signal will be evaluated. The name of the remaining parameters should match the keys of the `parameters` dictionary. The `signal` function should return a [NumPy array][numpy] with the same dimensions as `toas` containing the value of the induced shift for each TOA contained in `toas`.
 
-??? example "Deterministic signal example"
-    For example, the `signal` for a deterministic signal given by
+??? example "Deterministic Signal Example"
+    For a deterministic signal,
 
     $$
-    s(t) = a\sin(b t)
+    s(t) = a\sin(b t),
     $$
-
+    
+    the `signal` is given by
+    
     ``` py
     def signal(toas, a, b):
 
@@ -115,18 +117,17 @@ Deterministic signals are defined via the `signal` function. The first parameter
 
 ---
 
-???+ example "Model file example"
-    Here we give examples of model files for both stochastic and deterministic signals.
+???+ example "Model File Example"
 
     === "Stochastic"
-        Model file for a stochastic signal with a broken power-law spectrum
+        This is a model file for a stochastic signal with a broken power-law spectrum,
 
         $$
-        h^2\Omega_{\rm GW}(f) = A_* \frac{f/f_*}{1+f^2/f_*^2}
+        h^2\Omega_{\rm GW}(f) = A_* \frac{f/f_*}{1+f^2/f_*^2},
         $$
 
         whose parameters, $A_*$ and $f_*$, are assumed to have a log-uniform prior between
-        $[10^{-14},10^{-6}]$ and $[10^{-10},10^{-6}]$ respectively.
+        $[10^{-14},10^{-6}]$ and $[10^{-10},10^{-6}]$, respectively.
 
         ``` py 
         from ptarcade.models_utils import prior
@@ -147,14 +148,14 @@ Deterministic signals are defined via the `signal` function. The first parameter
         ```
 
     === "Deterministic"
-        Model file for a deterministic signal given by 
+        This is a model file for a deterministic signal given by 
 
         $$
-        s(t) = A\sin(k t)
+        s(t) = A\sin(k t),
         $$
 
-        and where we assumed log-uniform between  $[10^{-14},10^{-6}]$ and $[10^{-10},10^{-6}]$
-        for the two model parameters $A$ and $k$ respectively. 
+        and assuming log-uniform priors between $[10^{-14},10^{-6}]$ and $[10^{-10},10^{-6}]$
+        for the two model parameters $A$ and $k$, respectively. 
 
         ``` py
         import numpy
@@ -172,27 +173,27 @@ Deterministic signals are defined via the `signal` function. The first parameter
             
             return A *  numpy.sin(k * toas)
         ```
-!!! tip "Model file flexibility"
+!!! tip "Model File Flexibility"
 
-    In defining the `spectrum` or `signal` functions in the model file you have all the 
+    In defining the `spectrum` or `signal` functions in the model file, you have all the 
     flexibility of a normal Python file. You can, for example, define auxiliary functions,
-    import and interpolate tabulated data etc...
+    import and interpolate tabulated data etc.
 
-## Additional settings 
-The model file can also contain additional (optional) variables that can be used to control in more details the new-physics signal. Specifically, the following 
+## Additional Settings 
+The model file can also contain additional (optional) variables that can be used to control the new-physics signal in more detail. Specifically, you can control the following:
 
 [`name`](#+model.name){ #+model.name }
 
 :   :octicons-milestone-24: Default: _`"np_model"`_ – 
-    This variable can be assigned to a string to specify the model name. This will be used 
+    This variable can be assigned to a string to specify the model name. This will be used to
     [name the output directory][out_name].
 
 [`smbhb`](#+model.smbhb){ #+model.smbhb }
 
 :   :octicons-milestone-24: Default: _`False`_ – 
-    If set to `True` the expected signal from SMBHB will be added to the new-physic signal.
+    If set to `True`, the expected signal from SMBHBs will be added to the new-physics signal.
 
-!!! info "NG15 model files"
+!!! info "NG15 Model Files"
     The model files used in the [NANOGrav 15-year new-physics search][ng15_np] can be found [here][ng15_models].
 
   [out_name]: ../outputs.md
