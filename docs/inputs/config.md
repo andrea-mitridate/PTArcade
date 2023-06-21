@@ -158,7 +158,7 @@ with the signal from SMBHBs or compared to it. The GWB signal from SMBHBs is mod
 a power-law:
 
 $$
-h^2\Omega_{\textrm{GW}}(f) = \frac{2 \pi^2 A_{\textrm{BHB}}^2}{3 H_0^2} \left(\frac{f}{\textrm{year}}\right)^{5-\gamma_{\textrm{BHB}}}\textrm{year}^{-2}.
+h^2\Omega_{\textrm{GW}}(f) = \frac{2 \pi^2 A_{\textrm{BHB}}^2}{3 H_0^2} \left(\frac{f}{\textrm{year}^{-1}}\right)^{5-\gamma_{\textrm{BHB}}}\textrm{year}^{-2}.
 $$
 
 The prior distributions for $A_{\textrm{BHB}}$ and $\gamma_{\textrm{BHB}}$ can be controlled
