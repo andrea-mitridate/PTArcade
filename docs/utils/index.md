@@ -1,9 +1,9 @@
-PTArcade is shipped with three utilities modules aimed at facilitating 
+PTArcade is shipped with three utility modules aimed at facilitating 
 the creation of model files, as well as loading and analyzing the MCMC
 chains produced by PTArcade. 
 
-While detailed documentation for the content of these modules can be found in 
-the [Reference][ref] section, in the next sections we give a high-level overview
+Detailed documentation for the content of these modules can be found in 
+the [Reference][ref] section. In the next sections, we merely give a high-level overview
 of these utility modules.
 
 [ref]: ../reference/ptarcade/__init__
