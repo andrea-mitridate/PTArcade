@@ -85,6 +85,7 @@ plugins:
           - https://getdist.readthedocs.io/en/latest/objects.inv
           - https://matplotlib.org/stable/objects.inv
           - https://enterprise-extensions.readthedocs.io/en/latest/objects.inv
+          - https://pandas.pydata.org/docs/objects.inv
           options:
             selection:
               members: yes
