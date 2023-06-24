@@ -6,15 +6,14 @@ import re
 import time
 import warnings
 from collections.abc import Callable
+from datetime import datetime as dt
 from itertools import combinations
+from pathlib import Path
 from typing import Any
 
 import acor
 import numpy as np
 import pandas as pd
-import pyarrow as pa
-import pyarrow.feather as pf
-import pyarrow.parquet as pq
 from astroML.resample import bootstrap
 from enterprise_extensions import model_utils
 from getdist.mcsamples import MCSamples
@@ -23,12 +22,12 @@ from scipy import integrate
 from scipy.optimize import Bounds, minimize
 
 
-def params_loader(file: str) -> dict[str, tuple[float, float] | None]:
+def params_loader(file: str | Path) -> dict[str, tuple[float, float] | None]:
     """Load a parameter file and return a dictionary of the parameters with their respective values or None.
 
     Parameters
     ----------
-    file : str
+    file : str | Path
         The path to the prior.txt file.
 
     Returns
@@ -61,11 +60,226 @@ def params_loader(file: str) -> dict[str, tuple[float, float] | None]:
 
     return params # type: ignore
 
+def convert_chains_to_hdf(
+    chains_dir: str | Path,
+    burn_frac: float = 0.0,
+    quick_import: bool = False,  # noqa: FBT001, FBT002
+    chain_name: str = "chain_1.txt",
+    dest_path: Path | None = None,
+    **kwargs,
+) -> None:
+    """Convert the raw output of PTArcade to HDF format and write to disk.
 
-def import_chains(chains_dir: str,
+    Parameters
+    ----------
+    chains_dir : str | Path
+        Name of the directory containing the chains.
+    burn_frac : float, optional
+        Fraction of the chain that is removed from the head (default is 0).
+    quick_import : bool, optional
+        Flag to skip importing the rednoise portion of chains (default is False).
+    chain_name : str, optional
+        The name of the chain files, include the file extension of the chain files.
+        Compressed files with extension ".gz" can be used (default is "chain_1.txt").
+    dest_path : Path | None
+        The destination path including filename (default is to save
+        in chains_dir with a unique timestamp).
+    **kwargs : dict
+        Additional arguments passed to [pandas.DataFrame.to_hdf][]
+
+    Returns
+    -------
+    None
+        Saves an HDF5 file to `dest_path` in "table" format. There is one group for each
+        chain ("chain_N"), with a "table" dataset in each group that contains the
+        MCMC samples. There is also a single group for parameters called "parameters",
+        also with a dataset called "table".
+
+    """
+    if isinstance(chains_dir, str):
+        chains_dir = Path(chains_dir)
+
+    use_index = kwargs.pop("index", False)
+    complevel = kwargs.pop("complevel", 9)
+    complib = kwargs.pop("complib", "blosc:lz4")
+
+    if dest_path is None:
+        dest_path = (
+            chains_dir / f"chains-{chains_dir.name}-{dt.now().strftime('%Y%m%d_%H%M%S')}").with_suffix( # noqa: DTZ005
+            ".h5",
+        )
+
+    params, dataframes = import_to_dataframe(chains_dir, burn_frac, quick_import, chain_name, merge_chains=False)
+
+    for num, frame in enumerate(dataframes):
+        frame.to_hdf(dest_path, key=f"chain_{num}", index=use_index, complevel=complevel, complib=complib, **kwargs)
+
+    params.to_hdf(dest_path, key="parameters", index=use_index, complevel=complevel, complib=complib, **kwargs)
+    print(f"Successfully converted to HDF. Saved at {dest_path}.")
+
+
+def import_to_dataframe(
+    chains_dir: str | Path,
+    burn_frac: float = 0.0,
+    quick_import: bool = False,  # noqa: FBT001, FBT002
+    chain_name: str = "chain_1.txt",
+    merge_chains: bool = True, # noqa: FBT001, FBT002
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Import the chains and their parameter file as a pandas dataframe.
+
+    Given a `chain_dir` that contains chains, this function imports the chains, removes `burn_frac`, and returns
+    a dictionary of parameters: values and a numpy array of the merged chains.
+
+    Parameters
+    ----------
+    chains_dir : str | Path
+        Name of the directory containing the chains.
+    burn_frac : float, optional
+        Fraction of the chain that is removed from the head (default is 0).
+    quick_import : bool, optional
+        Flag to skip importing the rednoise portion of chains (default is False).
+    chain_name : str, optional
+        The name of the chain files, include the file extension of the chain files. Compressed files
+        with extension ".gz" and HDF5 files with extension ".h5" can be used (default is "chain_1.txt").
+    merge_chains : bool, optional
+        Whether to merge the chains into one dataframe (default is True).
+
+    Returns
+    -------
+    params : pandas.DataFrame
+        Dataframe containing the parameter names and their values.
+    chains : pandas.DataFrame | list[pandas.DataFrame]
+        Dataframe array containing the merged chains without the burn-in region. Can also optionally
+        return a list of unmerged chains if `merg_chains` is False.
+
+    Raises
+    ------
+    SystemExit
+        Raised when the chains have different parameters.
+
+    """
+    print("Starting import from", chains_dir)
+
+    start_time = time.time()
+
+    if isinstance(chains_dir, str):
+        chains_dir = Path(chains_dir)
+
+    chain_ext = Path(chain_name).suffix
+
+    if chain_ext == ".txt" or chain_ext == ".gz":
+        # get all the chain directories
+        directories = [x for x in chains_dir.iterdir()
+                       if x.is_dir()]
+
+        # get the parameter lits and check that all the chains have the same parameters
+        params = params_loader(directories[0] / "priors.txt")
+
+        for chain in directories:
+            temp_par = params_loader(chain / "priors.txt")
+
+            if temp_par != params:
+                err = f" ERROR: chains have different parameters. {temp_par=} != {params=}"
+                raise SystemExit(err)
+
+        n_pars = len(np.loadtxt(directories[0] / "chain_1.txt", max_rows=1))
+
+        # add name for sampler parameters
+        if n_pars - len(params) == 5:
+            params.update(
+                {
+                    "nmodel": None,
+                    "log_posterior": None,
+                    "log_likelihood": None,
+                    "acceptance_rate": None,
+                    "n_parall": None,
+                },
+            )
+        elif n_pars - len(params) == 4:
+            params.update({"log_posterior": None, "log_likelihood": None, "acceptance_rate": None, "n_parall": None})
+
+        # import and merge all the chains removing the burn-in
+        name_list = list(params.keys())
+
+        red_noise_filter = re.compile(".*red_noise.*")
+
+        if quick_import and any(filter(red_noise_filter.match, name_list)): # type: ignore
+            # Search reversed list for first occurence of "red_noise"
+            # Return the index (remember, the list is reversed!)
+            # The use of `next` and a generator makes it so that we don't have to
+            # search the whole list, we stop when we get the first match
+            red_noise_ind = next(i for i in enumerate(name_list[::-1]) if "red_noise" in i[1])[0]
+
+            # Slice the list so that we begin directly after the index found above
+            usecols = name_list[-1 * red_noise_ind :]
+
+            params = {name: params[name] for name in usecols}
+        else:
+            usecols = name_list
+        dtypes = {name: float for name in usecols}
+        # import and merge all the chains removing the burn-in
+
+
+        if merge_chains:
+            chains = pd.concat(
+                (
+                    pd.read_csv(
+                        (drct / chain_name),
+                        sep="\t",
+                        names=name_list,
+                        dtype=dtypes,
+                        usecols=usecols,
+                    ).iloc[lambda x: int(len(x) * burn_frac) <= x.index]
+                    for drct in directories
+                ),
+                ignore_index=True,
+                sort=False,
+            )
+
+            chains = chains.dropna()
+
+        else:
+            chains = [
+                pd.read_csv(
+                    (drct / chain_name),
+                    sep="\t",
+                    names=name_list,
+                    dtype=dtypes,
+                    usecols=usecols,
+                ).iloc[lambda x: int(len(x) * burn_frac) <= x.index]
+                for drct in directories
+            ]
+
+        params = pd.DataFrame.from_dict(params).fillna(np.nan)  # need to fill `None` with a numeric value
+
+    elif chain_ext == ".h5":
+
+        with pd.HDFStore(chains_dir / chain_name) as h5:
+            keys = h5.keys()
+            chain_keys = [key for key in keys if "chain" in key]
+
+            params = h5.get("/parameters")
+
+            chains = pd.concat(
+                [
+                    pd.read_hdf(h5, key=chain_key).iloc[lambda x: int(len(x) * burn_frac) <= x.index]
+                    for chain_key in chain_keys
+                ],
+                ignore_index=True,
+                sort=False,
+            )
+
+            chains = chains.dropna()
+
+
+    print(f"Finished importing   {chains_dir} in {time.time() - start_time:.2f}s")
+
+    return params, chains
+
+def import_chains(chains_dir: str | Path,
                   burn_frac: float = 1/4,
                   quick_import: bool = True, # noqa: FBT001, FBT002
-                  chain_ext: str = ".txt") -> tuple[dict, NDArray]:
+                  chain_name: str = "chain_1.txt") -> tuple[dict, NDArray]:
     """Import the chains and their parameter file.
 
     Given a `chain_dir` that contains chains, this function imports the chains, removes `burn_frac`, and returns
@@ -73,14 +287,15 @@ def import_chains(chains_dir: str,
 
     Parameters
     ----------
-    chains_dir : str
+    chains_dir : str | Path
         Name of the directory containing the chains.
     burn_frac : float, optional
         Fraction of the chain that is removed from the head (default is 1/4).
     quick_import : bool, optional
         Flag to skip importing the rednoise portion of chains (default is True).
-    chain_ext : str, optional
-        The file extension of the chain files. Compressed files can be used (default is ".txt").
+    chain_name : str, optional
+        The name of the chain files, include the file extension of the chain files. Compressed files
+        with extension ".gz" and HDF5 files with extension ".h5" can be used (default is "chain_1.txt").
 
     Returns
     -------
@@ -95,93 +310,11 @@ def import_chains(chains_dir: str,
         Raised when the chains have different parameters.
 
     """
-    # get all the chain directories
-    directories = [x for x in os.listdir(chains_dir) if not x.startswith(".")]
-
-    # get the parameter lits and check that all the chains have the same parameters
-    params = params_loader(os.path.join(chains_dir, directories[0], 'priors.txt'))
-
-    for chain in directories:
-        temp_par = params_loader(os.path.join(chains_dir, chain, 'priors.txt'))
-
-        if temp_par != params:
-            err = f" ERROR: chains have different parameters. {temp_par=} != {params=}"
-            raise SystemExit(err)
-
-
-    n_pars = len(np.loadtxt(os.path.join(chains_dir, directories[0], 'chain_1.txt'), max_rows=1))
-
-    # add name for sampler parameters
-    if n_pars - len(params) == 5:
-        params.update({
-            'nmodel' : None,
-            'log_posterior' : None,
-            'log_likelihood' : None,
-            'acceptance_rate' : None,
-            'n_parall' : None
-            })
-    elif n_pars - len(params) == 4:
-        params.update({
-            'log_posterior' : None,
-            'log_likelihood' : None,
-            'acceptance_rate' : None,
-            'n_parall' : None
-            })
-
-    # import and merge all the chains removing the burn-in
-    name_list = list(params.keys())
-    if quick_import:
-        # Search reversed list for first occurence of "red_noise"
-        # Return the index (remember, the list is reversed!)
-        # The use of `next` and a generator makes it so that we don't have to
-        # search the whole list, we stop when we get the first match
-        red_noise_ind = next((i for i in enumerate(name_list[::-1]) if "red_noise" in i[1]))[0]
-
-        # Slice the list so that we begin directly after the index found above
-        usecols = name_list[-1*red_noise_ind:]
-
-        params = {name: params[name] for name in usecols}
-    else:
-        usecols = name_list
-    dtypes = {name: float for name in usecols}
-    # import and merge all the chains removing the burn-in
-
-    print("Starting import from", chains_dir)
-    start_time = time.time()
-
-    if chain_ext==".feather":
-        table_list = []
-        for dir in directories:
-            table = pf.read_table(os.path.join(chains_dir, dir, 'chain_1' + chain_ext), columns=usecols)
-            table_list.append(table.slice(offset=int(table.num_rows * burn_frac)).drop_null())
-
-
-        mrgd_chain = pa.concat_tables(table_list).to_pandas()
-
-    elif chain_ext==".parquet":
-        table_list = []
-        for dir in directories:
-            table = pq.read_table(os.path.join(chains_dir, dir, 'chain_1' + chain_ext), columns=usecols)
-            table_list.append(table.slice(offset=int(table.num_rows * burn_frac)).drop_null())
-
-        mrgd_chain = pa.concat_tables(table_list).to_pandas()
-
-
-    else:
-        mrgd_chain = pd.concat((pd.read_csv(
-            os.path.join(chains_dir, dir, 'chain_1' + chain_ext),
-            sep='\t',
-            names=name_list,
-            dtype=dtypes,
-            usecols=usecols).iloc[lambda x: int(len(x) * burn_frac) <= x.index]
-                                for dir in directories),
-                               ignore_index=True,
-                               sort=False)
-        mrgd_chain = mrgd_chain.dropna()
+    params, mrgd_chain = import_to_dataframe(chains_dir, burn_frac, quick_import, chain_name)
 
     mrgd_chain = mrgd_chain.to_numpy(dtype=float)
+    params = params.to_dict(orient="list")
 
-    print(f"Finished importing   {chains_dir} in {time.time() - start_time:.2f}s")
     return params, mrgd_chain
 
 

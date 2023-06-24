@@ -140,12 +140,14 @@ encor = "^1.1.2"
 llvmlite = "^0.40.0"
 ceffyl = "^1.26"
 numba = "^0.57.0"
+tables = "^3.8.0"
 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.3.1"
 ruff = "^0.0.270"
 black = "^23.3.0"
+ipython = "^8.14.0"
 
 
 [tool.poetry.group.docs.dependencies]
