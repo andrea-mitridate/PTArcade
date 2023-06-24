@@ -110,7 +110,7 @@ file are:
     to derive the [Bayes factor][bf] between models by simply taking the ratio of
     samples spent in each bin of the model-indexing variable.
 
-    !!! tip "Get the BF"
+    !!! tip "Get the Bayes factor"
         After running with `mod_sel = True`, you can easily derive the Bayes factor 
         using the function [`get_bf`][ptarcade.chains_utils.compute_bf] defined in the 
         PTArcade [`chains_utils`][chains_utils] module.
@@ -122,7 +122,10 @@ file are:
 [`corr`](#+config.corr){ #+config.corr }
 
 :   :octicons-milestone-24: Default: `False` –
-    If set to `False`, MISSING DESCRIPTION
+    This parameter controls the inter-pulsar correlations for any user-specified
+    stochastic signal. If `corr=False`, spatial correlations between pulsars are set to zero and the 
+    overlap reduction function is taken to be a delta function in the pulsar space. If `corr=True`,
+    Hellings & Downs correlations are assumed..
 
     !!! warning "Running time"
         When `mode = "enterprise"`, running with `corr = True` is approximately one order
@@ -135,13 +138,25 @@ file are:
 :   :octicons-milestone-24: Default: `30` –
     This variable can be assigned to an integer specifying the number of frequency
     components that will be used to model intrinsic red noise. (1)
+    { .annotate }
+
+    1.  Intrinsic red noise is modeled using a Fourier basis of frequencies $i/T_{\textrm{obs}}$,
+    where $i$ indexes the harmonics of the basis and $T_{\textrm{obs}}$ is the timing baseline. The 
+    [`red_components`](#+config.red_components) parameter sets the harmonics at which this expansion
+    is truncated.
+
 
 [`gwb_components`](#+config.gwb_components){ #+config.gwb_components }
 
 :   :octicons-milestone-24: Default: `14` –
     This variable can be assigned to an integer specifying the number of frequency
     components that will be used to model common red noise. (1) 
-    #COMMENT: Please pay attention, previously this was a copy paste of the "red_components"-section. We changed "intrinisc red noise" to "common red noise" please make sure this is accurate.
+    { .annotate }
+
+    1.  The common red noise produced induced by a GWB is modeled using a Fourier basis of
+    frequencies $i/T_{\textrm{obs}}$, where $i$ indexes the harmonics of the basis and
+    $T_{\textrm{obs}}$ is the timing baseline. The [`gwb_components`](#+config.gwb_components)
+    parameter sets the harmonics at which this expansion is truncated.
 
     !!! tip "Suggested Number of GWB Components"
         === "IPTA2"

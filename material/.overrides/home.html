@@ -1,6 +1,8 @@
 {% extends "main.html" %}
 {% block htmltitle %}
   <title>{{ config.site_name }}</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 {% endblock %}
 {% block extrahead %}
   <link rel="me" href="https://fosstodon.org/@squidfunk">

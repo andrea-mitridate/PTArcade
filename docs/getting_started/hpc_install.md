@@ -1,5 +1,5 @@
 ## Prerequisites
-`conda` likes to install its own version of MPI, which frequently causes issues on HPCs. To get around that, first, load your HPC's MPI module. Save the path to the `mpicc` executable in an environment variable.
+`conda` likes to install its own version of MPI, which frequently causes issues on HPC clusteres. To get around that, first, load your HPC's MPI module. Save the path to the `mpicc` executable in an environment variable.
 ```
 export MPICC=$(which mpicc)
 ```

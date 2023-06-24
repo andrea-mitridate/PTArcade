@@ -191,7 +191,7 @@ nav:
     - getting_started/index.md
     - Installation: getting_started/local_install.md
     - Run PTArcade: getting_started/run.md
-    - Set up on HPCs: getting_started/hpc_install.md
+    - Set up for HPC: getting_started/hpc_install.md
     - Troubleshooting: getting_started/trouble.md
   - Inputs:
     - inputs/index.md

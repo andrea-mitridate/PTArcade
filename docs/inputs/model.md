@@ -3,7 +3,7 @@ The model file is a simple Python file that, at minimum, needs to contain the fo
 * [Names and prior distributions][priors] of the signal parameters.
 * Parametrized form of the signal, which can either be [stochastic][spectrum]
     (and parametrized via its power-spectrum), or [deterministic][signal] (and parametrized
-    as a timeseries).
+    as a times eries).
 
 In the following, we will explain how these two quantities are defined in the model file. 
 
@@ -12,9 +12,9 @@ In the following, we will explain how these two quantities are defined in the mo
   [signal]: #deterministic-signals
 
 ## Priors
-The priors for the signal parameters are defined via the `parameters` dictionary. The keys of this dictionary must be strings, which will be used as names for the model parameters. The values of this dictionary are [enterprise Parameter][enterprise.signals.parameter.Parameter] objects created with a helper function [ptarcade.models_utils.prior][].
+The priors for the signal parameters are defined via the `parameters` dictionary. The keys of this dictionary must be strings, which will be used as names for the model parameters. The values of this dictionary are [enterprise Parameter][enterprise.signals.parameter.Parameter] objects, the user can create these object via the [`prior`][ptarcade.models_utils.prior] helper function that can be imported from the [ptarcade.models_utils][] module. The first argument that the user needs to pass to the [`prior`][ptarcade.models_utils.prior] function is a string with the name of the prior class they want to use for that parameter, the remaining arguments are used to set the attributes of the prior. By default, parameters are assumed to be common across all pulsars. If the user wants to define a pulsar-dependent parameter, this can be done by passing `common=False` as a keyword argument.
 
-??? example "Priors Example"
+???+ example "Priors Example"
     The `parameters` dictionary of a model described by the parameters $a$ and $b$, which are common among all the pulsars, will look as follows for different choices of the priors:
 
     === "Uniform Priors"
@@ -55,13 +55,6 @@ The priors for the signal parameters are defined via the `parameters` dictionary
 
         1.  In this case, we have assumed 
 
-    === "Pulsar-Dependent"
-        ```py
-        parameters = {'a' : prior("Uniform", 0, 1), 'b' : prior("Uniform", 0, 1, common=False)} # (1)!
-        ```
-
-        1.  In this example, `b` is a pulsar-dependent parameter. By default, the parameters are common to all pulsars in the PTA.
-
 ??? info "Constructing Priors"
 
      Notice, how we used both positional and keyword arguments: Both are allowed. These arguments correspond to the functions defined in either [enterprise.signals.parameter][] or [ptarcade.models_utils][]. Below are links to all supported parameters:
@@ -75,7 +68,14 @@ The priors for the signal parameters are defined via the `parameters` dictionary
 
 ??? warning "Common Parameters vs. Pulsar-Dependent"
 
-    Parameters are assumed to be common by default. If they are pulsar-dependent, you **must** pass `common=False` as a keyword argument to `prior`.
+    Parameters are assumed to be common by default. If they are pulsar-dependent, you **must** pass `common=False` as a keyword argument to `prior`. 
+    For example, if we want to set the `b` parameters of previous examples to be pulsar-dependent, we can do that as follows 
+
+    ```py
+    parameters = {'a' : prior("Uniform", 0, 1), 'b' : prior("Uniform", 0, 1, common=False)} # (1)!
+    ```
+
+    1.  In this example, `b` is a pulsar-dependent parameter. By default, the parameters are common to all pulsars in the PTA.
 
 ## Stochastic Signals
 Stochastic signals are defined via the `spectrum` function. The first parameter of this function should be named `f` and it is supposed to be a [NumPy array][numpy] containing the frequencies (in units of Hz) at which the spectrum will be evaluated. The names of the remaining parameters should match the keys of the `parameters` dictionary. The `spectrum` function should return a [NumPy array][numpy] containing the value of $h^2\Omega_{\mathrm{GW}}$ at each of the frequencies in `f`.
@@ -98,7 +98,7 @@ Stochastic signals are defined via the `spectrum` function. The first parameter 
   [numpy]: https://numpy.org/doc/stable/reference/generated/numpy.array.html
 
 ## Deterministic Signals { #+model.deterministic }
-Deterministic signals are defined via the `signal` function. The first parameter of this function should be named `toas` and it is supposed to be a [NumPy array][numpy] containing the time of arrivals (TOAs) (in units of seconds) at which the deterministic signal will be evaluated. The name of the remaining parameters should match the keys of the `parameters` dictionary. The `signal` function should return a [NumPy array][numpy] with the same dimensions as `toas` containing the value of the induced shift for each TOA contained in `toas`.
+Deterministic signals are defined via the `signal` function. The first parameter of this function should be named `toas` and it is supposed to be a [NumPy array][numpy] containing the times of arrival (TOAs) (in units of seconds) at which the deterministic signal will be evaluated. The name of the remaining parameters should match the keys of the `parameters` dictionary. The `signal` function should return a [NumPy array][numpy] with the same dimensions as `toas` containing the value of the induced shift for each TOA contained in `toas`.
 
 ??? example "Deterministic Signal Example"
     For a deterministic signal,
@@ -191,7 +191,7 @@ The model file can also contain additional (optional) variables that can be used
 [`smbhb`](#+model.smbhb){ #+model.smbhb }
 
 :   :octicons-milestone-24: Default: _`False`_ – 
-    If set to `True`, the expected signal from SMBHBs will be added to the new-physics signal.
+    If set to `True`, the expected signal from SMBHBs will be added to the user-specified signal.
 
 !!! info "NG15 Model Files"
     The model files used in the [NANOGrav 15-year new-physics search][ng15_np] can be found [here][ng15_models].

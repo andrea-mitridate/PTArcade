@@ -2,12 +2,12 @@
 PTArcade streamlines the implementation of Bayesian inference analyses for PTA data
 by providing an easy-to-use wrapper of [ENTERPRISE] and [Ceffyl].
 
-Already confused? Let's try to be more concrete. Say you have a new physics model 
-that produces a gravitational wave background with a relic abundance given by
+Already confused? Let's try to be more concrete. Say you have a new-physics model 
+that produces a gravitational-wave background with a relic abundance given by
 $\Omega_{\textrm{GW}}(f;\,\vec{\theta})$, where $\vec{\theta}$ is a set of parameters
 describing the signal. You might now be interested in knowing if there are regions in 
 the $\vec{\theta}$ parameter space that could reproduce the signal observed in PTA
-data[^1]. PTArcade will allow you to answer this question in under 10 minutes
+data.[^1] PTArcade will allow you to answer this question in under 10 minutes
 (plus computational time) using real PTA data and the same statistical tools
 used by PTA collaborations.
 
@@ -41,14 +41,14 @@ def spectrum(f, log_A_star, log_f_star):  # (2)!
     return A_star * S(f/f_star) # (3)!
 ```
 
-1. The parameter priors are defined via a dictionary named `parameters`.
-The keys of this dictionary will be the name of the model parameters and
-the values are parameter objects specifying the parameter's prior distribution.
+1. The parameter priors are defined via a dictionary named `parameters`. The
+keys of this dictionary will be the names of the model parameters, and the
+values are parameter objects specifying the parameter prior distributions.
 
 2. The GWB spectrum is defined via the `spectrum` function. The first argument
 of this function has to be called `f` and is supposed to be an array of frequencies
 (in units of Hz) at which the spectrum will be evaluated. The remaining parameters
-should have the same names as the keys of the `parameters` dictionary. 
+should be named like the keys of the `parameters` dictionary. 
 
 3. For any given set of new-physics parameters, in this example `log_A_star` and 
 `log_f_star`, the `spectrum` function should return an array which contains the value of
@@ -80,17 +80,17 @@ our model. For the example that we are considering, this yields the result:
 <sub> The lower left panel shows the 68% and 95% levels of the 2D posterior
 distribution for the $\log_{10}A_*$ and $\log_{10}(f/{\rm Hz})$ parameters. The 
 other two panels report 1D marginalized posterior distributions. The dashed vertical
-lines in the plots for the 1D distributions indicate the 68% confidence intervals.</sub>
+lines in the plots for the 1D distributions indicate the 68% credible intervals.</sub>
 
 
 !!! info "Deterministic signals"
     PTArcade can also be used with deterministic signals. In this case, the user will
-    have to specify the signal timeseries instead of the signal power-spectrum in the
+    have to specify the signal time series instead of the signal power-spectrum in the
     model file. See [here][model] for more details. 
 
 The chains produced by PTArcade can also be used to derive [excluded regions][K_bound] of the 
 parameter space and to perform [model selection][mod_sel] against the standard astrophysical interpretation
-of the PTA signal in terms of SMBHBs.
+of the PTA signal in terms of supermassive black-hole binaries.
 
 After this high-level summary of what PTArcade can do, in the next sections, we will
 discuss:

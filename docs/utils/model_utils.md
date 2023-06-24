@@ -11,11 +11,11 @@ pre-defined in [models_utils][ptarcade.models_utils]. A complete list can be fou
 [here][ptarcade.models_utils].
 
 * The effective number of relativistic degrees of freedom contributing to 
-the Universe's energy and entropy density is parametrized in the functions
+the Universe's energy and entropy densities is parametrized in the functions
 [`g_rho`][ptarcade.models_utils.g_rho] and 
 [`g_s`][ptarcade.models_utils.g_s]. These functions, derived by 
-interpolating the tabulated data in #REFERENCE MISSING, can be evaluated both as a function of 
-temperature (in GeV), or as a function of frequency (in Hz). In the latter case, they 
+interpolating the tabulated data in [Saikawa et al.][gs], can be evaluated both as a functions of 
+temperature (in GeV), or as a functions of frequency (in Hz). In the latter case, they 
 will return the value of these functions at the time of the cosmological 
 evolution when GWs with comoving wavenumber $k=2\pi a_0 f$ re-entered the 
 horizon. (1)
@@ -26,3 +26,5 @@ In our convention, $a_0=1$.
 
 * The function [`spec_importer`][ptarcade.models_utils.spec_importer] allows 
 to define the spectrum of a stochastic signal by using tabulated data ... #WHAT ARE THE "..." REFERRING TO?
+
+[gs]: https://arxiv.org/abs/2005.03544
