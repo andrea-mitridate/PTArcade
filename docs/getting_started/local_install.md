@@ -39,8 +39,28 @@ for the conda installation, download the following PTA datasets:
 
     If you choose to install from PyPI, you'll need to get the non-Python dependencies yourself.
 
-    - `libstempo` needs [tempo2](https://github.com/vallis/libstempo#pip-install)
-    - `sckit-sparse` needs [suitesparse](https://github.com/scikit-sparse/scikit-sparse#with-pip)
+    - `libstempo` needs [tempo2](https://github.com/vallis/libstempo#pip-install). You can install
+    it by typing in a terminal
+    ```
+    curl -sSL https://raw.githubusercontent.com/vallis/libstempo/master/install_tempo2.sh | sh
+    ```
+    - `sckit-sparse` needs [suitesparse](https://github.com/scikit-sparse/scikit-sparse#with-pip). 
+    You can install it by typing in a terminal 
+
+        === "Mac"
+            ```
+            brew install suite-sparse
+            ```
+
+        === "Debian"
+            ```
+            sudo apt-get install libsuitesparse-dev
+            ```
+    - `ptmcmc` needs [mpi4py][https://github.com/mpi4py/mpi4py/]. You can install it by typing
+    in a terminal 
+        ```
+        pip install mpi4py
+        ```
 
 
 ### With docker 
