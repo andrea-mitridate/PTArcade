@@ -1,6 +1,7 @@
 """Utilities to be used with output MCMC chains of PTArcade."""
 from __future__ import annotations
 
+import logging
 import os
 import re
 import time
@@ -21,6 +22,7 @@ from numpy.typing import NDArray
 from scipy import integrate
 from scipy.optimize import Bounds, minimize
 
+log = logging.getLogger("rich")
 
 def params_loader(file: str | Path) -> dict[str, tuple[float, float] | None]:
     """Load a parameter file and return a dictionary of the parameters with their respective values or None.
@@ -179,8 +181,9 @@ def import_to_dataframe(
             temp_par = params_loader(chain / "priors.txt")
 
             if temp_par != params:
-                err = f" ERROR: chains have different parameters. {temp_par=} != {params=}"
-                raise SystemExit(err)
+                err = f"Chains have different parameters. {temp_par=} != {params=}"
+                log.error(err)
+                raise SystemExit
 
         n_pars = len(np.loadtxt(directories[0] / "chain_1.txt", max_rows=1))
 
@@ -373,8 +376,9 @@ def chain_filter(
         elif model_id == 1:
             filter_model = chain[:, nmodel_idx] > 0.5
         else:
-            err = f" ERROR: model_idx can only be an integer equal to 0 or 1. I got {model_id=}."
-            raise SystemExit(err)
+            err = f"'model_idx' can only be an integer equal to 0 or 1. I got {model_id=}."
+            log.error(err)
+            raise SystemExit
 
         chain = chain[filter_model]
     else:
@@ -497,13 +501,17 @@ def compute_bf(chain: NDArray, params: list[str], bootstrap: bool = False) -> tu
     try:
         nmodel_idx = list(params).index('nmodel')
     except ValueError:
-        err = "ERROR: 'nmodel' was not found in params."
-        raise SystemExit(err) from None
+        err = ("'nmodel' was not found in params.\n"
+               f"You supplied {params=}")
+        log.error(err)
+        raise SystemExit from None
     try:
         posterior_idx = list(params).index('log_posterior')
     except ValueError:
-        err = "ERROR: 'log_posterior' was not found in params."
-        raise SystemExit(err) from None
+        err = ("'log_posterior' was not found in params.\n"
+               f"You supplied {params=}")
+        log.error(err)
+        raise SystemExit from None
 
 
     if bootstrap:
@@ -554,11 +562,13 @@ def bisection(f: Callable[[Any], float], a: float, b: float, tol: float) -> floa
     """
     if a >= b:
         err = f"a is not less than b {a=} {b=}."
-        raise SystemExit(err)
+        log.error(err)
+        raise SystemExit
 
     if tol <= 0:
         err = f"tol is not greater than 0 {tol=}."
-        raise SystemExit(err)
+        log.error(err)
+        raise SystemExit
 
     if np.sign(f(a)) == np.sign(f(b)):
         return None

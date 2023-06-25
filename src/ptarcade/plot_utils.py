@@ -23,6 +23,9 @@ from getdist.mcsamples import MCSamples
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
 from scipy.stats import norm
+import logging
+
+log = logging.getLogger("rich")
 
 
 @dataclass(frozen=True)
@@ -62,7 +65,7 @@ plt_params = {
 def set_size(width: float,
              fraction: int = 1,
              ratio: float | None = None,
-             subplots: tuple[int, int] = (1, 1)) -> tuple[int, int]:
+             subplots: tuple[int, int] = (1, 1)) -> tuple[float, float]:
     """Set figure dimensions to avoid scaling in LaTeX.
 
     Parameters
@@ -218,8 +221,9 @@ def plot_chains(
                 params_dic[formatted_name] = idx
 
         if len(params_dic) != len(params_name):
-            warnings.warn(
-                f"{bcolors.WARNING}WARNING{bcolors.ENDC}: some of the requested parameters does not appear in the parameter list"
+            log.warning(
+                "Some of the requested parameters does not appear in the parameter list"
+                f"You suppplied {params_dic=} but {params_name=}"
             )
 
     else:
@@ -329,7 +333,7 @@ def create_ax_labels(par_names: list[str], labelsize: int = 8) -> None:
     return
 
 
-def level_to_sigma(level: float) -> None:
+def level_to_sigma(level: float) -> float:
     """Convert confidence level to standard deviation (sigma).
 
     This function uses the inverse of the cumulative distribution function (CDF) for a
@@ -355,9 +359,10 @@ def level_to_sigma(level: float) -> None:
     if 0 < level < 1:
         return np.sqrt(-2 * np.log(1-level))
     else:
-        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}:"
-                 "The level value needs to be between 0 and 1.")
-        raise ValueError(error)
+        error = ("The level value needs to be between 0 and 1.")
+
+        log.error(error)
+        raise SystemExit
 
 
 def plot_bhb_prior(plot: matplotlib.figure.Figure, bhb_prior: str, levels: list[float]) -> None:
@@ -445,7 +450,7 @@ def corner_plot_settings(
     samples: list[MCSamples],
     one_column: bool,
     legend_size: int = 12,
-    fig_width_pt: float = None,
+    fig_width_pt: float | None = None,
 ) -> plots.GetDistPlotSettings:
     """Configure the settings for corner plots.
 

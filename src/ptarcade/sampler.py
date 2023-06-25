@@ -8,25 +8,33 @@ from astropy.utils.exceptions import AstropyDeprecationWarning
 
 warnings.filterwarnings('ignore', category=AstropyDeprecationWarning)
 
+import logging
 import platform
+import shutil
+import sys
 import time
 from types import ModuleType
 from typing import Any
-import shutil
-import numpy as np
 
+import numpy as np
+import rich
+from ceffyl import Sampler
 from enterprise.pulsar import Pulsar
 from enterprise.signals.signal_base import PTA
 from enterprise_extensions import hypermodel
-from ptarcade.input_handler import bcolors
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
 from PTMCMCSampler.PTMCMCSampler import PTSampler
-from ceffyl import Sampler
+from rich import print
+from rich.console import Console
+from rich.panel import Panel
 
 from ptarcade import input_handler, pta_importer, signal_builder
+from ptarcade.input_handler import bcolors
 from ptarcade.models_utils import ParamDict
+from ptarcade import console
 
+log = logging.getLogger("rich")
 
 def cpu_model() -> str:
     """Get CPU info."""
@@ -58,10 +66,11 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
 
     if not cmd_input_okay:
 
-        error = (f"{bcolors.FAIL}ERROR{bcolors.ENDC}: Model file must be present\n"
-        "\t- This is added with the -m input flags. Add -h (--help) flags for more help.\n")
+        error = (f"Model file must be present\n"
+        "\t- This is added with the -[blue bold]m[/] input flags. Add -[blue bold]h[/] (--[blue bold]help[/]) flags for more help.\n")
 
-        raise SystemExit(error)
+        log.error(error, extra={"markup":True})
+        raise SystemExit
 
     inputs = input_handler.load_inputs(input_options)
     input_handler.check_config(inputs['config'])
@@ -253,7 +262,7 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
     """
     N_samples = inputs["config"].N_samples
 
-    print(f'--- Starting to sample {N_samples} samples... ---\n')
+    console.print(f'[bold green]Starting to sample {N_samples} samples\n')
 
     sampler.sample(
         x0,
@@ -262,13 +271,24 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
         AMweight=inputs['config'].am_weight,
         DEweight=inputs['config'].de_weight)
 
-    print('--- Done sampling. ---')
+    console.print()
+    console.print(Panel.fit('[bold green]Done sampling[/]', border_style="green"))
+    console.print()
 
 
 def main():
     """Read user inputs, set up sampler and models, and run sampler."""
-    print('\n--- Starting to run ---\n')
-    print("\tNode", platform.node(), cpu_model(),"\n");
+    console.print(Panel.fit('[bold green]Starting to run[/]', border_style="green"))
+    console.print()
+    table = rich.table.Table(title="Node Information", title_justify="left",box=rich.box.ROUNDED)
+
+    table.add_column("Node", style="cyan", no_wrap=True)
+    table.add_column("CPU", style="magenta")
+
+    table.add_row(platform.node(), cpu_model())
+
+    console.print(table)
+    console.print()
 
     start_cpu = time.process_time()
     start_real = time.perf_counter()
@@ -280,23 +300,24 @@ def main():
     emp_dist = None
 
     if inputs["config"].mode == "enterprise":
-        print('--- Loading Pulsars and noise data ... ---\n')
+        with console.status("Loading Pulsars and noise data...", spinner="bouncingBall"):
 
-        # import pta data
-        psrs, noise_params, emp_dist = get_user_pta_data(inputs)
+            # import pta data
+            psrs, noise_params, emp_dist = get_user_pta_data(inputs)
 
-        print('--- Done loading Pulsars and noise data. ---\n')
+            console.rule("[bold green]Done loading Pulsars and noise data :heavy_check_mark-emoji:")
 
 
-    print('--- Initializing PTA ... ---\n')
+    with console.status("Initializing PTA...", spinner="bouncingBall"):
+        pta = initialize_pta(inputs, psrs, noise_params)
+        console.print("[bold green]Done initializing PTA :heavy_check_mark:\n")
 
-    pta = initialize_pta(inputs, psrs, noise_params)
 
-    print('--- Done initializing PTA. ---\n\n')
+    with console.status("Initializing Sampler...", spinner="bouncingBall"):
+        sampler, x0 = setup_sampler(inputs, input_options, pta, emp_dist)
+        console.print("[bold green]Done initializing Sampler :heavy_check_mark:\n")
 
-    sampler, x0 = setup_sampler(inputs, input_options, pta, emp_dist)
-
-    print("\tSetup times (including first sample) {:.2f} seconds real, {:.2f} seconds CPU\n".format(
+    console.print("Done with all initializtions.\nSetup times (including first sample) {:.2f} seconds real, {:.2f} seconds CPU\n".format(
         time.perf_counter()-start_real, time.process_time()-start_cpu));
 
     start_cpu = time.process_time()
@@ -308,8 +329,17 @@ def main():
     cpu_time = time.process_time()-start_cpu
 
     N_samples = inputs["config"].N_samples
-    print("\tSampling times {:.2f} seconds real =  {:.4f} s/sample, {:.2f} seconds CPU =  {:.4f} s/sample\n".format(
-        real_time, real_time/N_samples, cpu_time, cpu_time/N_samples))
+
+    summary_table = rich.table.Table(title="Run Summary", title_justify="left", box=rich.box.ROUNDED)
+
+    summary_table.add_column("Time (real)", style="cyan")
+    summary_table.add_column("Time (real)/sample", style="cyan")
+    summary_table.add_column("Time (CPU)", style="magenta")
+    summary_table.add_column("Time (CPU)/sample", style="magenta")
+
+
+    summary_table.add_row(f"{real_time:.2f}", f"{real_time/N_samples:.4f}", f"{cpu_time:.2f}", f"{cpu_time/N_samples:.4f}")
+    console.print(summary_table)
 
 
 if __name__ == "__main__":

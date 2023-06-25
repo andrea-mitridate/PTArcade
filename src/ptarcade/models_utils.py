@@ -42,6 +42,7 @@ priors_type : typing.Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "C
 """
 from __future__ import annotations
 
+import logging
 from collections import UserDict
 from collections.abc import Callable
 from functools import cache
@@ -58,6 +59,7 @@ from numpy.typing import NDArray
 
 from ptarcade import fast_interpolate
 
+log = logging.getLogger("rich")
 nat.set_active_units("HEP")
 
 
@@ -502,7 +504,7 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
 
     Raises
     ------
-    ValueError
+    SystemExit
         If the prior name passed does not exist within [enterprise.signals.parameter]
 
     """
@@ -518,8 +520,11 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
         try:
             prior_factory = globals()[name]
         except KeyError:
-            err = f"ERROR: the `name` must be one of {priors_type=}, but you entered {name=}."
-            raise ValueError(err) from None
+            err = (f"The 'name' must be a string from the following list {priors_type=}.\n"
+            f"You supplied {name=}.")
+
+            log.error(err)
+            raise SystemExit from None
 
     # Use enterprise's class factory
     prior_obj = prior_factory(*args, **kwargs)

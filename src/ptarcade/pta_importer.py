@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import glob
 import json
+import logging
 import os
 import pickle
 
@@ -10,6 +11,7 @@ from astropy.utils.data import download_file
 from enterprise.pulsar import Pulsar
 from numpy._typing import _ArrayLikeFloat_co as array_like
 
+log = logging.getLogger("rich")
 
 def get_ephem_conv(par_file: str) -> str:
     """Get the ephemeris convention used in par files.
@@ -87,8 +89,9 @@ def get_pulsars(pta_data: str, filters: list[str] | None = None) -> list[Pulsar]
 
         return psrs
     else:
-        err = f"ERROR: `pta_data` is not correct. Must be path or file. Current value is {pta_data=}."
-        raise SystemExit(err)
+        err = f"'pta_data' is not correct. Must be path or file.\nCurrent value is {pta_data=}."
+        log.error(err)
+        raise SystemExit
 
 
 def get_wn(wn_data: str | None) -> dict | None :
@@ -126,8 +129,9 @@ def get_wn(wn_data: str | None) -> dict | None :
         return params
 
     else:
-        err = f"ERROR: `wn_data` is not correct. Must be path, file, or None. Current value is {wn_data=}."
-        raise SystemExit(err)
+        err = f"'wn_data' is not correct. Must be path, file, or None.\nCurrent value is {wn_data=}."
+        log.error(err)
+        raise SystemExit
 
 
 def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, array_like | None]:
@@ -205,7 +209,8 @@ def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, 
         emp_dist = pta_data["emp_dist"]
 
     else:
-        err = f"ERROR: `pta_data` is not correct. Current value is {pta_data=}."
-        raise SystemExit(err)
+        err = f"'pta_data' is not correct\n.Current value is {pta_data=}."
+        log.error(err)
+        raise SystemExit
 
     return psrs, params, emp_dist
