@@ -16,6 +16,11 @@ import time
 from types import ModuleType
 from typing import Any
 
+# Fix missinng astropy.erfa in some of our older dependencies
+import erfa
+
+sys.modules["astropy.erfa"] = erfa
+
 import numpy as np
 import rich
 from ceffyl import Sampler
