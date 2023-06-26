@@ -10,8 +10,8 @@ discussion can be found on its [reference page][ptarcade.plot_utils].
     in `./out/model/`. You can produce their [trace plots][trace] as follows:
 
     ```python
-    from ptarcade impor chain_utils as c_utils
-    from ptarcade impor plot_utils as p_utils
+    from ptarcade import chain_utils as c_utils
+    from ptarcade import plot_utils as p_utils
 
     params, chain = c_utils.import_chains('./chains/np_model/')
 
@@ -34,8 +34,8 @@ parameters, you can do it by using the `params_name` argument.
 :   This function can be used to produce posterior plots from MCMC chains:
 
     ```python
-    from ptarcade impor chain_utils as c_utils
-    from ptarcade impor plot_utils as p_utils
+    from ptarcade import chain_utils as c_utils
+    from ptarcade import plot_utils as p_utils
 
     params, chain = c_utils.import_chains('./chains/np_model/')
 
