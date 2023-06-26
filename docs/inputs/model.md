@@ -198,5 +198,5 @@ The model file can also contain additional (optional) variables that can be used
 
   [out_name]: ../outputs.md
   [ng15_np]:  link_to_papaer
-  [ng15_models]: https://zenodo.org/record/8021439
+  [ng15_models]: https://zenodo.org/record/8084351
 
