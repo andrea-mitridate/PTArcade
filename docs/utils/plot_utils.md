@@ -39,7 +39,7 @@ parameters, you can do it by using the `params_name` argument.
 
     params, chain = c_utils.import_chains('./chains/np_model/')
 
-    p_utils.plot_posteriors(chain, params)
+    p_utils.plot_posteriors([chain], [params])
 
     ```
     This will produce the plot below
