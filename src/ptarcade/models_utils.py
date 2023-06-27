@@ -16,7 +16,7 @@ z_eq : int
 T_eq : np.float64
     Temperature of matter-radiation equality (GeV)
 h : float
-    Scaling factor for Hubble expansion rate
+    Reduced Hubble parameter
 H_0 : np.float64
     Hubble constant (GeV)
 H_0_Hz : np.float64
