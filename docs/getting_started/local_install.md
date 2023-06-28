@@ -3,17 +3,23 @@ can install PTArcade with [`pip`][pip] or [`conda`][conda], the Python package m
 If not, we recommend using a [`docker`][docker] or [`singularity`][singularity] virtual environment.
 
 ### With conda <small>(recommended)</small> { #with-pip data-toc-label="with conda" }
-PTArcade is published as a conda package [add link] that can be installed with
-`conda`, ideally by using a [virtual environment][conda_env]. Open up a terminal
- and install PTArcade with:
-``` sh
-conda install ptarcade # (1)!
-```
+We are in the process of submitting PTArcade to the conda forge-channel,
+and soon you will be able to install PTArcade as a conda package. In the meantime, 
+you can install PTArcade using conda by downloading [this environment file][env], 
+and typing in a terminal (1)
+{ .annotate }
 
 1. See [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html) for conda installation info.
 
-Conda will also install the non-Python dependencies, as well as download the following PTA datasets:
- [NANOGrav 12.5-year][NG12], [NANOGrav 15-year][NG12], and [IPTA DR2][IPTA2].
+``` sh
+conda env create -f ptarcade.yml # (1)!
+```
+
+1. Here we are assuming that the `yml` file is located in the current directory, otherwise you will have to specify the 
+path to the `yml` file when executing `conda env create`.
+
+This will install PTArcade and all the required dependencies in a conda environment named `ptarcade`, and download the following PTA datasets:
+[NANOGrav 12.5-year][NG12], [NANOGrav 15-year][NG12], and [IPTA DR2][IPTA2].
 
 ### With pip 
 PTArcade is also published as a [PyPI package](https://pypi.org/project/PTArcade/) and can be installed with
@@ -93,3 +99,4 @@ singularity pull oras://ghcr.io/andrea-mitridate/non-bhb-search:latest
   [Pygments]: https://pygments.org/
   [Python Markdown Extensions]: https://facelessuser.github.io/pymdown-extensions/
   [Using Python's pip to Manage Your Projects' Dependencies]: https://realpython.com/what-is-pip/
+  [env]: ../assets/downloads/ptarcade.yml

@@ -253,13 +253,14 @@ def plot_chains(
         ax.set_xlabel("$\mathrm{MCMC\;sample}$", fontsize=label_size)
 
     plt.tight_layout()
-    plt.show()
 
     if save:
         if model_name:
             plt.savefig(f"./plots/{model_name}_chains.pdf")
         else:
             print("Please specify a model name to save the chain plot.")
+
+    plt.show()
 
     return
 
