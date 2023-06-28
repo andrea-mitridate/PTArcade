@@ -70,19 +70,20 @@ for the conda installation, download the following PTA datasets:
 
 
 ### With docker 
-The official [Docker image] is a great way to get up and running in a few
+The official [Docker image][docker] is a great way to get up and running in a few
 minutes, as it comes with all dependencies pre-installed. Open up a terminal
 and pull the image with:
-```
-docker pull <path to remote> # TODO
+```sh
+docker pull ngnewphy/ptarcade:latest
 ```
 
 
 ### With singularity 
 A singularity environment with all the necessary dependencies already installed can be downloaded by typing 
+```sh
+singularity pull ptarcade.sif docker://ngnewphy/ptarcade:latest
 ```
-singularity pull oras://ghcr.io/andrea-mitridate/non-bhb-search:latest
-```
+This will create a Singularity image and save it as \texttt{ptarcade.sif} in the current working directory.
 
   [pip]: #with-pip
   [conda]: #with-conda
@@ -100,3 +101,4 @@ singularity pull oras://ghcr.io/andrea-mitridate/non-bhb-search:latest
   [Python Markdown Extensions]: https://facelessuser.github.io/pymdown-extensions/
   [Using Python's pip to Manage Your Projects' Dependencies]: https://realpython.com/what-is-pip/
   [env]: ../assets/downloads/ptarcade.yml
+  [docker]: https://hub.docker.com/r/ngnewphy/ptarcade

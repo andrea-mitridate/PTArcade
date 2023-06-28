@@ -27,16 +27,44 @@ you want to save them in the same root folder.
 
 
 ## Using a docker Container
-Just prepend `ptarcade` with `docker run`
+The commands of the previous section must be slightly modified to run within a Docker container.
+Docker does not mount any directories into the container by default. 
+You must pass directories to mount inside the container using the syntax `-v <source>:<destination>`. 
+In the example below, we assume that the only directories you will pass to the command line options of PTArcade
+are accessible from your current working directory.
 ``` sh
-docker run ptarcade -m model.py 
+docker run -v $(pwd):$(pwd) -w $(pwd) -i -t ptarcade -m ./model.py
+```
+
+* `-v` tells Docker what to mount from the host computer and where to mount it in the container. Here, we mount the current working directory of the host into the container using its full path.
+* `-w` sets the working directory of the container. In this case, it sets it to the current working directory that was just mounted.
+* `-i -t` keeps `STDIN` open and allocates a pseudo-TTY 
+
+The PYArcade in the `docker run` command refers to the name of the Docker image.
+If you would like to run something else inside the container, then replace the PTArcade options with the program to run. For example, to run an interactive Bash shell
+
+```sh
+docker run -v $(pwd):$(pwd) -w $(pwd) -i -t ptarcade bash
 ```
 
 ## Using a singularity Container
-Just prepend `ptarcade` with `singularity run`
+As with Docker, the commands to run PTArcade must be slightly modified to run using Singularity.
+However, the commands are much simpler because Singularity will automatically mount your home directory inside the container. Using the `ptarcade.sif` file you created during the singularity installation, type into a terminal
 ``` sh
-singularity run ptarcade -m model.py 
+singularity run ptarcade.sif -m ./model.py
 ```
+You can also pass another command to run. For example, to start a Jupyter notebook type
+
+```sh
+singularity run ptarcade.sif jupyter notebook
+```
+
+If you want an interactive shell, run the following command
+
+```sh
+singularity shell ptarcade.sif
+```
+
   
   [model file]: ../inputs/model.md
   [configuration file]: ../inputs/config.md
