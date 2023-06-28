@@ -470,7 +470,9 @@ class ParamDict(UserDict):
     """
 
     def __setitem__(self, key: str, prior: parameter.Parameter):
-        if prior.common:
+        # The "or" here makes it backwards compatible with our old syntax
+        # for the parameter dictionaries
+        if isinstance(prior, parameter.Parameter ) or getattr(prior, "common", False):
             super().__setitem__(key, prior(key))
         else:
             super().__setitem__(key, prior)
