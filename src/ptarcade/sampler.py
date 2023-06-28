@@ -267,17 +267,42 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
     """
     N_samples = inputs["config"].N_samples
 
-    console.print(f'[bold green]Starting to sample {N_samples} samples\n')
+    console.print(f"[bold green]Starting to sample {N_samples} samples\n")
 
-    sampler.sample(
-        x0,
-        N_samples,
-        SCAMweight=inputs['config'].scam_weight,
-        AMweight=inputs['config'].am_weight,
-        DEweight=inputs['config'].de_weight)
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            category=RuntimeWarning,
+            message="invalid value encountered in scalar subtract",
+            module="PTMCMCSampler",
+            lineno=567,
+        )
+
+        warnings.filterwarnings(
+            "ignore",
+            category=RuntimeWarning,
+            message="All-NaN axis encountered",
+            module="PTMCMCSampler",
+            lineno=464,
+        )
+
+        warnings.filterwarnings(
+            "ignore",
+            category=RuntimeWarning,
+            message="divide by zero encountered in log",
+            module="enterprise.signals.parameter",
+            lineno=62,
+        )
+        sampler.sample(
+            x0,
+            N_samples,
+            SCAMweight=inputs["config"].scam_weight,
+            AMweight=inputs["config"].am_weight,
+            DEweight=inputs["config"].de_weight,
+        )
 
     console.print()
-    console.print(Panel.fit('[bold green]Done sampling[/]', border_style="green"))
+    console.print(Panel.fit("[bold green]Done sampling[/]", border_style="green"))
     console.print()
 
 
