@@ -47,7 +47,7 @@ this module can be found in its [reference page][ptarcade.chains_utils].
     By default, the Bayes factor is calculated by dividing the number of points
     in the chain that fall in the hypermodel bin of the user-specified signal by
     the number of points falling in the bin of the reference SMBHB model. For a 
-    more precise estimate of the Bayes factor and associated error, #THE ESTIMATE OF THE BF IS NOT REALLY MORE PRECISE, RIGHT? IT'S ONLY THE ERROR ESTIMATE?
+    more precise estimate of the Bayes factor and associated error, 
     you can set `bootstrap=True`. In this case, the Bayes factor and its standard deviation
     will be derived by using bootstrapping methods.
 
