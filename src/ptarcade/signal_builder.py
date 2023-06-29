@@ -451,7 +451,6 @@ def ceffyl_builder(inputs):
             tempdir.rename(ceffyldl)
         # find ipta data inside dir
         datadir = (ceffyldl / "ng12p5_ceffyl")
-        log.info(datadir)
 
     ceffyl_pta = Ceffyl.ceffyl(datadir)
 
