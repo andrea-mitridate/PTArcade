@@ -1,0 +1,11 @@
+name: ptarcade
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python==3.10.11
+  - pip
+  - tempo2
+  - suitesparse
+  - pip:
+    - git+ssh://git@github.com/andrea-mitridate/PTArcade.git@prepare-for-pypi

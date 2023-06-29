@@ -6,29 +6,44 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
+        <meta name="description" content="Searching for new physics signals in Pulsar Timing Array data has never been easier. ">
+      
+      
+        <meta name="author" content="Andrea Mitridate and David Wright">
       
       
       
       
-        <link rel="next" href="installation/">
+        <link rel="next" href="getting_started/">
       
-      <link rel="icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.15">
-    
-    
-      
-        <title>PTArcade</title>
-      
-    
-    
-      <link rel="stylesheet" href="assets/stylesheets/main.26e3688c.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ecc896b0.min.css">
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.15+insiders-4.35.3">
+    
+    
+  <title>PTArcade</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    
+  
+  
+      <link rel="stylesheet" href="assets/stylesheets/main.cac7c1ad.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.ecc776e4.min.css">
       
       
 
     
+  <link rel="stylesheet" href="assets/stylesheets/custom.78a0de75.min.css">
+
+  <link rel="stylesheet" href="assets/stylesheets/home.fefd3cb3.min.css">
+  <script>"Apple Computer, Inc."===navigator.vendor&&document.documentement.classList.add("safari")</script>
+
     
     
       
@@ -42,13 +57,26 @@
     
       <link rel="stylesheet" href="assets/_mkdocstrings.css">
     
+      <link rel="stylesheet" href="stylesheets/extra.css">
+    
     <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
+  
+
+
+  
+  
+
+
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
 
     
     
-    
+  <link rel="me" href="https://fosstodon.org/@squidfunk">
+
   </head>
   
   
@@ -59,21 +87,13 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
   
-    
-    
-      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
-      
-        
-        <a href="#welcome-to-ptarcade" class="md-skip">
-          Skip to content
-        </a>
       
     </div>
     <div data-md-component="announce">
@@ -83,9 +103,7 @@
     
       
 
-  
-
-<header class="md-header md-header--shadow" data-md-component="header">
+<header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="." title="PTArcade" class="md-header__button md-logo" aria-label="PTArcade" data-md-component="logo">
       
@@ -106,7 +124,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              About
+              Welcome to PTArcade
             
           </span>
         </div>
@@ -119,25 +137,28 @@
             
             
             
-            <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+            <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
             
-              <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+              <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
               </label>
             
           
             
             
             
-            <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+            <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
             
-              <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4m0-7c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3Z"/></svg>
+              <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
               </label>
             
           
         </form>
       
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
     
@@ -181,458 +202,457 @@
 </div>
     
     
+      <div class="md-header__source">
+        <a href="https://github.com/andrea-mitridate/PTArcade" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
   </nav>
   
 </header>
     
     <div class="md-container" data-md-component="container">
       
+  <div class="mdx-parallax" data-mdx-component="parallax">
+  <section class="mdx-parallax__group" data-md-color-scheme="slate">
+  
+    
+    
+    <picture class="mdx-parallax__layer" style="--md-parallax-depth: 8;--md-image-position: 70%">
+      <img src="assets/images/landing_1_light_text.jpg" alt="" class="mdx-parallax__image">
+    </picture>
+  
+    
+    
+    <picture class="mdx-parallax__layer" style="--md-parallax-depth: 5;--md-image-position: 25%">
+      <img src="assets/images/landing_1_light_text.jpg" alt="" class="mdx-parallax__image">
+    </picture>
+  
+    
+    
+    <picture class="mdx-parallax__layer" style="--md-parallax-depth: 4;--md-image-position: 20%">
+      <img src="assets/images/landing_1_light_text.jpg" alt="" class="mdx-parallax__image">
+    </picture>
+  
+    
+    
+    <picture class="mdx-parallax__layer" style="--md-parallax-depth: 3;--md-image-position: 30%">
+      <img src="assets/images/landing_1_light_text.jpg" alt="" class="mdx-parallax__image">
+    </picture>
+  
+    
+    
+    <picture class="mdx-parallax__layer" style="--md-parallax-depth: 2;--md-image-position: 40%">
+      <img src="assets/images/landing_1_light_text.jpg" alt="" class="mdx-parallax__image">
+    </picture>
+  
+    
+    
+    <picture class="mdx-parallax__layer" style="--md-parallax-depth: 1;--md-image-position: 50%">
+      <img src="assets/images/landing_1_light_text.jpg" alt="" class="mdx-parallax__image">
+    </picture>
+  
+  <div class="mdx-parallax__layer mdx-parallax__blend"></div>
+  <div class="mdx-hero" data-mdx-component="hero">
+    <div class="mdx-hero__scrollwrap md-grid">
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
       
         
-          
+  
+  
+    
+  
+  
+    <li class="md-tabs__item">
+      <a href="." class="md-tabs__link md-tabs__link--active">
         
-      
-      <main class="md-main" data-md-component="main">
-        <div class="md-main__inner md-grid">
-          
-            
-              
-              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-
-  
-
-<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
-  <label class="md-nav__title" for="__drawer">
-    <a href="." title="PTArcade" class="md-nav__button md-logo" aria-label="PTArcade" data-md-component="logo">
-      
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M.198 18.24a.966.966 0 0 1-.194-.571v-.955s0-.571.563-.313c0 0 6.919 3.135 8.033 3.626a7.832 7.832 0 0 0 3.408.729 8.216 8.216 0 0 0 3.396-.729l8.037-3.626c.559-.258.559.313.559.313v.955a1.038 1.038 0 0 1-.198.575c-.19.258-.515.539-1.411.959-.713.337-6.23 2.818-6.995 3.17a8.008 8.008 0 0 1-3.4.729 8.336 8.336 0 0 1-3.82-.927c-1.435-.65-5.849-2.631-6.567-2.972-.9-.428-1.153-.654-1.411-.963zm1.411-5.973 6.987-3.17a7.975 7.975 0 0 1 2.164-.634v5.707c0 .396.571.697 1.236.697s1.141-.313 1.141-.697V8.479c.778.105 1.54.313 2.263.618l6.987 3.17c.579.273 1.609.761 1.609 1.538s-1.011 1.236-1.609 1.53l-6.987 3.17a8.2 8.2 0 0 1-3.396.729 7.832 7.832 0 0 1-3.408-.729l-6.987-3.17C1.011 15.042 0 14.574 0 13.801s1.03-1.264 1.609-1.534zm1.807 2.247c.77.396 1.683.396 2.453 0 .682-.396.686-1.026 0-1.419a2.705 2.705 0 0 0-2.453 0c-.68.392-.666 1.02 0 1.419zM12 7.595a3.35 3.35 0 1 1 3.349-3.351v.003c0 1.849-1.5 3.348-3.349 3.348z"/></svg>
-
-    </a>
-    PTArcade
-  </label>
-  
-  <ul class="md-nav__list" data-md-scrollfix>
-    
-      
-      
-      
-
-  
   
     
   
+  Home
+
+      </a>
+    </li>
   
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
+
       
         
-      
-      
-      <a href="." class="md-nav__link md-nav__link--active">
-        About
-      </a>
-      
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="installation/" class="md-nav__link">
-        Install
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="inputs/" class="md-nav__link">
-        Inputs
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="outputs/" class="md-nav__link">
-        Outputs
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="usage/" class="md-nav__link">
-        Usage
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="contributing/" class="md-nav__link">
-        Contributing
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="overview/" class="md-nav__link">
-        Code Overview
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
   
   
   
     
-      
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-      
-      
-      
-      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
-      
-      
-      
-        <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
-          Code Reference
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-        <label class="md-nav__title" for="__nav_8">
-          <span class="md-nav__icon md-icon"></span>
-          Code Reference
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+      <li class="md-tabs__item">
+        <a href="getting_started/" class="md-tabs__link">
           
-            
-              
+  
+    
+  
+  Getting started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
   
   
   
     
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-      
-      
-      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_1" >
-      
-      
-      
-        <label class="md-nav__link" for="__nav_8_1" id="__nav_8_1_label" tabindex="0">
-          ptarcade
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_1_label" aria-expanded="false">
-        <label class="md-nav__title" for="__nav_8_1">
-          <span class="md-nav__icon md-icon"></span>
-          ptarcade
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+    
+      <li class="md-tabs__item">
+        <a href="inputs/" class="md-tabs__link">
           
-            
-              
+  
+    
+  
+  Inputs
+
+        </a>
+      </li>
+    
+  
+
+      
+        
   
   
   
-    <li class="md-nav__item">
-      <a href="reference/ptarcade/__init__/" class="md-nav__link">
-          init  
+    <li class="md-tabs__item">
+      <a href="outputs/" class="md-tabs__link">
+        
+  
+    
+  
+  Outputs
+
       </a>
     </li>
   
 
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/ptarcade/chains_utils/" class="md-nav__link">
-        chains_utils
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
+      
+        
   
   
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    
+      <li class="md-tabs__item">
+        <a href="utils/" class="md-tabs__link">
+          
+  
+    
+  
+  Utilities
+
+        </a>
+      </li>
+    
+  
+
       
+        
+  
+  
+  
+    
+    
       
-      
-      
-      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_1_3" >
-      
-      
-      
-        <label class="md-nav__link" for="__nav_8_1_3" id="__nav_8_1_3_label" tabindex="0">
-          data
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_1_3_label" aria-expanded="false">
-        <label class="md-nav__title" for="__nav_8_1_3">
-          <span class="md-nav__icon md-icon"></span>
-          data
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="reference/ptarcade/__init__/" class="md-tabs__link">
           
-            
-              
   
+    
   
-  
-    <li class="md-nav__item">
-      <a href="reference/ptarcade/data/__init__/" class="md-nav__link">
-          init  
-      </a>
-    </li>
-  
+  Reference
 
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/ptarcade/data/full_run/" class="md-nav__link">
-        full_run
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/ptarcade/fast_interpolate/" class="md-nav__link">
-        fast_interpolate
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/ptarcade/input_handler/" class="md-nav__link">
-        input_handler
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/ptarcade/models_utils/" class="md-nav__link">
-        models_utils
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/ptarcade/plotting_utils/" class="md-nav__link">
-        plotting_utils
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/ptarcade/pta_importer/" class="md-nav__link">
-        pta_importer
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/ptarcade/sampler/" class="md-nav__link">
-        sampler
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/ptarcade/signal_builder/" class="md-nav__link">
-        signal_builder
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
+        </a>
+      </li>
+    
   
 
     
-  </ul>
+  
+
+      
+    </ul>
+  </div>
 </nav>
-                  </div>
-                </div>
-              </div>
-            
-            
-          
-          
-            <div class="md-content" data-md-component="content">
-              <article class="md-content__inner md-typeset">
-                
-                  
-
-
-<h1 id="welcome-to-ptarcade">Welcome to PTArcade</h1>
-<p>PTArcade provides an interface to the ENTERPRISE analysis suite and allows for simple implementation of new-physics searches in PTA data. </p>
-<p>The user can specify a new physics signal (either deterministic or stochastic), and the code will output Monte Carlo chains that can be used to reconstruct the model's parameter posterior distributions. </p>
-<p>The following illustrates how to get started with PTArcade and some basic functionalities. More informations can be found at <a href="">this link</a>.</p>
-
-
-
-
-
-                
-              </article>
-            </div>
-          
-          
-  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
-
+      <div class="mdx-hero__inner">
+        <div class="mdx-hero__teaser md-typeset">
+          <h1>New physics meets PTAs</h1>
+          <p>Searching for new physics signals in Pulsar Timing Array data has never been easier. .</p>
+          <a href="/getting_started/" class="md-button">
+            Get started
+          </a>
+          <a href="#everything-you-would-expect" class="md-button md-button--secondary">
+            Learn more
+          </a>
+          <a href="https://ko-fi.com/bewilderedbird" class="mdx-hero__attribution" tabindex="-1">
+            <strong>© Author Landing</strong>
+          </a>
         </div>
-        
-          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
-            Back to top
-          </button>
-        
-      </main>
-      
-        <footer class="md-footer">
+        <div class="mdx-hero__more">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 4h2v12l5.5-5.5 1.42 1.42L12 19.84l-7.92-7.92L5.5 10.5 11 16V4Z"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+  <section class="mdx-parallax__group" data-md-color-scheme="slate" data-md-color-primary="indigo">
+  <div class="md-content md-grid" data-md-component="content">
+    <div class="md-content__inner">
+      <header class="md-typeset" hidden>
+        <h1 id="everything-you-would-expect">
+          Everything you would expect
+          <a href="#everything-you-would-expect" class="headerlink" title="Permanent link">
+            ¶
+          </a>
+        </h1>
+      </header>
+      <div class="mdx-expect">
+        <ul class="mdx-expect__list">
+          <li class="mdx-expect__item md-typeset" hidden>
+            <div class="mdx-expect__icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3C7.58 3 4 4.79 4 7s3.58 4 8 4 8-1.79 8-4-3.58-4-8-4M4 9v3c0 2.21 3.58 4 8 4s8-1.79 8-4V9c0 2.21-3.58 4-8 4s-8-1.79-8-4m0 5v3c0 2.21 3.58 4 8 4s8-1.79 8-4v-3c0 2.21-3.58 4-8 4s-8-1.79-8-4Z"/></svg>
+            </div>
+            <div class="mdx-expect__description">
+              <h2>Analyze real PTA data</h2>
+              <p>
+                Real PTA data from NANOGrav and the IPTA collaboration at your fingertips.
+              </p>
+            </div>
+          </li>
+          <li class="mdx-expect__item md-typeset" hidden>
+            <div class="mdx-expect__icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 15H6l7-14v8h5l-7 14v-8Z"/></svg>
+            </div>
+            <div class="mdx-expect__description">
+              <h2>Harness the power of ENTERPRISE</h2>
+              <p>
+                Take advantage of the full power of 
+                <a href="https://github.com/nanograv/enterprise">ENTERPRISE</a> and
+                <a href="https://github.com/astrolamb/ceffyl">Ceffyl</a>
+                via easy-to-use interface.
+              </p>
+            </div>
+          </li>
+          <li class="mdx-expect__item md-typeset" hidden>
+            <div class="mdx-expect__icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M499.6 11.3c6.7-10.7 20.5-14.5 31.7-8.5s15.8 19.5 10.6 31L404.8 338.6c2.2 2.3 4.3 4.7 6.3 7.1l97.2-54.7c10.5-5.9 23.6-3.1 30.9 6.4s6.3 23-2.2 31.5l-87 87h-71.5c-13.2-37.3-48.7-64-90.5-64s-77.4 26.7-90.5 64h-79.7l-75.5-52.2c-9.7-6.7-13.1-19.6-7.9-30.3s17.4-15.9 28.7-12.4l97.2 30.4c3-3.9 6.1-7.7 9.4-11.3l-62.3-103.8c-6.1-10.1-3.9-23.1 5.1-30.7s22.2-7.5 31.1.1L246 293.6c1.5-.4 3-.8 4.5-1.1l13.6-142.7c1.2-12.3 11.5-21.7 23.9-21.7s22.7 9.4 23.9 21.7l13.5 141.9L499.6 11.3zM64 448h480c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32h32zM288 0c13.3 0 24 10.7 24 24v48c0 13.3-10.7 24-24 24s-24-10.7-24-24V24c0-13.3 10.7-24 24-24z"/></svg>
+            </div>
+            <div class="mdx-expect__description">
+              <h2>Made for high energies</h2>
+              <p>
+                Signals of new physics can be defined using standard conventions in the high-energy physics
+                community.
+              </p>
+            </div>
+          </li>
+          <li class="mdx-expect__item md-typeset" hidden>
+            <div class="mdx-expect__icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <path d="M7.75 11c-.69 0-1.25.56-1.25 1.25v1.5a1.25 1.25 0 102.5 0v-1.5C9 11.56 8.44 11 7.75 11zm1.27 4.5a.469.469 0 01.48-.5h5a.47.47 0 01.48.5c-.116 1.316-.759 2.5-2.98 2.5s-2.864-1.184-2.98-2.5zm7.23-4.5c-.69 0-1.25.56-1.25 1.25v1.5a1.25 1.25 0 102.5 0v-1.5c0-.69-.56-1.25-1.25-1.25z" />
+  <path fill-rule="evenodd" d="M21.255 3.82a1.725 1.725 0 00-2.141-1.195c-.557.16-1.406.44-2.264.866-.78.386-1.647.93-2.293 1.677A18.442 18.442 0 0012 5c-.93 0-1.784.059-2.569.17-.645-.74-1.505-1.28-2.28-1.664a13.876 13.876 0 00-2.265-.866 1.725 1.725 0 00-2.141 1.196 23.645 23.645 0 00-.69 3.292c-.125.97-.191 2.07-.066 3.112C1.254 11.882 1 13.734 1 15.527 1 19.915 3.13 23 12 23c8.87 0 11-3.053 11-7.473 0-1.794-.255-3.647-.99-5.29.127-1.046.06-2.15-.066-3.125a23.652 23.652 0 00-.689-3.292zM20.5 14c.5 3.5-1.5 6.5-8.5 6.5s-9-3-8.5-6.5c.583-4 3-6 8.5-6s7.928 2 8.5 6z" />
+</svg>
+            </div>
+            <div class="mdx-expect__description">
+              <h2>Open source</h2>
+              <p>
+                Explore our open-source <a href="https://github.com/andrea-mitridate/PTArcade">code repository</a>:
+                download, customize to your needs, and contribute to its continuous development.
+              </p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+  <section class="mdx-parallax__group" data-md-color-scheme="default">
+  <div class="md-content md-grid" data-md-component="content">
+    <div class="md-content__inner">
+      <header class="md-typeset" hidden>
+        <h1 id="ptarcade-workflow-in-a-nutshell">
+          PTArcade workflow in a nutshell
+          <a href="#ptarcade-workflow-in-a-nutshell" class="headerlink" title="Permanent link">
+            ¶
+          </a>
+        </h1>
+      </header>
+      <div class="mdx-spotlight">
+        <figure class="mdx-spotlight__feature" hidden>
+          <a href="inputs/model/" title="Define signal" tabindex="-1">
+            <img src="assets/images/spotlight/model.png" alt="Defin signal" loading="lazy" width="500" height="327">
+          </a>
+          <figcaption class="md-typeset">
+            <h2>Define your signal</h2>
+            <p>
+              Defining your signal is as <strong>easy as defining a Python function</strong>. 
+            </p>
+            <p>
+              Just define the power spectrum in terms of \(h^2\Omega_{\textrm{GW}}\), if you are considering a stochastic signal; or the 
+              signal time series, if you are considering a deterministic signal. PTArcade will take
+              care of the rest.
+            <p>
+              <a href="inputs/" aria-label="Inputs">
+                <span class="twemoji">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg>
+                </span>
+                Learn more
+              </a>
+            </p>
+          </figcaption>
+        </figure>
+        <figure class="mdx-spotlight__feature" hidden>
+          <a href="getting_started/run/" title="Run" tabindex="-1">
+            <img src="assets/images/spotlight/run.png" alt="Run" loading="lazy" width="500" height="327">
+          </a>
+          <figcaption class="md-typeset">
+            <h2>
+              Run it 
+              <span class="twemoji">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.5 5.5c1.09 0 2-.92 2-2a2 2 0 0 0-2-2c-1.11 0-2 .88-2 2 0 1.08.89 2 2 2M9.89 19.38l1-4.38L13 17v6h2v-7.5l-2.11-2 .61-3A7.29 7.29 0 0 0 19 13v-2c-1.91 0-3.5-1-4.31-2.42l-1-1.58c-.4-.62-1-1-1.69-1-.31 0-.5.08-.81.08L6 8.28V13h2V9.58l1.79-.7L8.19 17l-4.9-1-.4 2 7 1.38Z"/></svg> 
+              </span>
+              
+            </h2>
+            <p>
+              <strong>Run</strong> the code <strong>locally or on a HPC cluster</strong>. 
+            </p>
+            <p>
+              PTArcade can run in various configuration modes to adapt to the available computational resources.
+            </p>
+              <a href="getting_started/run/" aria-label="Utilities">
+                <span class="twemoji">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg>
+                </span>
+                Learn more
+              </a>
+            </p>
+          </figcaption>
+        </figure>
+        <figure class="mdx-spotlight__feature" hidden>
+          <a href="utils/plot_utils/" title="Analyze the results" tabindex="-1">
+            <img src="assets/images/spotlight/ex_post.png" alt="Example posterior" loading="lazy" style="width:450px">
+          </a>
+          <figcaption class="md-typeset">
+            <h2>
+              Analyze the results              
+            </h2>
+            <p>
+              Can your model <strong>fit the observed PTA signal?</strong> Can your model be <strong>constrained by PTA
+              data?</strong>
+            </p>
+            <p>
+              Several utilities will help you answer these questions and much more (easy handling of 
+              multiple MCMC chains, easy plotting routings, etc...).
+            </p>
+              <a href="utils/" aria-label="Utilities">
+                <span class="twemoji">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg>
+                </span>
+                Learn more
+              </a>
+            </p>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+  <section class="mdx-parallax__group" data-md-color-scheme="slate" data-md-color-primary="indigo">
+  <div class="md-content md-grid" data-md-component="content">
+    <div class="md-content__inner mdx-content__inner">
+      <div class="mdx-content__column">
+      <header class="md-typeset" hidden>
+        <h1 id="become-a-sponsor">
+          Contribute
+          <a href="#become-a-sponsor" class="headerlink" title="Permanent link">
+            ¶
+          </a>
+        </h1>
+      </header>
+      <div class="mdx-connect md-typeset" hidden>
+        <div class="mdx-connect__column">
+          <p>
+            PTArcade is developed and mantained by an incredibly small number of people. 
+            If you have ideas on how to improve it, or would just like to help, please 
+            get in touch! We'd love to have you on board!
+          </p>
+          <p>
+            <a href="mailto: ptarcade.dev@gmail.com" class="md-button" aria-label="Insiders">
+              Contact
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="mdx-content__column">
+      <header class="md-typeset" hidden>
+        <h1 id="keep-in-touch">
+          Let's keep in touch
+          <a href="#keep-in-touch" class="headerlink" title="Permanent link">
+            ¶
+          </a>
+        </h1>
+      </header>
+      <div class="mdx-connect md-typeset" hidden>
+        <div class="mdx-connect__inner">
+          <p>
+            <a href="https://nanograv.org/" class="mdx-connect__link">
+              Stay up to date with new <strong>NANOGrav</strong> results.
+            </a>
+          </p>
+          <p>
+            <a href="https://github.com/andrea-mitridate/PTArcade" class="mdx-connect__link">
+              <span class="twemoji">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+              </span>
+              PTArcade on <strong>GitHub</strong>
+            </a>
+            <a href="https://hub.docker.com/r/squidfunk/mkdocs-material" class="mdx-connect__link">
+              <span class="twemoji">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M349.9 236.3h-66.1v-59.4h66.1v59.4zm0-204.3h-66.1v60.7h66.1V32zm78.2 144.8H362v59.4h66.1v-59.4zm-156.3-72.1h-66.1v60.1h66.1v-60.1zm78.1 0h-66.1v60.1h66.1v-60.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1l-13.3-8.9zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm-78.1-72.1h-66.1v60.1h66.1v-60.1z"/></svg>
+              </span>
+              PTArcade on <strong>DockerHub</strong>
+            </a>
+            <a href="https://pypi.org/project/PTArcade/" class="mdx-connect__link">
+              <span class="twemoji">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6zM286.2 404c11.1 0 20.1 9.1 20.1 20.3 0 11.3-9 20.4-20.1 20.4-11 0-20.1-9.2-20.1-20.4.1-11.3 9.1-20.3 20.1-20.3zM167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4zm-6.7-142.6c-11.1 0-20.1-9.1-20.1-20.3.1-11.3 9-20.4 20.1-20.4 11 0 20.1 9.2 20.1 20.4s-9 20.3-20.1 20.3z"/></svg>
+              </span>
+              PTArcade on <strong>PyPI</strong>
+            </a>
+            <a href="https://zenodo.org/record/7876430" class="mdx-connect__link">
+              <span class="twemoji">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M23.827 11.163a2.242 2.242 0 0 0-.467-.687 2.15 2.15 0 0 0-1.524-.627 2.11 2.11 0 0 0-1.207.365 2.247 2.247 0 0 0-.495.454c-.06.075-.125.175-.163.236a2.687 2.687 0 0 0-.205.464c.006-.27.046-.672.205-.898V8.522a.427.427 0 0 0-.137-.322.443.443 0 0 0-.317-.132.44.44 0 0 0-.323.132.44.44 0 0 0-.13.322v1.733a2.37 2.37 0 0 0-.592-.299 2.124 2.124 0 0 0-1.5.06 2.16 2.16 0 0 0-1.153 1.147l-.024.06a2.242 2.242 0 0 0-.49-.747 2.153 2.153 0 0 0-1.524-.627 2.11 2.11 0 0 0-.843.167 2.23 2.23 0 0 0-.687.46 2.106 2.106 0 0 0-.465.687l-.023.056-.023-.056a2.155 2.155 0 0 0-1.99-1.314c-.301 0-.582.056-.842.167a2.23 2.23 0 0 0-.686.46c-.2.196-.355.424-.467.687l-.02.053-.022-.053a2.243 2.243 0 0 0-.467-.687 2.148 2.148 0 0 0-1.523-.627 2.11 2.11 0 0 0-.842.167 2.229 2.229 0 0 0-.642.418v-.072a.463.463 0 0 0-.462-.463H.534a.463.463 0 0 0 0 .926h2.549L.09 14.85a.462.462 0 0 0-.091.275v.302c0 .256.207.463.463.463h3.45a.462.462 0 0 0 .462-.43 2.169 2.169 0 0 0 1.347.472c.446 0 .844-.12 1.195-.36.283-.192.507-.431.67-.72v.626c0 .127.043.235.13.322a.436.436 0 0 0 .324.132c.12 0 .224-.044.316-.132a.427.427 0 0 0 .138-.322v-1.62h-.002l.002-.003H7.36a.44.44 0 0 0-.418.287l-.074.152a1.234 1.234 0 0 1-.46.532 1.234 1.234 0 0 1-.687.197c-.168 0-.33-.031-.485-.095a1.175 1.175 0 0 1-.4-.27 1.382 1.382 0 0 1-.27-.4 1.165 1.165 0 0 1-.1-.477v-.406h4.028V12a1.237 1.237 0 0 1 .365-.878 1.24 1.24 0 0 1 .89-.365c.167 0 .329.032.484.095.155.065.289.154.4.27.112.115.2.249.269.4.067.151.102.311.102.478v3.477c0 .128.043.236.13.323a.438.438 0 0 0 .324.132c.12 0 .224-.044.316-.132a.431.431 0 0 0 .137-.323v-.623a2.144 2.144 0 0 0 1.867 1.078c.294 0 .574-.056.837-.168.262-.111.493-.264.693-.46a2.112 2.112 0 0 0 .484-.733l.018.047c.111.262.267.49.466.687.2.195.428.348.687.46.258.11.54.167.843.167a2.147 2.147 0 0 0 1.523-.627c.195-.196.351-.425.467-.687l.024-.06.024.06c.115.262.27.49.466.687a2.144 2.144 0 0 0 1.524.627c.294 0 .574-.056.837-.168a2.22 2.22 0 0 0 .693-.46A2.117 2.117 0 0 0 24 13.782V12a2.08 2.08 0 0 0-.173-.837zM1.16 14.965l2.42-3.259c-.012.096-.02.194-.02.294v1.78c0 .296.058.574.174.838.054.123.118.239.19.347zm5.818-2.5h-2.51V12a1.242 1.242 0 0 1 .765-1.147c.152-.064.315-.096.49-.096.168 0 .33.032.484.095.156.065.29.154.4.27.112.115.2.249.27.4.068.151.1.311.1.478zm8.057 1.316a1.249 1.249 0 0 1-1.254 1.243c-.168 0-.329-.032-.485-.096a1.168 1.168 0 0 1-.4-.27 1.376 1.376 0 0 1-.269-.4 1.159 1.159 0 0 1-.1-.477V12a1.24 1.24 0 0 1 1.255-1.243c.166 0 .328.032.482.095.156.065.29.154.4.27.112.115.201.249.27.4.067.152.101.311.101.478zm4.028 0c0 .167-.033.326-.1.478a1.38 1.38 0 0 1-.27.4 1.16 1.16 0 0 1-.4.27 1.26 1.26 0 0 1-.484.094 1.232 1.232 0 0 1-.89-.364 1.242 1.242 0 0 1-.366-.878V12c0-.167.035-.326.102-.478a1.4 1.4 0 0 1 .27-.4 1.16 1.16 0 0 1 .4-.27 1.27 1.27 0 0 1 .484-.095 1.25 1.25 0 0 1 .89.365 1.25 1.25 0 0 1 .364.878zm4.028 0a1.224 1.224 0 0 1-.364.878c-.116.116-.25.205-.4.27a1.25 1.25 0 0 1-.49.094 1.27 1.27 0 0 1-.485-.095 1.169 1.169 0 0 1-.4-.27 1.38 1.38 0 0 1-.27-.4 1.157 1.157 0 0 1-.1-.477V12a1.24 1.24 0 0 1 1.255-1.243c.167 0 .328.032.483.095.156.065.29.154.4.27.112.115.201.249.27.4.067.152.1.311.1.478v1.78z"/></svg>
+              </span>
+              PTArcade on <strong>zenodo</strong>
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+  <div class="mdx-parallax__group" data-md-color-scheme="slate">
+    <footer class="md-footer">
   
     
       
@@ -640,13 +660,13 @@
         
         
           
-          <a href="installation/" class="md-footer__link md-footer__link--next" aria-label="Next: Install" rel="next">
+          <a href="getting_started/" class="md-footer__link md-footer__link--next" aria-label="Next: Getting started" rel="next">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Install
+                Getting started
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -664,7 +684,44 @@
   
     Made with
     <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
+      Material for MkDocs Insiders
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/andrea-mitridate" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://pypi.org/project/PTArcade" target="_blank" rel="noopener" title="pypi.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6zM286.2 404c11.1 0 20.1 9.1 20.1 20.3 0 11.3-9 20.4-20.1 20.4-11 0-20.1-9.2-20.1-20.4.1-11.3 9.1-20.3 20.1-20.3zM167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4zm-6.7-142.6c-11.1 0-20.1-9.1-20.1-20.3.1-11.3 9-20.4 20.1-20.4 11 0 20.1 9.2 20.1 20.4s-9 20.3-20.1 20.3z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://zenodo.org/record/7876429" target="_blank" rel="noopener" title="zenodo.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M23.827 11.163a2.242 2.242 0 0 0-.467-.687 2.15 2.15 0 0 0-1.524-.627 2.11 2.11 0 0 0-1.207.365 2.247 2.247 0 0 0-.495.454c-.06.075-.125.175-.163.236a2.687 2.687 0 0 0-.205.464c.006-.27.046-.672.205-.898V8.522a.427.427 0 0 0-.137-.322.443.443 0 0 0-.317-.132.44.44 0 0 0-.323.132.44.44 0 0 0-.13.322v1.733a2.37 2.37 0 0 0-.592-.299 2.124 2.124 0 0 0-1.5.06 2.16 2.16 0 0 0-1.153 1.147l-.024.06a2.242 2.242 0 0 0-.49-.747 2.153 2.153 0 0 0-1.524-.627 2.11 2.11 0 0 0-.843.167 2.23 2.23 0 0 0-.687.46 2.106 2.106 0 0 0-.465.687l-.023.056-.023-.056a2.155 2.155 0 0 0-1.99-1.314c-.301 0-.582.056-.842.167a2.23 2.23 0 0 0-.686.46c-.2.196-.355.424-.467.687l-.02.053-.022-.053a2.243 2.243 0 0 0-.467-.687 2.148 2.148 0 0 0-1.523-.627 2.11 2.11 0 0 0-.842.167 2.229 2.229 0 0 0-.642.418v-.072a.463.463 0 0 0-.462-.463H.534a.463.463 0 0 0 0 .926h2.549L.09 14.85a.462.462 0 0 0-.091.275v.302c0 .256.207.463.463.463h3.45a.462.462 0 0 0 .462-.43 2.169 2.169 0 0 0 1.347.472c.446 0 .844-.12 1.195-.36.283-.192.507-.431.67-.72v.626c0 .127.043.235.13.322a.436.436 0 0 0 .324.132c.12 0 .224-.044.316-.132a.427.427 0 0 0 .138-.322v-1.62h-.002l.002-.003H7.36a.44.44 0 0 0-.418.287l-.074.152a1.234 1.234 0 0 1-.46.532 1.234 1.234 0 0 1-.687.197c-.168 0-.33-.031-.485-.095a1.175 1.175 0 0 1-.4-.27 1.382 1.382 0 0 1-.27-.4 1.165 1.165 0 0 1-.1-.477v-.406h4.028V12a1.237 1.237 0 0 1 .365-.878 1.24 1.24 0 0 1 .89-.365c.167 0 .329.032.484.095.155.065.289.154.4.27.112.115.2.249.269.4.067.151.102.311.102.478v3.477c0 .128.043.236.13.323a.438.438 0 0 0 .324.132c.12 0 .224-.044.316-.132a.431.431 0 0 0 .137-.323v-.623a2.144 2.144 0 0 0 1.867 1.078c.294 0 .574-.056.837-.168.262-.111.493-.264.693-.46a2.112 2.112 0 0 0 .484-.733l.018.047c.111.262.267.49.466.687.2.195.428.348.687.46.258.11.54.167.843.167a2.147 2.147 0 0 0 1.523-.627c.195-.196.351-.425.467-.687l.024-.06.024.06c.115.262.27.49.466.687a2.144 2.144 0 0 0 1.524.627c.294 0 .574-.056.837-.168a2.22 2.22 0 0 0 .693-.46A2.117 2.117 0 0 0 24 13.782V12a2.08 2.08 0 0 0-.173-.837zM1.16 14.965l2.42-3.259c-.012.096-.02.194-.02.294v1.78c0 .296.058.574.174.838.054.123.118.239.19.347zm5.818-2.5h-2.51V12a1.242 1.242 0 0 1 .765-1.147c.152-.064.315-.096.49-.096.168 0 .33.032.484.095.156.065.29.154.4.27.112.115.2.249.27.4.068.151.1.311.1.478zm8.057 1.316a1.249 1.249 0 0 1-1.254 1.243c-.168 0-.329-.032-.485-.096a1.168 1.168 0 0 1-.4-.27 1.376 1.376 0 0 1-.269-.4 1.159 1.159 0 0 1-.1-.477V12a1.24 1.24 0 0 1 1.255-1.243c.166 0 .328.032.482.095.156.065.29.154.4.27.112.115.201.249.27.4.067.152.101.311.101.478zm4.028 0c0 .167-.033.326-.1.478a1.38 1.38 0 0 1-.27.4 1.16 1.16 0 0 1-.4.27 1.26 1.26 0 0 1-.484.094 1.232 1.232 0 0 1-.89-.364 1.242 1.242 0 0 1-.366-.878V12c0-.167.035-.326.102-.478a1.4 1.4 0 0 1 .27-.4 1.16 1.16 0 0 1 .4-.27 1.27 1.27 0 0 1 .484-.095 1.25 1.25 0 0 1 .89.365 1.25 1.25 0 0 1 .364.878zm4.028 0a1.224 1.224 0 0 1-.364.878c-.116.116-.25.205-.4.27a1.25 1.25 0 0 1-.49.094 1.27 1.27 0 0 1-.485-.095 1.169 1.169 0 0 1-.4-.27 1.38 1.38 0 0 1-.27-.4 1.157 1.157 0 0 1-.1-.477V12a1.24 1.24 0 0 1 1.255-1.243c.167 0 .328.032.483.095.156.065.29.154.4.27.112.115.201.249.27.4.067.152.1.311.1.478v1.78z"/></svg>
     </a>
   
 </div>
@@ -672,23 +729,1118 @@
     </div>
   </div>
 </footer>
+  </div>
+</div>
+
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="PTArcade" class="md-nav__button md-logo" aria-label="PTArcade" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M.198 18.24a.966.966 0 0 1-.194-.571v-.955s0-.571.563-.313c0 0 6.919 3.135 8.033 3.626a7.832 7.832 0 0 0 3.408.729 8.216 8.216 0 0 0 3.396-.729l8.037-3.626c.559-.258.559.313.559.313v.955a1.038 1.038 0 0 1-.198.575c-.19.258-.515.539-1.411.959-.713.337-6.23 2.818-6.995 3.17a8.008 8.008 0 0 1-3.4.729 8.336 8.336 0 0 1-3.82-.927c-1.435-.65-5.849-2.631-6.567-2.972-.9-.428-1.153-.654-1.411-.963zm1.411-5.973 6.987-3.17a7.975 7.975 0 0 1 2.164-.634v5.707c0 .396.571.697 1.236.697s1.141-.313 1.141-.697V8.479c.778.105 1.54.313 2.263.618l6.987 3.17c.579.273 1.609.761 1.609 1.538s-1.011 1.236-1.609 1.53l-6.987 3.17a8.2 8.2 0 0 1-3.396.729 7.832 7.832 0 0 1-3.408-.729l-6.987-3.17C1.011 15.042 0 14.574 0 13.801s1.03-1.264 1.609-1.534zm1.807 2.247c.77.396 1.683.396 2.453 0 .682-.396.686-1.026 0-1.419a2.705 2.705 0 0 0-2.453 0c-.68.392-.666 1.02 0 1.419zM12 7.595a3.35 3.35 0 1 1 3.349-3.351v.003c0 1.849-1.5 3.348-3.349 3.348z"/></svg>
+
+    </a>
+    PTArcade
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/andrea-mitridate/PTArcade" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="getting_started/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              <label class="md-nav__link " for="__nav_2">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/local_install/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/run/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Run PTArcade
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/hpc_install/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Set up for HPC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/trouble/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="inputs/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    
+  
+    Inputs
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              <label class="md-nav__link " for="__nav_3">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Inputs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="inputs/model/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Model file
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="inputs/config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration file
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="outputs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Outputs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="utils/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    
+  
+    Utilities
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              <label class="md-nav__link " for="__nav_5">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Utilities
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="utils/model_utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Model utilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="utils/chain_utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Chains utilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="utils/plot_utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Plot utilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1" >
+        
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    
+  
+    ptarcade
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ptarcade
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/ptarcade/__init__/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+      init  
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/ptarcade/chains_utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    chains_utils
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_3" >
+        
+          <label class="md-nav__link" for="__nav_6_1_3" id="__nav_6_1_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    
+  
+    data
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_1_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    data
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/ptarcade/data/__init__/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+      init  
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/ptarcade/data/default_config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    default_config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/ptarcade/fast_interpolate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    fast_interpolate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/ptarcade/input_handler/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    input_handler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/ptarcade/models_utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    models_utils
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/ptarcade/plot_utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    plot_utils
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/ptarcade/pta_importer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    pta_importer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/ptarcade/sampler/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    sampler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/ptarcade/signal_builder/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    signal_builder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </button>
+        
+      </main>
       
     </div>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": ".", "features": ["header.autohide", "navigation.footer", "navigation.sections", "navigation.path", "navigation.top", "navigation.instant", "navigation.tracking", "navigation.top", "toc.integrate", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.annotate", "content.code.copy"], "search": "assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"annotate": {"json": [".s2"]}, "base": ".", "features": ["announce.dismiss", "content.action.view", "content.code.annotate", "content.code.copy", "content.code.select", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.top", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "assets/javascripts/workers/search.6c7302c4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="assets/javascripts/bundle.b4d07000.min.js"></script>
+  
+      <script src="assets/javascripts/bundle.10c6cd24.min.js"></script>
       
-        <script src="javascripts/mathjax.js"></script>
+        
+          <script src="javascripts/mathjax.js"></script>
+        
       
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
+          <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
+          <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
       
     
+  <script src="assets/javascripts/custom.805f8adb.min.js"></script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": "https://squidfunk.github.io/mkdocs-material/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://squidfunk.github.io/mkdocs-material/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+  </script>
+
   </body>
 </html>
