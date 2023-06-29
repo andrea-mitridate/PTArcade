@@ -373,6 +373,8 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
             x0[name] = par.sample()  # type: ignore
         except AttributeError:
             x0[name] = par.value  # type: ignore
+        except TypeError:
+            x0[name] = par(name).sample()
 
     if hasattr(model, "spectrum"):
         if mode == "enterprise":
