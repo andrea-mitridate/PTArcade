@@ -62,11 +62,18 @@ for the conda installation, download the following PTA datasets:
             ```
             sudo apt-get install libsuitesparse-dev
             ```
-    - `ptmcmc` needs [mpi4py][https://github.com/mpi4py/mpi4py/]. You can install it by typing
+    - `mpi4py` needs an MPI implementation. You can install it by typing
     in a terminal 
-        ```
-        pip install mpi4py
-        ```
+
+        === "Mac"
+            ```
+            brew install open-mpi
+            ```
+
+        === "Debian"
+            ```
+            sudo apt install libopenmpi-dev openmpi-bin
+            ```
 
 
 ### With docker 
