@@ -106,6 +106,7 @@ readme = "README.md"
 authors = ["Andrea Mitridate <andrea.mitridate@nanograv.org>",]
 keywords = ["ptarcade"]
 repository = "https://github.com/andrea-mitridate/PTArcade"
+documentation = "https://andrea-mitridate.github.io/PTArcade/"
 classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
