@@ -1,0 +1,206 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+site_name: PTArcade
+site_author: Andrea Mitridate and David Wright
+site_description: >-
+  Searching for new physics signals in Pulsar Timing Array data has
+  never been easier. 
+
+repo_url: https://github.com/andrea-mitridate/PTArcade
+
+theme:
+  name: material
+  custom_dir: material/.overrides
+  icon:
+    logo: simple/applearcade
+    repo: fontawesome/brands/github
+  features:
+    - announce.dismiss
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.code.select
+    # - content.tabs.link
+    - content.tooltips
+    # - header.autohide
+    # - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    # - navigation.instant
+    # - navigation.path
+    # - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    # - navigation.tabs.sticky
+    - navigation.top
+    # - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    # - toc.integrate
+  language: en
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+watch:
+- src/ptarcade
+- material/
+
+extra_css:
+  - stylesheets/extra.css
+
+# Hooks
+hooks:
+  - material/.overrides/hooks/translations.py
+
+plugins:
+  - search:
+      lang: en
+  - gen-files:
+      scripts:
+        - docs/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          import:
+          - https://enterprise.readthedocs.io/en/latest/objects.inv
+          - https://docs.python.org/3/objects.inv
+          - https://numpy.org/doc/stable/objects.inv
+          - http://jellis18.github.io/PTMCMCSampler/objects.inv
+          - https://getdist.readthedocs.io/en/latest/objects.inv
+          - https://matplotlib.org/stable/objects.inv
+          - https://enterprise-extensions.readthedocs.io/en/latest/objects.inv
+          - https://pandas.pydata.org/docs/objects.inv
+          options:
+            selection:
+              members: yes
+            docstring_style: numpy
+            docstring_section_style: spacy
+            show_if_no_docstring: false
+            separate_signature: true
+            show_signature_annotations: true
+            show_root_heading: false
+            heading_level: 2
+            group_by_category: true
+            show_category_heading: true
+            members_order: source
+
+
+# Extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:materialx.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+
+# Customization
+extra:
+  annotate:
+    json: [.s2]
+  status:
+    new: Recently added
+    deprecated: Deprecated
+  analytics:
+    provider: google
+    property: !ENV GOOGLE_ANALYTICS_KEY
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: This page was helpful
+          data: 1
+          note: Thanks for your feedback!
+        - icon: material/emoticon-sad-outline
+          name: This page could be improved
+          data: 0
+          note: >-
+            Thanks for your feedback! Help us improve this page by
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSe8L5YDggZiVjgvBKfv-XCdbQAEJrseRh8MBh-jS92TU2aqzw/viewform?usp=pp_url&entry.853143515={url}" target=_blank>telling us what you're missing</a>.
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/andrea-mitridate
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/PTArcade
+    - icon: simple/zenodo
+      link: https://zenodo.org/record/7876429
+
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+
+nav:
+  - Home: index.md
+  - Getting started:
+    - getting_started/index.md
+    - Installation: getting_started/local_install.md
+    - Run PTArcade: getting_started/run.md
+    - Set up for HPC: getting_started/hpc_install.md
+    - Troubleshooting: getting_started/trouble.md
+  - Inputs:
+    - inputs/index.md
+    - Model file: inputs/model.md
+    - Configuration file: inputs/config.md
+  - Outputs: outputs.md
+  - Utilities:
+    - utils/index.md
+    - Model utilities: utils/model_utils.md
+    - Chains utilities: utils/chain_utils.md
+    - Plot utilities: utils/plot_utils.md
+  - Reference: reference/

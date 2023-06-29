@@ -1,7 +1,7 @@
 __pycache__
 .DS_store
 
-outputs/*
+chains/*
 
 test.sh
 
@@ -13,3 +13,6 @@ batch_scripts
 
 # ignore the unzipped pta files but keep the folder 
 inputs/pta_data/*
+
+dist/
+poetry.lock
