@@ -1,23 +1,32 @@
 """Module for building PTA signals."""
 from __future__ import annotations
 
+import logging
 import sys
+from importlib.resources import files
+from pathlib import Path
 from types import ModuleType
+from zipfile import ZipFile
 
 import numpy as np
+from astropy.utils.data import download_file
+from ceffyl import Ceffyl
 from enterprise import constants as const
 from enterprise.pulsar import Pulsar
-from enterprise.signals import deterministic_signals, gp_signals, parameter, signal_base, utils
+from enterprise.signals import (deterministic_signals, gp_signals, parameter,
+                                signal_base, utils)
 from enterprise.signals.parameter import function
 from enterprise_extensions import chromatic as chrom
 from enterprise_extensions import hypermodel, model_utils
-from enterprise_extensions.blocks import common_red_noise_block, dm_noise_block, red_noise_block, white_noise_block
+from enterprise_extensions.blocks import (common_red_noise_block,
+                                          dm_noise_block, red_noise_block,
+                                          white_noise_block)
 from enterprise_extensions.sampler import get_parameter_groups
 from numpy.typing import NDArray
-from ceffyl import Ceffyl
-from importlib.resources import files
 
 import ptarcade.models_utils as aux
+
+log = logging.getLogger("rich")
 
 # gaussian parameters extracted from the holodeck library astro-02-gw
 bhb_priors = {"NG15" : [np.array([-15.61492963, 4.70709637]), np.array([[0.27871359, -0.00263617], [-0.00263617, 0.12415383]])],
@@ -382,10 +391,49 @@ def ent_builder(
 
 def ceffyl_builder(inputs):
 
-    if inputs["config"].corr:
-        datadir = files('ptarcade.data').joinpath('30f_fs{hd}_ceffyl/')
-    else:
-        datadir = files('ptarcade.data').joinpath('30f_fs{cp}_ceffyl/')
+    if inputs["config"].pta_data == "IPTA2":
+        # download from zenodo
+        ceffyldl = download_file(
+            "https://zenodo.org/record/8092873/files/ipta-dr2_fftkde_10k%5B94%5D_epa_sj.zip?download=1",
+            cache=True,
+            pkgname="ptarcade",
+            )
+        # make a Path object for ease of use
+        ceffyldl = Path(ceffyldl)
+
+        # Check if we've unzipped or not
+        # If not, unzip and name the same as the original download so that astropy can find it again
+        if ceffyldl.is_file():
+            tempdir = (ceffyldl.parent / "temp")
+            # extract
+            with ZipFile(ceffyldl) as zf:
+                zf.extractall(tempdir)
+            # delete original zip
+            ceffyldl.unlink()
+            # rename unzipped dir to original zip name
+            tempdir.rename(ceffyldl)
+        # find ipta data inside dir
+        datadir = (ceffyldl / "ipta-dr2_fftkde_10k[94]_epa_sj")
+
+
+    elif inputs["config"].pta_data == "NG15":
+        log.error("The 15yr data is [bold red]not yet[/] publicly available.\n"
+                  "We will update PTArcade in tandem with its release.\n"
+                  "At the moment, only IPTA2 is supported in ceffyl mode.\n",
+                  extra={"markup":True})
+        raise SystemExit
+
+        if inputs["config"].corr:
+            pass
+        else:
+            pass
+
+    elif inputs["config"].pta_data == "NG12":
+        log.error("The 12yr data needed for ceffyl is [bold red]not yet[/] publicly available.\n"
+                  "We will update PTArcade in tandem with its release.\n"
+                  "At the moment, only IPTA2 is supported in ceffyl mode.\n",
+                  extra={"markup":True})
+        raise SystemExit
 
     ceffyl_pta = Ceffyl.ceffyl(datadir)
 

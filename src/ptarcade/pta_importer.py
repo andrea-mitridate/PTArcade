@@ -7,7 +7,7 @@ import logging
 import os
 import pickle
 
-from astropy.utils.data import download_file
+from astropy.utils.data import download_file, get_readable_fileobj
 from enterprise.pulsar import Pulsar
 from numpy._typing import _ArrayLikeFloat_co as array_like
 
@@ -65,7 +65,7 @@ def get_pulsars(pta_data: str, filters: list[str] | None = None) -> list[Pulsar]
 
     """
     if os.path.isfile(pta_data):
-        with open(pta_data, "rb") as handle:
+        with get_readable_fileobj(pta_data, "binary") as handle:
             psrs = pickle.load(handle)
 
         return psrs
@@ -161,16 +161,22 @@ def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, 
     if pta_data == "NG15":
         # This returns a path in the astropy cache that points to these files, otherwise
         # it downloads them there and returns the path
-        #ng15_dic = {
-        #    "psrs_data": download_file("https://data.nanograv.org/ng15_psrs_v1p1.pkl", cache=True, pkgname="ptarcade"),
-        #    "noise_data": download_file("https://data.nanograv.org/ng15_wn_v1p1.json", cache=True, pkgname="ptarcade"),
-        #    "emp_dist": download_file("https://data.nanograv.org/ng15_emp_v1p1.pkl", cache=True, pkgname="ptarcade"),
-        #}
+
+        # Temporarily issue error msg and quit if user asks for NG15
+        log.error("The 15yr data is [bold red]not yet[/] publicly available.\n"
+                  "We will update PTArcade in tandem with its release.\n", extra={"markup":True})
+        raise SystemExit
 
         ng15_dic = {
-            "psrs_data": "/Users/andreamitridate/code/pta/nanograv/15yr/data/ng15_psrs_v1p1.pkl",
-            "noise_data": "/Users/andreamitridate/code/pta/nanograv/15yr/data/ng15_wn_v1p1.json",
-            "emp_dist": "/Users/andreamitridate/code/pta/nanograv/15yr/data/ng15_emp_v1p1.pkl",
+            "psrs_data": download_file(
+                "http://0.0.0.0/ng15_psrs_v1p1.pkl.gz", show_progress=True, cache=True, pkgname="ptarcade",
+            ),
+            "noise_data": download_file(
+                "http://0.0.0.0/ng15_wn_v1p1.json", show_progress=True, cache=True, pkgname="ptarcade",
+            ),
+            "emp_dist": download_file(
+                "http://0.0.0.0/ng15_emp_v1p1.pkl", show_progress=True, cache=True, pkgname="ptarcade",
+            ),
         }
 
         psrs = get_pulsars(ng15_dic["psrs_data"])
@@ -179,8 +185,16 @@ def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, 
 
     elif pta_data == "NG12":
         ng12_dic = {
-            "psrs_data": download_file("https://data.nanograv.org/ng12_psrs_v4.pkl", cache=True, pkgname="ptarcade"),
-            "noise_data": download_file("https://data.nanograv.org/ng12_wn_v4.json", cache=True, pkgname="ptarcade"),
+            "psrs_data": download_file(
+                "https://zenodo.org/record/8092873/files/ng12_psrs_v4.pkl.gz?download=1",
+                cache=True,
+                pkgname="ptarcade",
+            ),
+            "noise_data": download_file(
+                "https://zenodo.org/record/8092873/files/ng12_wn_v4.json?download=1",
+                cache=True,
+                pkgname="ptarcade",
+            ),
             "emp_dist": None,
         }
 
@@ -191,10 +205,14 @@ def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, 
     elif pta_data == "IPTA2":
         ipta2_dic = {
             "psrs_data": download_file(
-                "https://data.nanograv.org/ipta2_psrs_de438.pkl", cache=True, pkgname="ptarcade",
+                "https://zenodo.org/record/8092873/files/ipta2_psrs_de438.pkl.gz?download=1",
+                cache=True,
+                pkgname="ptarcade",
             ),
             "noise_data": download_file(
-                "https://data.nanograv.org/ipta2_wn_de438.json", cache=True, pkgname="ptarcade",
+                "https://zenodo.org/record/8092873/files/ipta2_wn_de438.json?download=1",
+                cache=True,
+                pkgname="ptarcade",
             ),
             "emp_dist": None,
         }
