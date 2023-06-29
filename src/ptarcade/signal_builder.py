@@ -429,11 +429,29 @@ def ceffyl_builder(inputs):
             pass
 
     elif inputs["config"].pta_data == "NG12":
-        log.error("The 12yr data needed for ceffyl is [bold red]not yet[/] publicly available.\n"
-                  "We will update PTArcade in tandem with its release.\n"
-                  "At the moment, only IPTA2 is supported in ceffyl mode.\n",
-                  extra={"markup":True})
-        raise SystemExit
+        # download from zenodo
+        ceffyldl = download_file(
+            "https://zenodo.org/record/8096699/files/ng12p5_ceffyl.zip?download=1",
+            cache=True,
+            pkgname="ptarcade",
+            )
+        # make a Path object for ease of use
+        ceffyldl = Path(ceffyldl)
+
+        # Check if we've unzipped or not
+        # If not, unzip and name the same as the original download so that astropy can find it again
+        if ceffyldl.is_file():
+            tempdir = (ceffyldl.parent / "temp")
+            # extract
+            with ZipFile(ceffyldl) as zf:
+                zf.extractall(tempdir)
+            # delete original zip
+            ceffyldl.unlink()
+            # rename unzipped dir to original zip name
+            tempdir.rename(ceffyldl)
+        # find ipta data inside dir
+        datadir = (ceffyldl / "ng12p5_ceffyl")
+        log.info(datadir)
 
     ceffyl_pta = Ceffyl.ceffyl(datadir)
 
@@ -448,7 +466,7 @@ def ceffyl_builder(inputs):
     
     
     if inputs["model"].smbhb:
-        mu, sigma = bhb_priors.get(inputs["config"].pta_data, [False, False])
+        mu, sigma = bhb_priors.get(inputs["config"].pta_data, np.array([False, False]))
 
         if mu.all() and inputs["config"].bhb_th_prior:
             bhb_params = [parameter.Normal(mu=mu, sigma=sigma, size=2)("gw_bhb")]
