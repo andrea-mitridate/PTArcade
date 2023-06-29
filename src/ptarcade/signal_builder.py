@@ -448,7 +448,7 @@ def ceffyl_builder(inputs):
     
     
     if inputs["model"].smbhb:
-        mu, sigma = bhb_priors.get(inputs["config"].pta_data, [False, False])
+        mu, sigma = bhb_priors.get(inputs["config"].pta_data, np.array([False, False]))
 
         if mu.all() and inputs["config"].bhb_th_prior:
             bhb_params = [parameter.Normal(mu=mu, sigma=sigma, size=2)("gw_bhb")]
