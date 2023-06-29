@@ -8,4 +8,4 @@ dependencies:
   - tempo2
   - suitesparse
   - pip:
-    - git+ssh://git@github.com/andrea-mitridate/PTArcade.git@prepare-for-pypi
+    - ptarcade
