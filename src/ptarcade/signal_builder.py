@@ -417,16 +417,55 @@ def ceffyl_builder(inputs):
 
 
     elif inputs["config"].pta_data == "NG15":
-        log.error("The 15yr data is [bold red]not yet[/] publicly available.\n"
-                  "We will update PTArcade in tandem with its release.\n"
-                  "At the moment, only IPTA2 is supported in ceffyl mode.\n",
-                  extra={"markup":True})
-        raise SystemExit
 
         if inputs["config"].corr:
-            pass
+            # download from zenodo
+            ceffyldl = download_file(
+                "https://zenodo.org/record/8102748/files/30f_fs%7Bhd%7D_ceffyl.zip?download=1",
+                cache=True,
+                pkgname="ptarcade",
+                )
+            # make a Path object for ease of use
+            ceffyldl = Path(ceffyldl)
+
+            # Check if we've unzipped or not
+            # If not, unzip and name the same as the original download so that astropy can find it again
+            if ceffyldl.is_file():
+                tempdir = (ceffyldl.parent / "temp")
+                # extract
+                with ZipFile(ceffyldl) as zf:
+                    zf.extractall(tempdir)
+                # delete original zip
+                ceffyldl.unlink()
+                # rename unzipped dir to original zip name
+                tempdir.rename(ceffyldl)
+            # find ipta data inside dir
+            datadir = (ceffyldl / "30f_fs{hd}_ceffyl")
         else:
-            pass
+
+            # download from zenodo
+            ceffyldl = download_file(
+                "https://zenodo.org/record/8102748/files/30f_fs%7Bcp%7D_ceffyl.zip?download=1",
+                cache=True,
+                pkgname="ptarcade",
+                )
+            # make a Path object for ease of use
+            ceffyldl = Path(ceffyldl)
+
+            # Check if we've unzipped or not
+            # If not, unzip and name the same as the original download so that astropy can find it again
+            if ceffyldl.is_file():
+                tempdir = (ceffyldl.parent / "temp")
+                # extract
+                with ZipFile(ceffyldl) as zf:
+                    zf.extractall(tempdir)
+                # delete original zip
+                ceffyldl.unlink()
+                # rename unzipped dir to original zip name
+                tempdir.rename(ceffyldl)
+            # find ipta data inside dir
+            datadir = (ceffyldl / "30f_fs{cp}_ceffyl")
+        log.info(datadir)
 
     elif inputs["config"].pta_data == "NG12":
         # download from zenodo
