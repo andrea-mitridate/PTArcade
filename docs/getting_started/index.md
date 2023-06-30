@@ -118,13 +118,13 @@ using a [configuration file][config]
         copyright = {Open Access}}
 
     @article{Mitridate:2023oar,
-    author = {Mitridate, Andrea and Wright, David and von Eckardstein, Richard and Schr\"oder, Tobias and Nay, Jonathan and Olum, Ken and Schmitz, Kai and Trickle, Tanner},
-    title = "{PTArcade}",
-    eprint = "2306.16377",
-    archivePrefix = "arXiv",
-    primaryClass = "hep-ph",
-    month = "6",
-    year = "2023"}   
+        author = {Mitridate, Andrea and Wright, David and von Eckardstein, Richard and Schr\"oder, Tobias and Nay, Jonathan and Olum, Ken and Schmitz, Kai and Trickle, Tanner},
+        title = "{PTArcade}",
+        eprint = "2306.16377",
+        archivePrefix = "arXiv",
+        primaryClass = "hep-ph",
+        month = "6",
+        year = "2023"}   
     ```
 
   [ENTERPRISE]: https://github.com/nanograv/enterprise
@@ -137,7 +137,7 @@ using a [configuration file][config]
   [model_utils]: ../utils/model_utils.md
   [chain_utils]: ../utils/chain_utils.md
   [plot_utils]: ../utils/plot_utils.md
-  [NG15]: https://aas.com
+  [NG15]: https://arxiv.org/abs/2306.16213
   [MC]: https://en.wikipedia.org/wiki/Markov_chain#:~:text=A%20Markov%20chain%20or%20Markov,attained%20in%20the%20previous%20event.
   [posterior]: https://en.wikipedia.org/wiki/Posterior_probability#:~:text=In%20the%20context%20of%20Bayesian,a%20collection%20of%20observed%20data.
   [K_bound]: ../utils/plot_utils.md
