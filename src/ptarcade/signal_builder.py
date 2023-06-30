@@ -465,7 +465,6 @@ def ceffyl_builder(inputs):
                 tempdir.rename(ceffyldl)
             # find ipta data inside dir
             datadir = (ceffyldl / "30f_fs{cp}_ceffyl")
-        log.info(datadir)
 
     elif inputs["config"].pta_data == "NG12":
         # download from zenodo
