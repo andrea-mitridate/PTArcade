@@ -117,7 +117,14 @@ using a [configuration file][config]
         month={Apr},
         copyright = {Open Access}}
 
-    @article{mitridate...}    
+    @article{Mitridate:2023oar,
+    author = {Mitridate, Andrea and Wright, David and von Eckardstein, Richard and Schr\"oder, Tobias and Nay, Jonathan and Olum, Ken and Schmitz, Kai and Trickle, Tanner},
+    title = "{PTArcade}",
+    eprint = "2306.16377",
+    archivePrefix = "arXiv",
+    primaryClass = "hep-ph",
+    month = "6",
+    year = "2023"}   
     ```
 
   [ENTERPRISE]: https://github.com/nanograv/enterprise
