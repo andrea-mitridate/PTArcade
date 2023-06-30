@@ -1645,10 +1645,20 @@ You can install it by typing in a terminal </p>
 </div>
 </li>
 <li>
-<p><code>ptmcmc</code> needs [mpi4py][<a href="https://github.com/mpi4py/mpi4py/">https://github.com/mpi4py/mpi4py/</a>]. You can install it by typing
-in a terminal 
-    <div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>pip install mpi4py
-</span></code></pre></div></p>
+<p><code>mpi4py</code> needs an MPI implementation. You can install it by typing
+in a terminal </p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="mac_1" name="__tabbed_2" type="radio" /><input id="debian_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="mac_1">Mac</label><label for="debian_1">Debian</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>brew install open-mpi
+</span></code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo apt install libopenmpi-dev openmpi-bin
+</span></code></pre></div>
+</div>
+</div>
+</div>
 </li>
 </ul>
 </div>
@@ -1656,11 +1666,11 @@ in a terminal
 <p>The official <a href="https://hub.docker.com/r/ngnewphy/ptarcade">Docker image</a> is a great way to get up and running in a few
 minutes, as it comes with all dependencies pre-installed. Open up a terminal
 and pull the image with:
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>ngnewphy/ptarcade:latest
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>ngnewphy/ptarcade:latest
 </span></code></pre></div></p>
 <h3 id="with-singularity">With singularity<a class="headerlink" href="#with-singularity" title="Permanent link">&para;</a></h3>
 <p>A singularity environment with all the necessary dependencies already installed can be downloaded by typing 
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>singularity<span class="w"> </span>pull<span class="w"> </span>ptarcade.sif<span class="w"> </span>docker://ngnewphy/ptarcade:latest
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>singularity<span class="w"> </span>pull<span class="w"> </span>ptarcade.sif<span class="w"> </span>docker://ngnewphy/ptarcade:latest
 </span></code></pre></div>
 This will create a Singularity image and save it as \texttt{ptarcade.sif} in the current working directory.</p>
 
