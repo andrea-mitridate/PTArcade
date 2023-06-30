@@ -7,5 +7,6 @@ dependencies:
   - pip
   - tempo2
   - suitesparse
+  - mpi4py
   - pip:
     - ptarcade
