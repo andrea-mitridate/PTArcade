@@ -162,20 +162,24 @@ def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, 
         # This returns a path in the astropy cache that points to these files, otherwise
         # it downloads them there and returns the path
 
-        # Temporarily issue error msg and quit if user asks for NG15
-        log.error("The 15yr data is [bold red]not yet[/] publicly available.\n"
-                  "We will update PTArcade in tandem with its release.\n", extra={"markup":True})
-        raise SystemExit
-
         ng15_dic = {
             "psrs_data": download_file(
-                "http://0.0.0.0/ng15_psrs_v1p1.pkl.gz", show_progress=True, cache=True, pkgname="ptarcade",
+                "https://zenodo.org/record/8102748/files/ng15_psrs_v1p1.pkl.gz?download=1",
+                show_progress=True,
+                cache=True,
+                pkgname="ptarcade",
             ),
             "noise_data": download_file(
-                "http://0.0.0.0/ng15_wn_v1p1.json", show_progress=True, cache=True, pkgname="ptarcade",
+                "https://zenodo.org/record/8102748/files/ng15_wn_v1p1.json?download=1",
+                show_progress=True,
+                cache=True,
+                pkgname="ptarcade",
             ),
             "emp_dist": download_file(
-                "http://0.0.0.0/ng15_emp_v1p1.pkl", show_progress=True, cache=True, pkgname="ptarcade",
+                "https://zenodo.org/record/8102748/files/ng15_emp_v1p1.pkl?download=1",
+                show_progress=True,
+                cache=True,
+                pkgname="ptarcade",
             ),
         }
 
