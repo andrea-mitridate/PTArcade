@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import h5py
 import numpy as np
+from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
 
 
@@ -35,7 +36,7 @@ def load_data(file: str) -> tuple[list[tuple[str, float, float]], NDArray]:
         return (info, spectrum)
 
 
-def interp(info: list[tuple[float, float, float]], data: NDArray) -> NDArray:
+def interp(info: list[tuple[float, float, array_like]], data: NDArray) -> NDArray:
     """Do interpolation.
 
     Called with info: list of (start, step, value) and multidimensional array of data points. Multiple values
@@ -59,7 +60,20 @@ def interp(info: list[tuple[float, float, float]], data: NDArray) -> NDArray:
     if len(info) == 0:       # Nothing to do: just return element
         return data
     x0, dx, x = info[0]
-    (fract, index) = np.modf((x - x0) / dx)
+    # This function exploits single integer vs array of integer indexing.
+    # Ceffyl returns an array, even if it only contains a single element.
+    # Enterprise doesn't experience this issue.
+    # The type of `x` below can change the type of `index` s.t. it breaks
+    # this function (i.e. `index` will become [3] instead of just 3).
+    # So, here we cast all single element arrays `x` to their
+    # scalar representations.
+    # We use getattr as a quick test for the type (if it's not an
+    # array it won't have the attribute) and to get the shape
+    # if it is an array.
+    # There is probably a much more intelligent way to solve this issue
+    if getattr(x, "shape", None)==(1,):
+        x = x.item() # type: ignore
+    (fract, index) = np.modf((x - x0) / dx) # type: ignore
     index = index.astype(int)
     # Call ourselves to interpolate over remaining variables if any
     # then combine results linearly
