@@ -112,8 +112,6 @@ def get_user_pta_data(inputs: dict[str, Any]) -> tuple[list[Pulsar], dict | None
     # import pta data
     psrs, noise_params, emp_dist = pta_importer.pta_data_importer(inputs['config'].pta_data)
 
-    print(f"\tloaded {len(psrs)} pulsars\n")
-    
     return psrs, noise_params, emp_dist
 
 
@@ -335,7 +333,7 @@ def main():
             # import pta data
             psrs, noise_params, emp_dist = get_user_pta_data(inputs)
 
-            console.rule("[bold green]Done loading Pulsars and noise data :heavy_check_mark-emoji:")
+            console.print(f"[bold green]Done loading [blue]{len(psrs)}[/] Pulsars and noise data :heavy_check_mark:\n")
 
 
     with console.status("Initializing PTA...", spinner="bouncingBall"):
