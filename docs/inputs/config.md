@@ -244,8 +244,8 @@ with the following parameters in the configuration file:
 [model]: model.md
 [bf]: https://en.wikipedia.org/wiki/Bayes_factor
 [chains_utils]: ../utils/chain_utils.md
-[NG15newphys]: https://en.wikipedia.org/wiki/Bayes_factor
-[NG15astro]: https://en.wikipedia.org/wiki/Bayes_factor
+[NG15newphys]: https://arxiv.org/abs/2306.16219
+[NG15astro]: https://arxiv.org/abs/2306.16220
 [ENTERPRISE]: https://github.com/nanograv/enterprise
 [GFL]: https://arxiv.org/pdf/2303.15442.pdf
 [Ceffyl]: https://github.com/astrolamb/ceffyl
