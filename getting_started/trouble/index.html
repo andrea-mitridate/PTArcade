@@ -680,6 +680,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#runtimeerror-involving-autocorrelation-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RuntimeError involving autocorrelation time
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1527,6 +1538,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#runtimeerror-involving-autocorrelation-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RuntimeError involving autocorrelation time
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1562,6 +1584,12 @@
 <p>If you are <code>pip</code> installing, check that you have installed <code>tempo2</code> as instructed <a href="../local_install/#with-pip">here</a>.</p>
 <h2 id="scikit-sparse-fails-to-install"><code>scikit-sparse</code> Fails to Install<a class="headerlink" href="#scikit-sparse-fails-to-install" title="Permanent link">&para;</a></h2>
 <p>If you are <code>pip</code> installing, check that you have installed <code>suitesparse</code> as instructed <a href="../local_install/#with-pip">here</a>.</p>
+<h2 id="runtimeerror-involving-autocorrelation-time"><code>RuntimeError</code> involving autocorrelation time<a class="headerlink" href="#runtimeerror-involving-autocorrelation-time" title="Permanent link">&para;</a></h2>
+<p>If you get an error like 
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="ne">RuntimeError</span><span class="p">:</span> <span class="n">The</span> <span class="n">autocorrelation</span> <span class="n">time</span> <span class="ow">is</span> <span class="n">too</span> <span class="n">long</span> <span class="n">relative</span> <span class="n">to</span> <span class="n">the</span> <span class="n">variance</span> <span class="ow">in</span> <span class="n">dimension</span> <span class="mf">632846881.</span>
+</span></code></pre></div>
+a temporary solution is to increase <a href="../../inputs/config/#+config.N_samples"><code>N_samples</code></a>.
+We are actively working to upgrade our sampler and fix this issue.</p>
 
 
 
