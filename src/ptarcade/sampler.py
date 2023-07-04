@@ -291,13 +291,21 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
             module="enterprise.signals.parameter",
             lineno=62,
         )
-        sampler.sample(
-            x0,
-            N_samples,
-            SCAMweight=inputs["config"].scam_weight,
-            AMweight=inputs["config"].am_weight,
-            DEweight=inputs["config"].de_weight,
-        )
+        try:
+            sampler.sample(
+                x0,
+                N_samples,
+                SCAMweight=inputs["config"].scam_weight,
+                AMweight=inputs["config"].am_weight,
+                DEweight=inputs["config"].de_weight,
+            )
+        except RuntimeError as e:
+            err = ("There was an error while sampling. If this error involves autocorrelation time,\n"
+                  "a temporary fix is to increase the number of samples in the configuration file.\n"
+                  "We are actively working to upgrade the autocorrelation routines in our sampler.\n\n")
+            console.print("\n\n")
+            log.exception(err)
+            raise SystemExit from None
 
     console.print()
     console.print(Panel.fit("[bold green]Done sampling[/]", border_style="green"))
