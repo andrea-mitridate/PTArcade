@@ -149,6 +149,7 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
             psrs=psrs,
             model=inputs['model'],
             noisedict=noise_params,
+            white_vary=inputs['config'].white_vary,
             pta_dataset=inputs['config'].pta_data,
             bhb_th_prior=inputs['config'].bhb_th_prior,
             gamma_bhb=inputs['config'].gamma_bhb,
