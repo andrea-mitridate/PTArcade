@@ -14,7 +14,7 @@ from ceffyl import Ceffyl
 from enterprise import constants as const
 from enterprise.pulsar import Pulsar
 from enterprise.signals import (deterministic_signals, gp_signals, parameter,
-                                signal_base, utils)
+                                signal_base, utils, white_signals)
 from enterprise.signals.parameter import function
 from enterprise_extensions import chromatic as chrom
 from enterprise_extensions import hypermodel, model_utils
@@ -199,6 +199,7 @@ def ent_builder(
     psrs: list[Pulsar],
     model: ModuleType | None = None,
     noisedict: dict | None = None,
+    white_vary: bool = True,
     pta_dataset: str | None = None,
     bhb_th_prior: bool = False,
     gamma_bhb: float | None = None,
@@ -222,6 +223,10 @@ def ent_builder(
         signal. Defaults to None.
     noisedict : dict, optional
         Dictionary of pulsar noise properties. Defaults to None]
+    white_vary: bool, optional
+        If set to False, efac is set to a constant value of 1.0. If True, all
+        white noise parameters are sampled. If a noisedict is supplied, this
+        bool is set to False. Defaults to True. 
     pta_dataset : str, optional
         PTADataset object containing the data for the PTA. Defaults to None.
     bhb_th_prior : bool
@@ -353,31 +358,38 @@ def ent_builder(
     models = []
 
     if noisedict is None:
-        white_vary = True
         tnequad = False
     else:
         white_vary = False
         tnequad = tnequad_conv(noisedict)
 
-    for p in psrs:
-        if "NANOGrav" in p.flags["pta"]:
-            s2 = s + white_noise_block(vary=white_vary, inc_ecorr=True, tnequad=tnequad, select="backend")
-            if "1713" in p.name and not any(dm_var):
-                s3 = s2 + chrom.dm_exponential_dip(tmin=54500, tmax=55000, idx=2, sign=False, name="dmexp_1")
-                if p.toas.max() / const.day > 57850:
-                    s3 += chrom.dm_exponential_dip(tmin=57300, tmax=57850, idx=2, sign=False, name="dmexp_2")
-                models.append(s3(p))
+    # constant white noise for simulations
+    if noisedict is None and white_vary is False:
+        efac = parameter.Constant(1.0)
+        wn = white_signals.MeasurementNoise(efac=efac)
+        s2 = s + wn
+        models.append(s2(p))
+
+    else:
+        for p in psrs:
+            if "NANOGrav" in p.flags["pta"]:
+                s2 = s + white_noise_block(vary=white_vary, inc_ecorr=True, tnequad=tnequad, select="backend")
+                if "1713" in p.name and not any(dm_var):
+                    s3 = s2 + chrom.dm_exponential_dip(tmin=54500, tmax=55000, idx=2, sign=False, name="dmexp_1")
+                    if p.toas.max() / const.day > 57850:
+                        s3 += chrom.dm_exponential_dip(tmin=57300, tmax=57850, idx=2, sign=False, name="dmexp_2")
+                    models.append(s3(p))
+                else:
+                    models.append(s2(p))
             else:
-                models.append(s2(p))
-        else:
-            s4 = s + white_noise_block(vary=white_vary, inc_ecorr=False, tnequad=tnequad, select="backend")
-            if "1713" in p.name and not any(dm_var):
-                s5 = s4 + chrom.dm_exponential_dip(tmin=54500, tmax=55000, idx=2, sign=False, name="dmexp_1")
-                if p.toas.max() / const.day > 57850:
-                    s5 += chrom.dm_exponential_dip(tmin=57300, tmax=57850, idx=2, sign=False, name="dmexp_2")
-                models.append(s5(p))
-            else:
-                models.append(s4(p))
+                s4 = s + white_noise_block(vary=white_vary, inc_ecorr=False, tnequad=tnequad, select="backend")
+                if "1713" in p.name and not any(dm_var):
+                    s5 = s4 + chrom.dm_exponential_dip(tmin=54500, tmax=55000, idx=2, sign=False, name="dmexp_1")
+                    if p.toas.max() / const.day > 57850:
+                        s5 += chrom.dm_exponential_dip(tmin=57300, tmax=57850, idx=2, sign=False, name="dmexp_2")
+                    models.append(s5(p))
+                else:
+                    models.append(s4(p))
 
     # set up PTA
     pta = signal_base.PTA(models)
