@@ -368,7 +368,8 @@ def ent_builder(
         efac = parameter.Constant(1.0)
         wn = white_signals.MeasurementNoise(efac=efac)
         s2 = s + wn
-        models.append(s2(p))
+        for p in psrs:
+            models.append(s2(p))
 
     else:
         for p in psrs:
