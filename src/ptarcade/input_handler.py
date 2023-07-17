@@ -172,6 +172,7 @@ def check_config(config: ModuleType) -> None:
            "A_bhb_logmin": None,
            "A_bhb_logmax" : None,
            "gamma_bhb" : None,
+           "white_vary" : True,
        }
 
     for par in default.keys():
@@ -241,6 +242,7 @@ def check_config(config: ModuleType) -> None:
         "resume": config.resume,
         "corr": config.corr,
         "bhb_th_prior": config.bhb_th_prior,
+        "white_vary": config.white_vary,
     }
 
     for key, value in bools.items():
