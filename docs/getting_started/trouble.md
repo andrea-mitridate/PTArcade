@@ -51,3 +51,6 @@ The temporary fix for this problem is to first install `libstempo` from the merg
 pip install git+https://github.com/vallis/libstempo@refs/pull/54/merge
 ```
 Now that the patched version of `libstempo` is installed, you can install `ptarcade` as usual.
+
+## My problem is not described here
+If you don't see a solution to your problem on this page, please open an issue on our [GitHub](https://github.com/andrea-mitridate/PTArcade/issues) repository or email us at [ptarcade.dev@gmail.com](mailto:ptarcade.dev@gmail.com).
