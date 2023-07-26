@@ -9,4 +9,4 @@ dependencies:
   - suitesparse
   - mpi4py
   - pip:
-    - ptarcade
+    - ptarcade 
