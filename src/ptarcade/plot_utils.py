@@ -851,7 +851,7 @@ def plot_posteriors(
         filtered_priors = {
             k.replace("_", "-"): v
             for k, v in priors[idx].items()
-            if k.replace("_", "-") in filtered[1] and v is not None
+            if k.replace("_", "-") in filtered[1] and (v is not None or not np.isnan(v))
         }
 
         samples.append(
