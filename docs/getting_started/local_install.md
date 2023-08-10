@@ -90,7 +90,7 @@ A singularity environment with all the necessary dependencies already installed 
 ```sh
 singularity pull ptarcade.sif docker://ngnewphy/ptarcade:latest
 ```
-This will create a Singularity image and save it as \texttt{ptarcade.sif} in the current working directory.
+This will create a Singularity image and save it as `ptarcade.sif` in the current working directory.
 
   [pip]: #with-pip
   [conda]: #with-conda
