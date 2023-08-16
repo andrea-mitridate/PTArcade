@@ -1582,37 +1582,36 @@
 can install PTArcade with <a href="#with-pip"><code>pip</code></a> or <a href="#with-conda"><code>conda</code></a>, the Python package manager.
 If not, we recommend using a <a href="https://hub.docker.com/r/ngnewphy/ptarcade"><code>docker</code></a> or <a href="#with-singularity"><code>singularity</code></a> virtual environment.</p>
 <h3 id="with-pip">With conda <small>(recommended)</small><a class="headerlink" href="#with-pip" title="Permanent link">&para;</a></h3>
-<p class="annotate">We are in the process of submitting PTArcade to the conda forge-channel,
-and soon you will be able to install PTArcade as a conda package. In the meantime, 
-you can install PTArcade using conda by downloading <a href="../../assets/downloads/ptarcade.yml">this environment file</a>, 
-and typing in a terminal (1)</p>
+<p><del>We are in the process of submitting PTArcade to the conda-forge-channel</del></p>
+<p class="annotate">PTArcade is now available on <a href="https://anaconda.org/conda-forge/ptarcade">conda-forge</a>! you can install PTArcade using conda by typing in a terminal (1)</p>
 <ol>
 <li>See <a href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html">here</a> for conda installation info.</li>
 </ol>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>ptarcade.yml<span class="w"> </span><span class="c1"># (1)!</span>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>ptarcade<span class="w"> </span><span class="c1"># (1)!</span>
 </span></code></pre></div>
 <ol>
-<li>Here we are assuming that the <code>yml</code> file is located in the current directory, otherwise you will have to specify the 
-path to the <code>yml</code> file when executing <code>conda env create</code>.</li>
+<li>If you want to install PTArcade in a new environment, run
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>ptarcade<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10<span class="w"> </span>ptarcade
+</span></code></pre></div></li>
 </ol>
-<p>This will install PTArcade and all the required dependencies in a conda environment named <code>ptarcade</code>, and download the following PTA datasets:
+<p>This will install PTArcade and all the required dependencies in a conda environment named <code>ptarcade</code>. PTArcade will download and cache the following PTA datasets at runtime:
 <a href="https://nanograv.org/science/data/125-year-pulsar-timing-array-data-release">NANOGrav 12.5-year</a>, <a href="https://nanograv.org/science/data/125-year-pulsar-timing-array-data-release">NANOGrav 15-year</a>, and <a href="https://gitlab.com/IPTA/DR2/tree/master/release">IPTA DR2</a>.</p>
 <h3 id="with-pip_1">With pip<a class="headerlink" href="#with-pip_1" title="Permanent link">&para;</a></h3>
 <p>PTArcade is also published as a <a href="https://pypi.org/project/PTArcade/">PyPI package</a> and can be installed with
 <code>pip</code>, ideally by using a <a href="https://docs.python.org/3/library/venv.html">virtual environment</a>. Open up a terminal
  and install PTArcade with:
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>pip<span class="w"> </span>install<span class="w"> </span>ptarcade<span class="w"> </span><span class="c1"># (1)!</span>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span>ptarcade<span class="w"> </span><span class="c1"># (1)!</span>
 </span></code></pre></div></p>
 <ol>
 <li>We suggest to install PTArcade in a virtual environment. You can do
     so by running
-    <div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>&lt;path/to/env&gt;
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">source</span><span class="w"> </span>&lt;path/to/env&gt;/bin/activate
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>ptarcade
+    <div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>&lt;path/to/env&gt;
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">source</span><span class="w"> </span>&lt;path/to/env&gt;/bin/activate
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>ptarcade
 </span></code></pre></div></li>
 </ol>
 <p>This will automatically install compatible versions of all <strong>Python</strong> dependencies and, as 
-for the conda installation, download the following PTA datasets:
+for the conda installation, download the following PTA datasets at runtime:
 <a href="https://nanograv.org/science/data/125-year-pulsar-timing-array-data-release">NANOGrav 12.5-year</a>, <a href="https://nanograv.org/science/data/125-year-pulsar-timing-array-data-release">NANOGrav 15-year</a>, and <a href="https://gitlab.com/IPTA/DR2/tree/master/release">IPTA DR2</a>.</p>
 <div class="admonition danger">
 <p class="admonition-title">Non-Python Dependencies</p>
@@ -1620,7 +1619,7 @@ for the conda installation, download the following PTA datasets:
 <ul>
 <li><code>libstempo</code> needs <a href="https://github.com/vallis/libstempo#pip-install">tempo2</a>. You can install
 it by typing in a terminal
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl -sSL https://raw.githubusercontent.com/vallis/libstempo/master/install_tempo2.sh | sh
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>curl -sSL https://raw.githubusercontent.com/vallis/libstempo/master/install_tempo2.sh | sh
 </span></code></pre></div></li>
 <li>
 <p><code>sckit-sparse</code> needs <a href="https://github.com/scikit-sparse/scikit-sparse#with-pip">suitesparse</a>. 
@@ -1628,11 +1627,11 @@ You can install it by typing in a terminal </p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="mac" name="__tabbed_1" type="radio" /><input id="debian" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="mac">Mac</label><label for="debian">Debian</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>brew install suite-sparse
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>brew install suite-sparse
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo apt-get install libsuitesparse-dev
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo apt-get install libsuitesparse-dev
 </span></code></pre></div>
 </div>
 </div>
@@ -1644,11 +1643,11 @@ in a terminal </p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="mac_1" name="__tabbed_2" type="radio" /><input id="debian_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="mac_1">Mac</label><label for="debian_1">Debian</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>brew install open-mpi
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>brew install open-mpi
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo apt install libopenmpi-dev openmpi-bin
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo apt install libopenmpi-dev openmpi-bin
 </span></code></pre></div>
 </div>
 </div>
@@ -1660,11 +1659,11 @@ in a terminal </p>
 <p>The official <a href="https://hub.docker.com/r/ngnewphy/ptarcade">Docker image</a> is a great way to get up and running in a few
 minutes, as it comes with all dependencies pre-installed. Open up a terminal
 and pull the image with:
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>ngnewphy/ptarcade:latest
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>ngnewphy/ptarcade:latest
 </span></code></pre></div></p>
 <h3 id="with-singularity">With singularity<a class="headerlink" href="#with-singularity" title="Permanent link">&para;</a></h3>
 <p>A singularity environment with all the necessary dependencies already installed can be downloaded by typing 
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>singularity<span class="w"> </span>pull<span class="w"> </span>ptarcade.sif<span class="w"> </span>docker://ngnewphy/ptarcade:latest
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>singularity<span class="w"> </span>pull<span class="w"> </span>ptarcade.sif<span class="w"> </span>docker://ngnewphy/ptarcade:latest
 </span></code></pre></div>
 This will create a Singularity image and save it as <code>ptarcade.sif</code> in the current working directory.</p>
 
