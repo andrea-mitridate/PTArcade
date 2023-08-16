@@ -19,7 +19,7 @@ conda install -c conda-forge ptarcade # (1)!
 conda create -n ptarcade -c conda-forge python=3.10 ptarcade
 ```
 
-This will install PTArcade and all the required dependencies in a conda environment named `ptarcade`, and download the following PTA datasets:
+This will install PTArcade and all the required dependencies in a conda environment named `ptarcade`. PTArcade will download and cache the following PTA datasets at runtime:
 [NANOGrav 12.5-year][NG12], [NANOGrav 15-year][NG12], and [IPTA DR2][IPTA2].
 
 ### With pip 
@@ -39,7 +39,7 @@ pip install ptarcade # (1)!
     ```
 
 This will automatically install compatible versions of all **Python** dependencies and, as 
-for the conda installation, download the following PTA datasets:
+for the conda installation, download the following PTA datasets at runtime:
 [NANOGrav 12.5-year][NG12], [NANOGrav 15-year][NG12], and [IPTA DR2][IPTA2].
 
 !!! danger "Non-Python Dependencies"
