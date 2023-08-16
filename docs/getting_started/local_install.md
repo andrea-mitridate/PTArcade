@@ -3,20 +3,21 @@ can install PTArcade with [`pip`][pip] or [`conda`][conda], the Python package m
 If not, we recommend using a [`docker`][docker] or [`singularity`][singularity] virtual environment.
 
 ### With conda <small>(recommended)</small> { #with-pip data-toc-label="with conda" }
-We are in the process of submitting PTArcade to the conda forge-channel,
-and soon you will be able to install PTArcade as a conda package. In the meantime, 
-you can install PTArcade using conda by downloading [this environment file][env], 
-and typing in a terminal (1)
+~~We are in the process of submitting PTArcade to the conda-forge-channel~~
+
+PTArcade is now available on [conda-forge](https://anaconda.org/conda-forge/ptarcade)! you can install PTArcade using conda by typing in a terminal (1)
 { .annotate }
 
 1. See [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html) for conda installation info.
 
 ``` sh
-conda env create -f ptarcade.yml # (1)!
+conda install -c conda-forge ptarcade # (1)!
 ```
 
-1. Here we are assuming that the `yml` file is located in the current directory, otherwise you will have to specify the 
-path to the `yml` file when executing `conda env create`.
+1. If you want to install PTArcade in a new environment, run
+```sh
+conda create -n ptarcade -c conda-forge python=3.10 ptarcade
+```
 
 This will install PTArcade and all the required dependencies in a conda environment named `ptarcade`, and download the following PTA datasets:
 [NANOGrav 12.5-year][NG12], [NANOGrav 15-year][NG12], and [IPTA DR2][IPTA2].
