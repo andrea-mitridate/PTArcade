@@ -81,7 +81,11 @@ gev_to_hz : np.float64 = nat.convert(nat.GeV, nat.Hz) # conversion from gev to H
 # tabulated values for the number of relativistic degrees of
 # freedom from reference 1803.01038
 gs = np.loadtxt(files('ptarcade.data').joinpath('g_star.dat')) # type: ignore
-
+ng15_sensitivity = np.loadtxt(
+    files("ptarcade.data").joinpath("sensitivity_curves_NG15yr_fullPTA.txt"),
+    delimiter=",",
+    usecols=(0, -1),
+)  # type: ignore
 # type to use for priors-building functions
 priors_type = Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "Constant", "Gamma"]
 
@@ -535,3 +539,6 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
     prior_obj.common = common
 
     return prior_obj
+
+def signal_to_noise(signal: Callable[..., NDArray], Tspan: float, sensitivity:NDArray):
+    pass
