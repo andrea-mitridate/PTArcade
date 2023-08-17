@@ -52,6 +52,8 @@ from typing import Any, Literal
 import natpy as nat
 import numpy as np
 import scipy.stats as ss
+from scipy.interpolate import interp1d
+from scipy.integrate import quad
 from enterprise.signals import parameter
 from enterprise.signals.parameter import function
 from numpy._typing import _ArrayLikeFloat_co as array_like
@@ -86,8 +88,10 @@ ng15_sensitivity = np.loadtxt(
     delimiter=",",
     usecols=(0, -1),
 )  # type: ignore
+ng15_sensitivity_interp = interp1d(ng15_sensitivity[:,0], h**2*ng15_sensitivity[:,1])
 # type to use for priors-building functions
 priors_type = Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "Constant", "Gamma"]
+
 
 
 def g_rho(x: array_like, is_freq: bool = False) -> array_like:  # noqa: FBT001, FBT002
@@ -540,5 +544,32 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
 
     return prior_obj
 
-def signal_to_noise(signal: Callable[..., NDArray], Tspan: float, sensitivity:NDArray):
-    pass
+def signal_to_noise(
+    signal: Callable[[NDArray], NDArray],
+    sensitivity: Callable[[NDArray], NDArray],
+    Tspan: float,
+    fmin: float,
+    fmax: float,
+) -> np.float64:
+    """Calculate the SNR of a signal given a sensitivity curve.
+
+    Parameters
+    ----------
+    signal : Callable[[NDArray], NDArray]
+        Callable signal function with frequency as the only argument
+    sensitivity : Callable[[NDArray], NDArray]
+        Callable sensitivity curve function with frequency as the only argument
+    Tspan : float
+        Timespan of the observation
+    fmin : float
+        lower limit on the frequencies to consider
+    fmax : float
+        upper limit on the frequencies to consider
+
+    Returns
+    -------
+    np.float64
+        SNR ratio
+
+    """
+    return np.sqrt(2 * Tspan * quad(lambda x: (signal(x) / sensitivity(x))**2, fmin, fmax)[0])
