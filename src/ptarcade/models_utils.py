@@ -52,8 +52,6 @@ from typing import Any, Literal
 import natpy as nat
 import numpy as np
 import scipy.stats as ss
-from scipy.interpolate import interp1d
-from scipy.integrate import quad
 from enterprise.signals import parameter
 from enterprise.signals.parameter import function
 from numpy._typing import _ArrayLikeFloat_co as array_like
@@ -83,15 +81,20 @@ gev_to_hz : np.float64 = nat.convert(nat.GeV, nat.Hz) # conversion from gev to H
 # tabulated values for the number of relativistic degrees of
 # freedom from reference 1803.01038
 gs = np.loadtxt(files('ptarcade.data').joinpath('g_star.dat')) # type: ignore
+
+# Sensitivity curves from 10.5281/zenodo.8092346
+
 ng15_sensitivity = np.loadtxt(
     files("ptarcade.data").joinpath("sensitivity_curves_NG15yr_fullPTA.txt"),
     delimiter=",",
     usecols=(0, -1),
 )  # type: ignore
-ng15_sensitivity_interp = interp1d(ng15_sensitivity[:,0], h**2*ng15_sensitivity[:,1])
+
+# convert to h^2 Omega_GW
+ng15_sensitivity[:,-1] *= h**2
+
 # type to use for priors-building functions
 priors_type = Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "Constant", "Gamma"]
-
 
 
 def g_rho(x: array_like, is_freq: bool = False) -> array_like:  # noqa: FBT001, FBT002
@@ -544,27 +547,36 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
 
     return prior_obj
 
+def find_nearest_index(array,value):
+    idx = np.searchsorted(array, value, side="left")
+    idx = idx - (np.abs(value - array[idx-1]) < np.abs(value - array[idx]))
+    return idx
+
+
+def find_nearest_value(array,value):
+    idx = np.searchsorted(array, value, side="left")
+    idx = idx - (np.abs(value - array[idx-1]) < np.abs(value - array[idx]))
+    return array[idx]
+
+
 def signal_to_noise(
-    signal: Callable[[NDArray], NDArray],
-    sensitivity: Callable[[NDArray], NDArray],
+    signal: Callable[[NDArray,...], NDArray],
+    signal_args: dict,
+    sensitivity: NDArray,
     Tspan: float,
-    fmin: float,
-    fmax: float,
 ) -> np.float64:
     """Calculate the SNR of a signal given a sensitivity curve.
 
     Parameters
     ----------
-    signal : Callable[[NDArray], NDArray]
-        Callable signal function with frequency as the only argument
-    sensitivity : Callable[[NDArray], NDArray]
-        Callable sensitivity curve function with frequency as the only argument
+    signal : Callable[[NDArray, ...], NDArray]
+        Callable signal function with frequency as the first
+    signal_args : dict
+        Dictionary of kwargs to pass to `signal`
+    sensitivity : NDArray
+        Sensitivity curve stored as a 2D NumPy array with dimensions (Hz, h**2*Omega_GW)
     Tspan : float
         Timespan of the observation
-    fmin : float
-        lower limit on the frequencies to consider
-    fmax : float
-        upper limit on the frequencies to consider
 
     Returns
     -------
@@ -572,4 +584,5 @@ def signal_to_noise(
         SNR ratio
 
     """
-    return np.sqrt(2 * Tspan * quad(lambda x: (signal(x) / sensitivity(x))**2, fmin, fmax)[0])
+    freqs = sensitivity[:,0]
+    return np.sqrt(2 * Tspan * np.trapz((signal(freqs,**signal_args) / sensitivity[:,-1])**2, freqs))
