@@ -547,20 +547,19 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
 
     return prior_obj
 
-def find_nearest_index(array,value):
+def find_nearest_index(array, value):
     idx = np.searchsorted(array, value, side="left")
     idx = idx - (np.abs(value - array[idx-1]) < np.abs(value - array[idx]))
     return idx
 
 
-def find_nearest_value(array,value):
-    idx = np.searchsorted(array, value, side="left")
-    idx = idx - (np.abs(value - array[idx-1]) < np.abs(value - array[idx]))
+def find_nearest_value(array, value):
+    idx = find_nearest_index(array, value)
     return array[idx]
 
 
 def signal_to_noise(
-    signal: Callable[[NDArray,...], NDArray],
+    signal: Callable[[NDArray, ...], NDArray],
     signal_args: dict,
     sensitivity: NDArray,
     Tspan: float,
@@ -570,7 +569,7 @@ def signal_to_noise(
     Parameters
     ----------
     signal : Callable[[NDArray, ...], NDArray]
-        Callable signal function with frequency as the first
+        Callable signal function with frequency as the first argument
     signal_args : dict
         Dictionary of kwargs to pass to `signal`
     sensitivity : NDArray
