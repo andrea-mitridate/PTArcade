@@ -583,5 +583,7 @@ def signal_to_noise(
         SNR ratio
 
     """
-    freqs = sensitivity[:,0]
-    return np.sqrt(2 * Tspan * np.trapz((signal(freqs,**signal_args) / sensitivity[:,-1])**2, freqs))
+    freqs = sensitivity[np.newaxis, :, 0]
+    return np.sqrt(
+        2 * Tspan * np.trapz((signal(freqs, **signal_args) / sensitivity[:, -1]) ** 2, freqs, axis=1)
+    )
