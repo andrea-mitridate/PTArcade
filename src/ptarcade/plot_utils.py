@@ -10,11 +10,12 @@ plt_params : dict[str, Any]
 """
 from __future__ import annotations
 
+import logging
 import math
 import warnings
 from dataclasses import dataclass
+from pathlib import Path
 
-import ptarcade.chains_utils as utils
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,7 +24,8 @@ from getdist.mcsamples import MCSamples
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
 from scipy.stats import norm
-import logging
+
+import ptarcade.chains_utils as utils
 
 log = logging.getLogger("rich")
 
@@ -759,6 +761,7 @@ def plot_posteriors(
     legend_size: float=12,
     verbose: bool=False,
     save:bool=False,
+    plots_dir: Path | str = './plots',
     model_name: str | None=None) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Plot posterior distributions for the chosen parameters in the chains.
@@ -807,6 +810,8 @@ def plot_posteriors(
         If set to True, the function will print statistical summaries of the data.
     save : bool, optional
         If set to True, the function will save the plot to a PDF file.
+    plots_dir : Path | str, optional
+        The directory to save plots in. The directory will be created if needed.
     model_name : str, optional
         Model name used to name the output files. If not specified the plot will be
         saved as 'corner.pdf'.
@@ -933,10 +938,21 @@ def plot_posteriors(
     create_ax_labels(par_names_union, labelsize=labelsize)
     g.fig.align_labels()
 
+    # Check if we got the right type, convert to Path if possible
+    if not isinstance(plots_dir, Path):
+        if isinstance(plots_dir, str):
+            plots_dir = Path(plots_dir)
+        else:
+            err = f"{plots_dir} is not a string or Path object. Falling back to saving in ./plots."
+            log.error(err)
+
+    # Make the directory if it doesn't exist
+    plots_dir.mkdir(parents=True, exist_ok=True)
+
     if save and model_name:
-        plt.savefig(f"./plots/{model_name}_posteriors.pdf", bbox_inches="tight")
+        plt.savefig(plots_dir / f"{model_name}_posteriors.pdf", bbox_inches="tight")
     elif save:
-        plt.savefig("./plots/posteriors.pdf", bbox_inches="tight")
+        plt.savefig(plots_dir / "posteriors.pdf", bbox_inches="tight")
 
     if verbose:
         print_stats(k_levels, hpi_points, bayes_est, max_pos, hpi_levels)
