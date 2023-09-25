@@ -172,6 +172,7 @@ def check_config(config: ModuleType) -> None:
            "A_bhb_logmin": None,
            "A_bhb_logmax" : None,
            "gamma_bhb" : None,
+           "ln_modelweight": 0,
        }
 
     for par in default.keys():
@@ -290,6 +291,12 @@ def check_config(config: ModuleType) -> None:
             "A_bhb_logmax, or gamma_bhb will be ignored.\n"
         )
         log.warning(warning)
+
+    if config.mod_sel:
+        message = (
+            "A model comparison with weight " + str(config.ln_modelweight) + " will be performed.\n"
+            )
+        log.info(message)
 
 
 def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_components: int, mode: str) -> None:
