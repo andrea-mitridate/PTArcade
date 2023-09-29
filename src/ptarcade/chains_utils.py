@@ -464,7 +464,7 @@ def bf_bootstrap(chain: NDArray, burn: int = 0) -> tuple[float, float]:
     mean = np.mean(df_dist_bs)
     var = np.var(df_dist_bs)
 
-    return mean, var
+    return mean, np.sqrt(var)
 
 
 def compute_bf(chain: NDArray, params: list[str], bootstrap: bool = False) -> tuple[float, float]:  # noqa: FBT001, FBT002
