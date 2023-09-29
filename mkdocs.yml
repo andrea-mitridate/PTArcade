@@ -176,7 +176,7 @@ extra:
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/PTArcade
     - icon: simple/zenodo
-      link: https://zenodo.org/record/7876429
+      link: https://zenodo.org/record/8106173
 
 
 extra_javascript:
