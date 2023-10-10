@@ -723,11 +723,11 @@ def print_stats(
                 x2 = level[1]
 
                 if x1:
-                    print(f'Lower {100*levels[idy]}%-HPDI limit is reached for {par} = {10**x1}')
+                    print(f'Lower {100*levels[idy]}%-HPDI limit is reached for {par} = {x1}')
                 else:
                     print(f'Lower {100*levels[idy]}%-HPDI limit is reached for {par} does not exist')
                 if x2:
-                    print(f'Upper {100*levels[idy]}%-HPDI limit is reached for {par} = {10**x2}')
+                    print(f'Upper {100*levels[idy]}%-HPDI limit is reached for {par} = {x2}')
                 else:
                     print(f'Upper {100*levels[idy]}%-HPDI limit is reached for {par} does not exist')
 
