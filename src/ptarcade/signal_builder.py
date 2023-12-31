@@ -28,7 +28,9 @@ import ptarcade.models_utils as aux
 
 log = logging.getLogger("rich")
 
-# gaussian parameters extracted from the holodeck library astro-02-gw
+# gaussian parameters for the SMBHB signal. 
+# NG15 parameters are extracted from the holodeck library astro-02-gw
+# IPTA2 parameters are taken from Middleton et al. 2021
 bhb_priors = {"NG15" : [np.array([-15.61492963, 4.70709637]), np.array([[0.27871359, -0.00263617], [-0.00263617, 0.12415383]])],
               "IPTA2" : [np.array([-15.02928454, 4.14290127]), np.array([[0.06869369, 0.00017051], [0.00017051, 0.04681747]])]}
 
