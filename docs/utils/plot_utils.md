@@ -44,9 +44,10 @@ parameters, you can do it by using the `params_name` argument.
     ```
     This will produce the plot below
 <figure markdown>
-  ![Image title](../assets/images/ex_post.png){ width="600" }
+  ![Image title](../assets/images/ex_post_bare.png){ width="458" }
 </figure>
 
+  For more details on how to control the appearence of this plot see [`here`][ptarcade.plot_utils.plot_posteriors].
 
     
 
