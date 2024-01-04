@@ -100,7 +100,7 @@ exclude = [
 
 [tool.poetry]
 name = "PTArcade"
-version = "0.1.7"
+version = "0.1.8"
 description = "PTArcade provides an interface to the ENTERPRISE analysis suite and allows for simple implementation of new-physics searches in PTA data."
 readme = "README.md"
 authors = ["Andrea Mitridate <andrea.mitridate@nanograv.org>",]
