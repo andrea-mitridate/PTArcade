@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.15+insiders-4.35.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.1.15+insiders-4.35.3">
     
     
       
@@ -1265,7 +1265,7 @@
   <a href="#ptarcade.fast_interpolate" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ptarcade.fast_interpolate
+        fast_interpolate
       
     </span>
   </a>
@@ -1547,7 +1547,7 @@
   <a href="#ptarcade.fast_interpolate" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ptarcade.fast_interpolate
+        fast_interpolate
       
     </span>
   </a>
@@ -1653,6 +1653,7 @@
 <div class="doc doc-object doc-module">
 
 
+
 <a id="ptarcade.fast_interpolate"></a>
   <div class="doc doc-contents first">
   
@@ -1670,16 +1671,18 @@
 
 <h2 id="ptarcade.fast_interpolate-functions">Functions<a href="#ptarcade.fast_interpolate-functions" class="headerlink" title="Permanent link">&para;</a></h2>
 
+
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.fast_interpolate.load_data" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">load_data</span>
+          <span class="doc doc-object-name doc-function-name">load_data</span>
 
 
 <a href="#ptarcade.fast_interpolate.load_data" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">load_data</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">load_data</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">NDArray</span><span class="p">]</span>
 </span></code></pre></div>
@@ -1694,11 +1697,13 @@ The last parameter must be the gravitational wave frequency <code>f</code>.
 Each parameter name: array giving start and step values.</p>
 <p><code>spectrum</code>: array indexed by parameters in order, giving omega_GW for these parameters.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -1718,6 +1723,8 @@ Each parameter name: array giving start and step values.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -1742,9 +1749,9 @@ Each parameter name: array giving start and step values.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/fast_interpolate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-10">10</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/fast_interpolate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-10">10</a></span>
 <span class="normal"><a href="#__codelineno-0-11">11</a></span>
 <span class="normal"><a href="#__codelineno-0-12">12</a></span>
 <span class="normal"><a href="#__codelineno-0-13">13</a></span>
@@ -1798,21 +1805,23 @@ Each parameter name: array giving start and step values.</p>
 </span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a>        <span class="n">spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">h5</span><span class="p">[</span><span class="s1">&#39;spectrum&#39;</span><span class="p">])</span>
 </span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36"></a>        <span class="k">return</span> <span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.fast_interpolate.interp" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">interp</span>
+          <span class="doc doc-object-name doc-function-name">interp</span>
 
 
 <a href="#ptarcade.fast_interpolate.interp" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">interp</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">interp</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">info</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">array_like</span><span class="p">]],</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span>
@@ -1825,11 +1834,13 @@ Each parameter name: array giving start and step values.</p>
 (in an np.array) are OK for the last value, but not earlier ones or else we will get confusion about
 array indexes.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -1865,6 +1876,8 @@ not earlier ones or else we will get confusion about array indexes.</p>
     </tbody>
   </table>
 
+
+
   <table>
     <thead>
       <tr>
@@ -1888,9 +1901,9 @@ not earlier ones or else we will get confusion about array indexes.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/fast_interpolate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-39">39</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/fast_interpolate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-39">39</a></span>
 <span class="normal"><a href="#__codelineno-0-40">40</a></span>
 <span class="normal"><a href="#__codelineno-0-41">41</a></span>
 <span class="normal"><a href="#__codelineno-0-42">42</a></span>
@@ -1976,32 +1989,36 @@ not earlier ones or else we will get confusion about array indexes.</p>
 </span><span id="__span-0-80"><a id="__codelineno-0-80" name="__codelineno-0-80"></a>    <span class="k">return</span> <span class="p">(</span><span class="n">interp</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">fract</span><span class="p">)</span>
 </span><span id="__span-0-81"><a id="__codelineno-0-81" name="__codelineno-0-81"></a>            <span class="o">+</span> <span class="n">interp</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">fract</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.fast_interpolate.reformat" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">reformat</span>
+          <span class="doc doc-object-name doc-function-name">reformat</span>
 
 
 <a href="#ptarcade.fast_interpolate.reformat" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">reformat</span><span class="p">(</span><span class="n">infile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">reformat</span><span class="p">(</span><span class="n">infile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </span></code></pre></div>
 
   <div class="doc doc-contents ">
   
       <p>Convert an old-style file to our HDF5 format.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -2036,6 +2053,8 @@ not earlier ones or else we will get confusion about array indexes.</p>
     </tbody>
   </table>
 
+
+
   <table>
     <thead>
       <tr>
@@ -2058,6 +2077,8 @@ not earlier ones or else we will get confusion about array indexes.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -2089,9 +2110,9 @@ the later parameters must go through precisely the same values. The values
 must be evenly spaced and in ascending order. There is no error checking
 in this code!</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/fast_interpolate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-84"> 84</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/fast_interpolate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-84"> 84</a></span>
 <span class="normal"><a href="#__codelineno-0-85"> 85</a></span>
 <span class="normal"><a href="#__codelineno-0-86"> 86</a></span>
 <span class="normal"><a href="#__codelineno-0-87"> 87</a></span>
@@ -2183,7 +2204,7 @@ in this code!</p>
 </span><span id="__span-0-128"><a id="__codelineno-0-128" name="__codelineno-0-128"></a>            <span class="n">shape</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
 </span><span id="__span-0-129"><a id="__codelineno-0-129" name="__codelineno-0-129"></a>        <span class="n">out</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;spectrum&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># Reshape and write</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>

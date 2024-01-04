@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.15+insiders-4.35.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.1.15+insiders-4.35.3">
     
     
       
@@ -1343,7 +1343,7 @@
   <a href="#ptarcade.plot_utils" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ptarcade.plot_utils
+        plot_utils
       
     </span>
   </a>
@@ -1674,7 +1674,7 @@
   <a href="#ptarcade.plot_utils" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ptarcade.plot_utils
+        plot_utils
       
     </span>
   </a>
@@ -1907,10 +1907,13 @@
 <div class="doc doc-object doc-module">
 
 
+
 <a id="ptarcade.plot_utils"></a>
   <div class="doc doc-contents first">
   
       <p>Utilities for plotting.</p>
+
+
 
   <table>
     <thead>
@@ -1966,8 +1969,9 @@
 
 
 
+
 <h3 id="ptarcade.plot_utils.bcolors" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">bcolors</span>
+          <span class="doc doc-object-name doc-class-name">bcolors</span>
 
   
   <span class="doc doc-labels">
@@ -1981,6 +1985,8 @@
 
   
       <p>Class to hold ANSI escape sequences.</p>
+
+
 
   <table>
     <thead>
@@ -2035,10 +2041,9 @@
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-33">33</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-33">33</a></span>
 <span class="normal"><a href="#__codelineno-0-34">34</a></span>
 <span class="normal"><a href="#__codelineno-0-35">35</a></span>
 <span class="normal"><a href="#__codelineno-0-36">36</a></span>
@@ -2068,7 +2073,7 @@
 </span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46"></a>    <span class="n">FAIL</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[0;31m&#39;</span>
 </span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="n">ENDC</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[0m&#39;</span>
 </span></code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -2091,16 +2096,18 @@
 </div>
 <h2 id="ptarcade.plot_utils-functions">Functions<a href="#ptarcade.plot_utils-functions" class="headerlink" title="Permanent link">&para;</a></h2>
 
+
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.plot_utils.set_size" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">set_size</span>
+          <span class="doc doc-object-name doc-function-name">set_size</span>
 
 
 <a href="#ptarcade.plot_utils.set_size" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">set_size</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">set_size</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">fraction</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -2112,11 +2119,13 @@
   
       <p>Set figure dimensions to avoid scaling in LaTeX.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -2143,7 +2152,7 @@
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2162,7 +2171,7 @@ by default None</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2180,7 +2189,7 @@ by default None</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>], optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>]</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2191,6 +2200,8 @@ by default None</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -2220,9 +2231,9 @@ the height is further adjusted based on the number of subplots.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-67"> 67</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-67"> 67</a></span>
 <span class="normal"><a href="#__codelineno-0-68"> 68</a></span>
 <span class="normal"><a href="#__codelineno-0-69"> 69</a></span>
 <span class="normal"><a href="#__codelineno-0-70"> 70</a></span>
@@ -2298,21 +2309,23 @@ the height is further adjusted based on the number of subplots.</p>
 </span><span id="__span-0-103"><a id="__codelineno-0-103" name="__codelineno-0-103"></a>
 </span><span id="__span-0-104"><a id="__codelineno-0-104" name="__codelineno-0-104"></a>    <span class="k">return</span> <span class="n">fig_dim</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.plot_utils.set_custom_tick_options" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">set_custom_tick_options</span>
+          <span class="doc doc-object-name doc-function-name">set_custom_tick_options</span>
 
 
 <a href="#ptarcade.plot_utils.set_custom_tick_options" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">set_custom_tick_options</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">set_custom_tick_options</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">ax</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">left</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">right</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -2328,11 +2341,13 @@ the height is further adjusted based on the number of subplots.</p>
   
       <p>Sets custom tick options for a matplotlib axis.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -2345,7 +2360,7 @@ the height is further adjusted based on the number of subplots.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://matplotlib.org/stable/index.html#module-matplotlib">matplotlib</a>.<a class="autorefs autorefs-external" title="matplotlib.pyplot" href="https://matplotlib.org/stable/api/pyplot_summary.html#module-matplotlib.pyplot">pyplot</a>.<a class="autorefs autorefs-external" title="matplotlib.pyplot.axis" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.axis.html#matplotlib.pyplot.axis">axis</a></code>
+                    <code><a class="autorefs autorefs-external" title="matplotlib.pyplot.axis" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.axis.html#matplotlib.pyplot.axis">axis</a></code>
                 </span>
             </p>
           </td>
@@ -2359,7 +2374,7 @@ the height is further adjusted based on the number of subplots.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2377,7 +2392,7 @@ the height is further adjusted based on the number of subplots.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2395,7 +2410,7 @@ the height is further adjusted based on the number of subplots.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2413,7 +2428,7 @@ the height is further adjusted based on the number of subplots.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2431,7 +2446,7 @@ the height is further adjusted based on the number of subplots.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2449,7 +2464,7 @@ the height is further adjusted based on the number of subplots.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2467,7 +2482,7 @@ the height is further adjusted based on the number of subplots.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2478,6 +2493,8 @@ the height is further adjusted based on the number of subplots.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -2502,9 +2519,9 @@ the height is further adjusted based on the number of subplots.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-107">107</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-107">107</a></span>
 <span class="normal"><a href="#__codelineno-0-108">108</a></span>
 <span class="normal"><a href="#__codelineno-0-109">109</a></span>
 <span class="normal"><a href="#__codelineno-0-110">110</a></span>
@@ -2636,21 +2653,23 @@ the height is further adjusted based on the number of subplots.</p>
 </span><span id="__span-0-171"><a id="__codelineno-0-171" name="__codelineno-0-171"></a>
 </span><span id="__span-0-172"><a id="__codelineno-0-172" name="__codelineno-0-172"></a>    <span class="k">return</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.plot_utils.plot_chains" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">plot_chains</span>
+          <span class="doc doc-object-name doc-function-name">plot_chains</span>
 
 
 <a href="#ptarcade.plot_utils.plot_chains" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">plot_chains</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">plot_chains</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">chain</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">params</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">params_name</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -2664,11 +2683,13 @@ the height is further adjusted based on the number of subplots.</p>
   
       <p>Plot the MCMC (Markov chain Monte Carlo) chain for the parameters specified by params.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -2682,7 +2703,7 @@ Each row corresponds to a step in the chain, and each column corresponds to a pa
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">numpy</a>.<a class="autorefs autorefs-external" title="numpy.ndarray" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a></code>
+                    <code><a class="autorefs autorefs-external" title="numpy.ndarray" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a></code>
                 </span>
             </p>
           </td>
@@ -2712,7 +2733,7 @@ Default is None, which plots all the common parameters + the MCMC parameters wit
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2730,7 +2751,7 @@ Default is None, which plots all the common parameters + the MCMC parameters wit
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2748,7 +2769,7 @@ Default is None, which plots all the common parameters + the MCMC parameters wit
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2766,7 +2787,7 @@ Default is None, which plots all the common parameters + the MCMC parameters wit
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -2777,6 +2798,8 @@ Default is None, which plots all the common parameters + the MCMC parameters wit
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -2801,6 +2824,8 @@ Default is None, which plots all the common parameters + the MCMC parameters wit
     </tbody>
   </table>
 
+
+
   <table>
     <thead>
       <tr>
@@ -2824,9 +2849,9 @@ Default is None, which plots all the common parameters + the MCMC parameters wit
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-175">175</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-175">175</a></span>
 <span class="normal"><a href="#__codelineno-0-176">176</a></span>
 <span class="normal"><a href="#__codelineno-0-177">177</a></span>
 <span class="normal"><a href="#__codelineno-0-178">178</a></span>
@@ -3012,21 +3037,23 @@ Default is None, which plots all the common parameters + the MCMC parameters wit
 </span><span id="__span-0-266"><a id="__codelineno-0-266" name="__codelineno-0-266"></a>
 </span><span id="__span-0-267"><a id="__codelineno-0-267" name="__codelineno-0-267"></a>    <span class="k">return</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.plot_utils.create_ax_labels" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">create_ax_labels</span>
+          <span class="doc doc-object-name doc-function-name">create_ax_labels</span>
 
 
 <a href="#ptarcade.plot_utils.create_ax_labels" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">create_ax_labels</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">create_ax_labels</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">par_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">labelsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </span></code></pre></div>
@@ -3037,11 +3064,13 @@ Default is None, which plots all the common parameters + the MCMC parameters wit
 <p>This function fetches the current figure and all its axes, sets custom tick options
 and labels for all axes according to the names of the parameters.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -3069,7 +3098,7 @@ this value is set to 12.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -3080,6 +3109,8 @@ this value is set to 12.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -3111,9 +3142,9 @@ this value is set to 12.</p>
   to prevent padding issues.</li>
 </ul>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-270">270</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-270">270</a></span>
 <span class="normal"><a href="#__codelineno-0-271">271</a></span>
 <span class="normal"><a href="#__codelineno-0-272">272</a></span>
 <span class="normal"><a href="#__codelineno-0-273">273</a></span>
@@ -3247,21 +3278,23 @@ this value is set to 12.</p>
 </span><span id="__span-0-335"><a id="__codelineno-0-335" name="__codelineno-0-335"></a>
 </span><span id="__span-0-336"><a id="__codelineno-0-336" name="__codelineno-0-336"></a>    <span class="k">return</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.plot_utils.level_to_sigma" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">level_to_sigma</span>
+          <span class="doc doc-object-name doc-function-name">level_to_sigma</span>
 
 
 <a href="#ptarcade.plot_utils.level_to_sigma" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">level_to_sigma</span><span class="p">(</span><span class="n">level</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">level_to_sigma</span><span class="p">(</span><span class="n">level</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span>
 </span></code></pre></div>
 
   <div class="doc doc-contents ">
@@ -3271,11 +3304,13 @@ this value is set to 12.</p>
 normal distribution to convert a confidence level to the equivalent number of
 standard deviations (sigma).</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -3295,6 +3330,8 @@ standard deviations (sigma).</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -3319,6 +3356,8 @@ standard deviations (sigma).</p>
     </tbody>
   </table>
 
+
+
   <table>
     <thead>
       <tr>
@@ -3342,9 +3381,9 @@ standard deviations (sigma).</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-339">339</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-339">339</a></span>
 <span class="normal"><a href="#__codelineno-0-340">340</a></span>
 <span class="normal"><a href="#__codelineno-0-341">341</a></span>
 <span class="normal"><a href="#__codelineno-0-342">342</a></span>
@@ -3404,21 +3443,23 @@ standard deviations (sigma).</p>
 </span><span id="__span-0-367"><a id="__codelineno-0-367" name="__codelineno-0-367"></a>        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
 </span><span id="__span-0-368"><a id="__codelineno-0-368" name="__codelineno-0-368"></a>        <span class="k">raise</span> <span class="ne">SystemExit</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.plot_utils.plot_bhb_prior" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">plot_bhb_prior</span>
+          <span class="doc doc-object-name doc-function-name">plot_bhb_prior</span>
 
 
 <a href="#ptarcade.plot_utils.plot_bhb_prior" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">plot_bhb_prior</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">plot_bhb_prior</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">plot</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">bhb_prior</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">levels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
@@ -3429,11 +3470,13 @@ standard deviations (sigma).</p>
   
       <p>Plot the prior distribution for SMBHB signal.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -3448,7 +3491,7 @@ object for the given parameters.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://matplotlib.org/stable/index.html#module-matplotlib">matplotlib</a>.<a class="autorefs autorefs-external" title="matplotlib.figure" href="https://matplotlib.org/stable/api/figure_api.html#module-matplotlib.figure">figure</a>.<a class="autorefs autorefs-external" title="matplotlib.figure.Figure" href="https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure">Figure</a></code>
+                    <code><a class="autorefs autorefs-external" title="matplotlib.figure.Figure" href="https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure">Figure</a></code>
                 </span>
             </p>
           </td>
@@ -3484,6 +3527,8 @@ object for the given parameters.</p>
     </tbody>
   </table>
 
+
+
   <table>
     <thead>
       <tr>
@@ -3507,9 +3552,9 @@ object for the given parameters.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-371">371</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-371">371</a></span>
 <span class="normal"><a href="#__codelineno-0-372">372</a></span>
 <span class="normal"><a href="#__codelineno-0-373">373</a></span>
 <span class="normal"><a href="#__codelineno-0-374">374</a></span>
@@ -3665,21 +3710,23 @@ object for the given parameters.</p>
 </span><span id="__span-0-447"><a id="__codelineno-0-447" name="__codelineno-0-447"></a>            <span class="p">)</span>
 </span><span id="__span-0-448"><a id="__codelineno-0-448" name="__codelineno-0-448"></a>    <span class="k">return</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.plot_utils.corner_plot_settings" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">corner_plot_settings</span>
+          <span class="doc doc-object-name doc-function-name">corner_plot_settings</span>
 
 
 <a href="#ptarcade.plot_utils.corner_plot_settings" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">corner_plot_settings</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">corner_plot_settings</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">levels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">samples</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MCSamples</span><span class="p">],</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">one_column</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -3692,11 +3739,13 @@ object for the given parameters.</p>
   
       <p>Configure the settings for corner plots.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -3710,7 +3759,7 @@ Each value in the list should be between 0 and 1. Default is None.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>], optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>]</code>
                 </span>
             </p>
           </td>
@@ -3755,7 +3804,7 @@ Default is 12.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -3775,7 +3824,7 @@ Default is None.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -3786,6 +3835,8 @@ Default is None.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -3798,7 +3849,7 @@ Default is None.</p>
         <tr>
           <td>
               <span class="doc-returns-annotation">
-                  <code><a class="autorefs autorefs-external" title="getdist.plots" href="https://getdist.readthedocs.io/en/latest/plots.html#module-getdist.plots">plots</a>.<a class="autorefs autorefs-external" title="getdist.plots.GetDistPlotSettings" href="https://getdist.readthedocs.io/en/latest/plots.html#getdist.plots.GetDistPlotSettings">GetDistPlotSettings</a></code>
+                  <code><a class="autorefs autorefs-external" title="getdist.plots.GetDistPlotSettings" href="https://getdist.readthedocs.io/en/latest/plots.html#getdist.plots.GetDistPlotSettings">GetDistPlotSettings</a></code>
               </span>
           </td>
           <td class="doc-returns-details">
@@ -3811,9 +3862,9 @@ settings configured as specified.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-451">451</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-451">451</a></span>
 <span class="normal"><a href="#__codelineno-0-452">452</a></span>
 <span class="normal"><a href="#__codelineno-0-453">453</a></span>
 <span class="normal"><a href="#__codelineno-0-454">454</a></span>
@@ -3925,21 +3976,23 @@ settings configured as specified.</p>
 </span><span id="__span-0-505"><a id="__codelineno-0-505" name="__codelineno-0-505"></a>
 </span><span id="__span-0-506"><a id="__codelineno-0-506" name="__codelineno-0-506"></a>    <span class="k">return</span> <span class="n">sets</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.plot_utils.oned_plot_settings" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">oned_plot_settings</span>
+          <span class="doc doc-object-name doc-function-name">oned_plot_settings</span>
 
 
 <a href="#ptarcade.plot_utils.oned_plot_settings" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">oned_plot_settings</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">oned_plot_settings</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">legend_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plots</span><span class="o">.</span><span class="n">GetDistPlotSettings</span>
 </span></code></pre></div>
@@ -3948,11 +4001,13 @@ settings configured as specified.</p>
   
       <p>Configure the settings for one-dimensional (1D) plots.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -3965,7 +4020,7 @@ settings configured as specified.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -3976,6 +4031,8 @@ settings configured as specified.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -3988,7 +4045,7 @@ settings configured as specified.</p>
         <tr>
           <td>
               <span class="doc-returns-annotation">
-                  <code><a class="autorefs autorefs-external" title="getdist.plots" href="https://getdist.readthedocs.io/en/latest/plots.html#module-getdist.plots">plots</a>.<a class="autorefs autorefs-external" title="getdist.plots.GetDistPlotSettings" href="https://getdist.readthedocs.io/en/latest/plots.html#getdist.plots.GetDistPlotSettings">GetDistPlotSettings</a></code>
+                  <code><a class="autorefs autorefs-external" title="getdist.plots.GetDistPlotSettings" href="https://getdist.readthedocs.io/en/latest/plots.html#getdist.plots.GetDistPlotSettings">GetDistPlotSettings</a></code>
               </span>
           </td>
           <td class="doc-returns-details">
@@ -4001,9 +4058,9 @@ settings configured as specified.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-510">510</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-510">510</a></span>
 <span class="normal"><a href="#__codelineno-0-511">511</a></span>
 <span class="normal"><a href="#__codelineno-0-512">512</a></span>
 <span class="normal"><a href="#__codelineno-0-513">513</a></span>
@@ -4055,21 +4112,23 @@ settings configured as specified.</p>
 </span><span id="__span-0-534"><a id="__codelineno-0-534" name="__codelineno-0-534"></a>
 </span><span id="__span-0-535"><a id="__codelineno-0-535" name="__codelineno-0-535"></a>    <span class="k">return</span> <span class="n">sets</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.plot_utils.plot_k_bounds" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">plot_k_bounds</span>
+          <span class="doc doc-object-name doc-function-name">plot_k_bounds</span>
 
 
 <a href="#ptarcade.plot_utils.plot_k_bounds" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">plot_k_bounds</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">plot_k_bounds</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">plot</span><span class="p">:</span> <span class="n">plots</span><span class="o">.</span><span class="n">GetDistPlotter</span><span class="o">.</span><span class="n">triangle_plot</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">samples</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MCSamples</span><span class="p">],</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">k_levels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">NDArray</span><span class="p">],</span>
@@ -4080,11 +4139,13 @@ settings configured as specified.</p>
   
       <p>Add the k-ratio bounds to an existing plot.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -4097,7 +4158,7 @@ settings configured as specified.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" title="getdist.plots" href="https://getdist.readthedocs.io/en/latest/plots.html#module-getdist.plots">plots</a>.<a class="autorefs autorefs-external" title="getdist.plots.GetDistPlotter" href="https://getdist.readthedocs.io/en/latest/plots.html#getdist.plots.GetDistPlotter">GetDistPlotter</a>.<a class="autorefs autorefs-external" title="getdist.plots.GetDistPlotter.triangle_plot" href="https://getdist.readthedocs.io/en/latest/plots.html#getdist.plots.GetDistPlotter.triangle_plot">triangle_plot</a></code>
+                    <code><a class="autorefs autorefs-external" title="getdist.plots.GetDistPlotter.triangle_plot" href="https://getdist.readthedocs.io/en/latest/plots.html#getdist.plots.GetDistPlotter.triangle_plot">triangle_plot</a></code>
                 </span>
             </p>
           </td>
@@ -4128,13 +4189,15 @@ corresponding K-ratio bound.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<span title="numpy._typing._ArrayLikeFloat_co">array_like</span>]</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<span title="numpy._typing._ArrayLikeFloat_co">_ArrayLikeFloat_co</span>]</code>
                 </span>
             </p>
           </td>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -4159,9 +4222,9 @@ corresponding K-ratio bound.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-538">538</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-538">538</a></span>
 <span class="normal"><a href="#__codelineno-0-539">539</a></span>
 <span class="normal"><a href="#__codelineno-0-540">540</a></span>
 <span class="normal"><a href="#__codelineno-0-541">541</a></span>
@@ -4313,21 +4376,23 @@ corresponding K-ratio bound.</p>
 </span><span id="__span-0-612"><a id="__codelineno-0-612" name="__codelineno-0-612"></a>
 </span><span id="__span-0-613"><a id="__codelineno-0-613" name="__codelineno-0-613"></a>    <span class="k">return</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.plot_utils.plot_hpi" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">plot_hpi</span>
+          <span class="doc doc-object-name doc-function-name">plot_hpi</span>
 
 
 <a href="#ptarcade.plot_utils.plot_hpi" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">plot_hpi</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">plot_hpi</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">plot</span><span class="p">:</span> <span class="n">plots</span><span class="o">.</span><span class="n">GetDistPlotter</span><span class="o">.</span><span class="n">triangle_plot</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">samples</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MCSamples</span><span class="p">],</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">hpi_points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">array_like</span><span class="p">],</span>
@@ -4338,11 +4403,13 @@ corresponding K-ratio bound.</p>
   
       <p>Add the highest posterior interval (HPI) to an existing plot.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -4355,7 +4422,7 @@ corresponding K-ratio bound.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" title="getdist.plots" href="https://getdist.readthedocs.io/en/latest/plots.html#module-getdist.plots">plots</a>.<a class="autorefs autorefs-external" title="getdist.plots.GetDistPlotter" href="https://getdist.readthedocs.io/en/latest/plots.html#getdist.plots.GetDistPlotter">GetDistPlotter</a>.<a class="autorefs autorefs-external" title="getdist.plots.GetDistPlotter.triangle_plot" href="https://getdist.readthedocs.io/en/latest/plots.html#getdist.plots.GetDistPlotter.triangle_plot">triangle_plot</a></code>
+                    <code><a class="autorefs autorefs-external" title="getdist.plots.GetDistPlotter.triangle_plot" href="https://getdist.readthedocs.io/en/latest/plots.html#getdist.plots.GetDistPlotter.triangle_plot">triangle_plot</a></code>
                 </span>
             </p>
           </td>
@@ -4385,13 +4452,15 @@ should contain the parameter name and corresponding HPI.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<span title="numpy._typing._ArrayLikeFloat_co">array_like</span>]</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<span title="numpy._typing._ArrayLikeFloat_co">_ArrayLikeFloat_co</span>]</code>
                 </span>
             </p>
           </td>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -4416,9 +4485,9 @@ should contain the parameter name and corresponding HPI.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-616">616</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-616">616</a></span>
 <span class="normal"><a href="#__codelineno-0-617">617</a></span>
 <span class="normal"><a href="#__codelineno-0-618">618</a></span>
 <span class="normal"><a href="#__codelineno-0-619">619</a></span>
@@ -4526,21 +4595,23 @@ should contain the parameter name and corresponding HPI.</p>
 </span><span id="__span-0-668"><a id="__codelineno-0-668" name="__codelineno-0-668"></a>
 </span><span id="__span-0-669"><a id="__codelineno-0-669" name="__codelineno-0-669"></a>    <span class="k">return</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.plot_utils.print_stats" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">print_stats</span>
+          <span class="doc doc-object-name doc-function-name">print_stats</span>
 
 
 <a href="#ptarcade.plot_utils.print_stats" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">print_stats</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">print_stats</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">k_levels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">array_like</span><span class="p">],</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">hpi_points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">array_like</span><span class="p">],</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">bayes_est</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
@@ -4553,11 +4624,13 @@ should contain the parameter name and corresponding HPI.</p>
   
       <p>Print the statistical summary for each sample.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -4571,7 +4644,7 @@ should contain the parameter name and corresponding K-ratio bound.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<span title="numpy._typing._ArrayLikeFloat_co">array_like</span>]</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<span title="numpy._typing._ArrayLikeFloat_co">_ArrayLikeFloat_co</span>]</code>
                 </span>
             </p>
           </td>
@@ -4586,7 +4659,7 @@ Each array should contain the parameter name and corresponding HPI.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<span title="numpy._typing._ArrayLikeFloat_co">array_like</span>]</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<span title="numpy._typing._ArrayLikeFloat_co">_ArrayLikeFloat_co</span>]</code>
                 </span>
             </p>
           </td>
@@ -4637,6 +4710,8 @@ in the list should be between 0 and 1.</p>
     </tbody>
   </table>
 
+
+
   <table>
     <thead>
       <tr>
@@ -4660,9 +4735,9 @@ in the list should be between 0 and 1.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-672">672</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-672">672</a></span>
 <span class="normal"><a href="#__codelineno-0-673">673</a></span>
 <span class="normal"><a href="#__codelineno-0-674">674</a></span>
 <span class="normal"><a href="#__codelineno-0-675">675</a></span>
@@ -4786,11 +4861,11 @@ in the list should be between 0 and 1.</p>
 </span><span id="__span-0-723"><a id="__codelineno-0-723" name="__codelineno-0-723"></a>                <span class="n">x2</span> <span class="o">=</span> <span class="n">level</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 </span><span id="__span-0-724"><a id="__codelineno-0-724" name="__codelineno-0-724"></a>
 </span><span id="__span-0-725"><a id="__codelineno-0-725" name="__codelineno-0-725"></a>                <span class="k">if</span> <span class="n">x1</span><span class="p">:</span>
-</span><span id="__span-0-726"><a id="__codelineno-0-726" name="__codelineno-0-726"></a>                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Lower </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">levels</span><span class="p">[</span><span class="n">idy</span><span class="p">]</span><span class="si">}</span><span class="s1">%-HPDI limit is reached for </span><span class="si">{</span><span class="n">par</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="mi">10</span><span class="o">**</span><span class="n">x1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span><span id="__span-0-726"><a id="__codelineno-0-726" name="__codelineno-0-726"></a>                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Lower </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">levels</span><span class="p">[</span><span class="n">idy</span><span class="p">]</span><span class="si">}</span><span class="s1">%-HPDI limit is reached for </span><span class="si">{</span><span class="n">par</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">x1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 </span><span id="__span-0-727"><a id="__codelineno-0-727" name="__codelineno-0-727"></a>                <span class="k">else</span><span class="p">:</span>
 </span><span id="__span-0-728"><a id="__codelineno-0-728" name="__codelineno-0-728"></a>                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Lower </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">levels</span><span class="p">[</span><span class="n">idy</span><span class="p">]</span><span class="si">}</span><span class="s1">%-HPDI limit is reached for </span><span class="si">{</span><span class="n">par</span><span class="si">}</span><span class="s1"> does not exist&#39;</span><span class="p">)</span>
 </span><span id="__span-0-729"><a id="__codelineno-0-729" name="__codelineno-0-729"></a>                <span class="k">if</span> <span class="n">x2</span><span class="p">:</span>
-</span><span id="__span-0-730"><a id="__codelineno-0-730" name="__codelineno-0-730"></a>                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Upper </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">levels</span><span class="p">[</span><span class="n">idy</span><span class="p">]</span><span class="si">}</span><span class="s1">%-HPDI limit is reached for </span><span class="si">{</span><span class="n">par</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="mi">10</span><span class="o">**</span><span class="n">x2</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span><span id="__span-0-730"><a id="__codelineno-0-730" name="__codelineno-0-730"></a>                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Upper </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">levels</span><span class="p">[</span><span class="n">idy</span><span class="p">]</span><span class="si">}</span><span class="s1">%-HPDI limit is reached for </span><span class="si">{</span><span class="n">par</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">x2</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 </span><span id="__span-0-731"><a id="__codelineno-0-731" name="__codelineno-0-731"></a>                <span class="k">else</span><span class="p">:</span>
 </span><span id="__span-0-732"><a id="__codelineno-0-732" name="__codelineno-0-732"></a>                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Upper </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">levels</span><span class="p">[</span><span class="n">idy</span><span class="p">]</span><span class="si">}</span><span class="s1">%-HPDI limit is reached for </span><span class="si">{</span><span class="n">par</span><span class="si">}</span><span class="s1"> does not exist&#39;</span><span class="p">)</span>
 </span><span id="__span-0-733"><a id="__codelineno-0-733" name="__codelineno-0-733"></a>
@@ -4804,21 +4879,23 @@ in the list should be between 0 and 1.</p>
 </span><span id="__span-0-741"><a id="__codelineno-0-741" name="__codelineno-0-741"></a>
 </span><span id="__span-0-742"><a id="__codelineno-0-742" name="__codelineno-0-742"></a>    <span class="k">return</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.plot_utils.plot_posteriors" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">plot_posteriors</span>
+          <span class="doc doc-object-name doc-function-name">plot_posteriors</span>
 
 
 <a href="#ptarcade.plot_utils.plot_posteriors" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">plot_posteriors</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">plot_posteriors</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">chains</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">array_like</span><span class="p">],</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">params</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">par_to_plot</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -4846,11 +4923,13 @@ in the list should be between 0 and 1.</p>
   
       <p>Plot posterior distributions for the chosen parameters in the chains.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -4863,7 +4942,7 @@ in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<span title="numpy._typing._ArrayLikeFloat_co">array_like</span>]</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<span title="numpy._typing._ArrayLikeFloat_co">_ArrayLikeFloat_co</span>]</code>
                 </span>
             </p>
           </td>
@@ -4891,7 +4970,7 @@ in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]], optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]]</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -4910,7 +4989,7 @@ If not specified the name in the par files will be used.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>lists[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]], optional</code>
+                    <code>lists[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]]</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -4929,7 +5008,7 @@ which to plot the posteriors (default is None and in this case nmodel is taken t
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>], optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>]</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -4948,7 +5027,7 @@ create the legend. If not specified, the labels in the legend will be Sample 1, 
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>], optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -4967,7 +5046,7 @@ should be computed. Each value in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>], optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>]</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -4985,7 +5064,7 @@ should be computed. Each value in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>], optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>]</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -5003,7 +5082,7 @@ should be computed. Each value in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>], optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>]</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -5022,7 +5101,7 @@ or lists specifying the lower and upper bounds of the range.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -5041,7 +5120,7 @@ in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>], optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>]</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -5059,7 +5138,7 @@ in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -5077,7 +5156,7 @@ in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -5095,7 +5174,7 @@ in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -5113,7 +5192,7 @@ in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -5131,7 +5210,7 @@ in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -5149,7 +5228,7 @@ in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -5167,7 +5246,7 @@ in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -5185,7 +5264,7 @@ in the list should be between 0 and 1.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a> | <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a> | <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -5204,7 +5283,7 @@ saved as 'corner.pdf'.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -5215,6 +5294,8 @@ saved as 'corner.pdf'.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -5235,7 +5316,7 @@ saved as 'corner.pdf'.</p>
               <p>
                 <span class="doc-returns-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://matplotlib.org/stable/index.html#module-matplotlib">matplotlib</a>.<a class="autorefs autorefs-external" title="matplotlib.figure" href="https://matplotlib.org/stable/api/figure_api.html#module-matplotlib.figure">figure</a>.<a class="autorefs autorefs-external" title="matplotlib.figure.Figure" href="https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure">Figure</a></code>
+                    <code><a class="autorefs autorefs-external" title="matplotlib.figure.Figure" href="https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure">Figure</a></code>
                 </span>
               </p>
           </td>
@@ -5251,7 +5332,7 @@ saved as 'corner.pdf'.</p>
               <p>
                 <span class="doc-returns-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://matplotlib.org/stable/index.html#module-matplotlib">matplotlib</a>.<a class="autorefs autorefs-external" title="matplotlib.axes" href="https://matplotlib.org/stable/api/axes_api.html#module-matplotlib.axes">axes</a>.<a class="autorefs autorefs-external" title="matplotlib.axes.Axes" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes">Axes</a>]</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" title="matplotlib.axes.Axes" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes">Axes</a>]</code>
                 </span>
               </p>
           </td>
@@ -5259,9 +5340,9 @@ saved as 'corner.pdf'.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-745">745</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/plot_utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-745">745</a></span>
 <span class="normal"><a href="#__codelineno-0-746">746</a></span>
 <span class="normal"><a href="#__codelineno-0-747">747</a></span>
 <span class="normal"><a href="#__codelineno-0-748">748</a></span>
@@ -5699,7 +5780,7 @@ saved as 'corner.pdf'.</p>
 </span><span id="__span-0-962"><a id="__codelineno-0-962" name="__codelineno-0-962"></a>
 </span><span id="__span-0-963"><a id="__codelineno-0-963" name="__codelineno-0-963"></a>    <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">axs</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>

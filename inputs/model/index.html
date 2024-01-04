@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.15+insiders-4.35.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.1.15+insiders-4.35.3">
     
     
       
@@ -1587,7 +1587,7 @@
 </ul>
 <p>In the following, we will explain how these two quantities are defined in the model file. </p>
 <h2 id="priors">Priors<a class="headerlink" href="#priors" title="Permanent link">&para;</a></h2>
-<p>The priors for the signal parameters are defined via the <code>parameters</code> dictionary. The keys of this dictionary must be strings, which will be used as names for the model parameters. The values of this dictionary are <a class="autorefs autorefs-external" href="https://enterprise.readthedocs.io/en/latest/enterprise.signals.html#enterprise.signals.parameter.Parameter">ENTERPRISE Parameter</a> objects, the user can create these object via the <a class="autorefs autorefs-internal" href="../../reference/ptarcade/models_utils/#ptarcade.models_utils.prior"><code>prior</code></a> helper function that can be imported from the <a class="autorefs autorefs-internal" href="../../reference/ptarcade/models_utils/#ptarcade.models_utils">ptarcade.models_utils</a> module. The first argument that the user needs to pass to the <a class="autorefs autorefs-internal" href="../../reference/ptarcade/models_utils/#ptarcade.models_utils.prior"><code>prior</code></a> function is a string with the name of the prior class they want to use for that parameter, the remaining arguments are used to set the attributes of the prior. By default, parameters are assumed to be common across all pulsars. If the user wants to define a pulsar-dependent parameter, this can be done by passing <code>common=False</code> as a keyword argument.</p>
+<p>The priors for the signal parameters are defined via the <code>parameters</code> dictionary. The keys of this dictionary must be strings, which will be used as names for the model parameters. The values of this dictionary are [ENTERPRISE Parameter][enterprise.signals.parameter.Parameter] objects, the user can create these object via the <a class="autorefs autorefs-internal" href="../../reference/ptarcade/models_utils/#ptarcade.models_utils.prior"><code>prior</code></a> helper function that can be imported from the <a class="autorefs autorefs-internal" href="../../reference/ptarcade/models_utils/#ptarcade.models_utils">ptarcade.models_utils</a> module. The first argument that the user needs to pass to the <a class="autorefs autorefs-internal" href="../../reference/ptarcade/models_utils/#ptarcade.models_utils.prior"><code>prior</code></a> function is a string with the name of the prior class they want to use for that parameter, the remaining arguments are used to set the attributes of the prior. By default, parameters are assumed to be common across all pulsars. If the user wants to define a pulsar-dependent parameter, this can be done by passing <code>common=False</code> as a keyword argument.</p>
 <details class="example" open="open">
 <summary>Priors Example</summary>
 <p>The <code>parameters</code> dictionary of a model described by the parameters <span class="arithmatex">\(a\)</span> and <span class="arithmatex">\(b\)</span>, which are common among all the pulsars, will look as follows for different choices of the priors:</p>
@@ -1632,13 +1632,13 @@ which are grouped in a single two dimensional parameter called <code>a_b</code>.
 </details>
 <details class="info">
 <summary>Constructing Priors</summary>
-<p>Notice, how we used both positional and keyword arguments: Both are allowed. These arguments correspond to the functions defined in either <a class="autorefs autorefs-external" href="https://enterprise.readthedocs.io/en/latest/enterprise.signals.html#module-enterprise.signals.parameter">enterprise.signals.parameter</a> or <a class="autorefs autorefs-internal" href="../../reference/ptarcade/models_utils/#ptarcade.models_utils">ptarcade.models_utils</a>. Below are links to all supported parameters:</p>
+<p>Notice, how we used both positional and keyword arguments: Both are allowed. These arguments correspond to the functions defined in either [enterprise.signals.parameter][] or <a class="autorefs autorefs-internal" href="../../reference/ptarcade/models_utils/#ptarcade.models_utils">ptarcade.models_utils</a>. Below are links to all supported parameters:</p>
 <ul>
-<li><a class="autorefs autorefs-external" href="https://enterprise.readthedocs.io/en/latest/enterprise.signals.html#enterprise.signals.parameter.Normal">enterprise.signals.parameter.Normal</a> </li>
-<li><a class="autorefs autorefs-external" href="https://enterprise.readthedocs.io/en/latest/enterprise.signals.html#enterprise.signals.parameter.Uniform">enterprise.signals.parameter.Uniform</a> </li>
-<li><a class="autorefs autorefs-external" href="https://enterprise.readthedocs.io/en/latest/enterprise.signals.html#enterprise.signals.parameter.TruncNormal">enterprise.signals.parameter.TruncNormal</a> </li>
-<li><a class="autorefs autorefs-external" href="https://enterprise.readthedocs.io/en/latest/enterprise.signals.html#enterprise.signals.parameter.LinearExp">enterprise.signals.parameter.LinearExp</a> </li>
-<li><a class="autorefs autorefs-external" href="https://enterprise.readthedocs.io/en/latest/enterprise.signals.html#enterprise.signals.parameter.Constant">enterprise.signals.parameter.Constant</a> </li>
+<li>[enterprise.signals.parameter.Normal][] </li>
+<li>[enterprise.signals.parameter.Uniform][] </li>
+<li>[enterprise.signals.parameter.TruncNormal][] </li>
+<li>[enterprise.signals.parameter.LinearExp][] </li>
+<li>[enterprise.signals.parameter.Constant][] </li>
 <li><a class="autorefs autorefs-internal" href="../../reference/ptarcade/models_utils/#ptarcade.models_utils.Gamma">ptarcade.models_utils.Gamma</a>.</li>
 </ul>
 </details>

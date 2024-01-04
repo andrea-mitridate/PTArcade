@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.15+insiders-4.35.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.1.15+insiders-4.35.3">
     
     
       
@@ -1369,7 +1369,7 @@
   <a href="#ptarcade.pta_importer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ptarcade.pta_importer
+        pta_importer
       
     </span>
   </a>
@@ -1541,7 +1541,7 @@
   <a href="#ptarcade.pta_importer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ptarcade.pta_importer
+        pta_importer
       
     </span>
   </a>
@@ -1641,6 +1641,7 @@
 <div class="doc doc-object doc-module">
 
 
+
 <a id="ptarcade.pta_importer"></a>
   <div class="doc doc-contents first">
   
@@ -1658,27 +1659,31 @@
 
 <h2 id="ptarcade.pta_importer-functions">Functions<a href="#ptarcade.pta_importer-functions" class="headerlink" title="Permanent link">&para;</a></h2>
 
+
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.pta_importer.get_ephem_conv" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">get_ephem_conv</span>
+          <span class="doc doc-object-name doc-function-name">get_ephem_conv</span>
 
 
 <a href="#ptarcade.pta_importer.get_ephem_conv" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">get_ephem_conv</span><span class="p">(</span><span class="n">par_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">get_ephem_conv</span><span class="p">(</span><span class="n">par_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
 </span></code></pre></div>
 
   <div class="doc doc-contents ">
   
       <p>Get the ephemeris convention used in par files.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -1698,6 +1703,8 @@
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -1726,9 +1733,9 @@
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/pta_importer.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-16">16</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/pta_importer.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-16">16</a></span>
 <span class="normal"><a href="#__codelineno-0-17">17</a></span>
 <span class="normal"><a href="#__codelineno-0-18">18</a></span>
 <span class="normal"><a href="#__codelineno-0-19">19</a></span>
@@ -1778,21 +1785,23 @@
 </span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39"></a>
 </span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="k">return</span> <span class="n">ephem</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.pta_importer.get_pulsars" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">get_pulsars</span>
+          <span class="doc doc-object-name doc-function-name">get_pulsars</span>
 
 
 <a href="#ptarcade.pta_importer.get_pulsars" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">get_pulsars</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">get_pulsars</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">pta_data</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Pulsar</span><span class="p">]</span>
 </span></code></pre></div>
@@ -1803,11 +1812,13 @@
 <p>If <code>pta_data</code> is a file, attempt to load it as a pickle. If it is a
 directory, read in the par and tim files within.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -1846,6 +1857,8 @@ directory, read in the par and tim files within.</p>
     </tbody>
   </table>
 
+
+
   <table>
     <thead>
       <tr>
@@ -1865,13 +1878,15 @@ directory, read in the par and tim files within.</p>
               <p>
                 <span class="doc-returns-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" title="enterprise.pulsar.Pulsar" href="https://enterprise.readthedocs.io/en/latest/enterprise.html#enterprise.pulsar.Pulsar">Pulsar</a>]</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<span title="enterprise.pulsar.Pulsar">Pulsar</span>]</code>
                 </span>
               </p>
           </td>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -1896,9 +1911,9 @@ directory, read in the par and tim files within.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/pta_importer.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-43">43</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/pta_importer.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-43">43</a></span>
 <span class="normal"><a href="#__codelineno-0-44">44</a></span>
 <span class="normal"><a href="#__codelineno-0-45">45</a></span>
 <span class="normal"><a href="#__codelineno-0-46">46</a></span>
@@ -2002,32 +2017,36 @@ directory, read in the par and tim files within.</p>
 </span><span id="__span-0-93"><a id="__codelineno-0-93" name="__codelineno-0-93"></a>        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
 </span><span id="__span-0-94"><a id="__codelineno-0-94" name="__codelineno-0-94"></a>        <span class="k">raise</span> <span class="ne">SystemExit</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.pta_importer.get_wn" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">get_wn</span>
+          <span class="doc doc-object-name doc-function-name">get_wn</span>
 
 
 <a href="#ptarcade.pta_importer.get_wn" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">get_wn</span><span class="p">(</span><span class="n">wn_data</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">get_wn</span><span class="p">(</span><span class="n">wn_data</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span>
 </span></code></pre></div>
 
   <div class="doc doc-contents ">
   
       <p>Get whitenoise data.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -2040,13 +2059,15 @@ directory, read in the par and tim files within.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, optional</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
                 </span>
             </p>
           </td>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -2072,9 +2093,9 @@ directory, read in the par and tim files within.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/pta_importer.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-97"> 97</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/pta_importer.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-97"> 97</a></span>
 <span class="normal"><a href="#__codelineno-0-98"> 98</a></span>
 <span class="normal"><a href="#__codelineno-0-99"> 99</a></span>
 <span class="normal"><a href="#__codelineno-0-100">100</a></span>
@@ -2150,21 +2171,23 @@ directory, read in the par and tim files within.</p>
 </span><span id="__span-0-133"><a id="__codelineno-0-133" name="__codelineno-0-133"></a>        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
 </span><span id="__span-0-134"><a id="__codelineno-0-134" name="__codelineno-0-134"></a>        <span class="k">raise</span> <span class="ne">SystemExit</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.pta_importer.pta_data_importer" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">pta_data_importer</span>
+          <span class="doc doc-object-name doc-function-name">pta_data_importer</span>
 
 
 <a href="#ptarcade.pta_importer.pta_data_importer" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">pta_data_importer</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">pta_data_importer</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">pta_data</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Pulsar</span><span class="p">],</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">array_like</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span>
 </span></code></pre></div>
@@ -2173,11 +2196,13 @@ directory, read in the par and tim files within.</p>
   
       <p>Import PTA pulsars objects, white noise parameters, and empirical distributions.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -2201,6 +2226,8 @@ directory, read in the par and tim files within.</p>
     </tbody>
   </table>
 
+
+
   <table>
     <thead>
       <tr>
@@ -2220,7 +2247,7 @@ directory, read in the par and tim files within.</p>
               <p>
                 <span class="doc-returns-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" title="enterprise.pulsar.Pulsar" href="https://enterprise.readthedocs.io/en/latest/enterprise.html#enterprise.pulsar.Pulsar">Pulsar</a>]</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<span title="enterprise.pulsar.Pulsar">Pulsar</span>]</code>
                 </span>
               </p>
           </td>
@@ -2252,13 +2279,15 @@ directory, read in the par and tim files within.</p>
               <p>
                 <span class="doc-returns-annotation">
                   <b>TYPE:</b>
-                    <code><span title="numpy._typing._ArrayLikeFloat_co">array_like</span> | None</code>
+                    <code><span title="numpy._typing._ArrayLikeFloat_co">_ArrayLikeFloat_co</span> | None</code>
                 </span>
               </p>
           </td>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -2283,9 +2312,9 @@ directory, read in the par and tim files within.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/pta_importer.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-137">137</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/pta_importer.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-137">137</a></span>
 <span class="normal"><a href="#__codelineno-0-138">138</a></span>
 <span class="normal"><a href="#__codelineno-0-139">139</a></span>
 <span class="normal"><a href="#__codelineno-0-140">140</a></span>
@@ -2489,7 +2518,7 @@ directory, read in the par and tim files within.</p>
 </span><span id="__span-0-237"><a id="__codelineno-0-237" name="__codelineno-0-237"></a>
 </span><span id="__span-0-238"><a id="__codelineno-0-238" name="__codelineno-0-238"></a>    <span class="k">return</span> <span class="n">psrs</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">emp_dist</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>

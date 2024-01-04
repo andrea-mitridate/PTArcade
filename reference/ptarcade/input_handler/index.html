@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.15+insiders-4.35.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.1.15+insiders-4.35.3">
     
     
       
@@ -1291,7 +1291,7 @@
   <a href="#ptarcade.input_handler" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ptarcade.input_handler
+        input_handler
       
     </span>
   </a>
@@ -1597,7 +1597,7 @@
   <a href="#ptarcade.input_handler" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ptarcade.input_handler
+        input_handler
       
     </span>
   </a>
@@ -1753,6 +1753,7 @@
 <div class="doc doc-object doc-module">
 
 
+
 <a id="ptarcade.input_handler"></a>
   <div class="doc doc-contents first">
   
@@ -1773,8 +1774,9 @@
 
 
 
+
 <h3 id="ptarcade.input_handler.bcolors" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">bcolors</span>
+          <span class="doc doc-object-name doc-class-name">bcolors</span>
 
   
   <span class="doc doc-labels">
@@ -1788,6 +1790,8 @@
 
   
       <p>Class to hold ANSI escape sequences.</p>
+
+
 
   <table>
     <thead>
@@ -1926,10 +1930,9 @@
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>src/ptarcade/input_handler.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-21">21</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/ptarcade/input_handler.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-21">21</a></span>
 <span class="normal"><a href="#__codelineno-0-22">22</a></span>
 <span class="normal"><a href="#__codelineno-0-23">23</a></span>
 <span class="normal"><a href="#__codelineno-0-24">24</a></span>
@@ -1983,7 +1986,7 @@
 </span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46"></a>    <span class="n">BOLD</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;</span>
 </span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="n">UNDERLINE</span> <span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[4m&quot;</span>
 </span></code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -2006,27 +2009,31 @@
 </div>
 <h2 id="ptarcade.input_handler-functions">Functions<a href="#ptarcade.input_handler-functions" class="headerlink" title="Permanent link">&para;</a></h2>
 
+
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.input_handler.import_file" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">import_file</span>
+          <span class="doc doc-object-name doc-function-name">import_file</span>
 
 
 <a href="#ptarcade.input_handler.import_file" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">import_file</span><span class="p">(</span><span class="n">full_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModuleType</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">import_file</span><span class="p">(</span><span class="n">full_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModuleType</span>
 </span></code></pre></div>
 
   <div class="doc doc-contents ">
   
       <p>Import a python module from a path.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -2061,6 +2068,8 @@
     </tbody>
   </table>
 
+
+
   <table>
     <thead>
       <tr>
@@ -2090,9 +2099,9 @@
       <h5 id="ptarcade.input_handler.import_file--notes">Notes<a class="headerlink" href="#ptarcade.input_handler.import_file--notes" title="Permanent link">&para;</a></h5>
 <p>Python 3.4+ only. Does not call <code>sys.modules[full_name] = path</code></p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/input_handler.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-50">50</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/input_handler.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-50">50</a></span>
 <span class="normal"><a href="#__codelineno-0-51">51</a></span>
 <span class="normal"><a href="#__codelineno-0-52">52</a></span>
 <span class="normal"><a href="#__codelineno-0-53">53</a></span>
@@ -2140,26 +2149,30 @@
 </span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a>    <span class="n">spec</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">exec_module</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
 </span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a>    <span class="k">return</span> <span class="n">mod</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.input_handler.get_cmdline_arguments" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">get_cmdline_arguments</span>
+          <span class="doc doc-object-name doc-function-name">get_cmdline_arguments</span>
 
 
 <a href="#ptarcade.input_handler.get_cmdline_arguments" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">get_cmdline_arguments</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">get_cmdline_arguments</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span>
 </span></code></pre></div>
 
   <div class="doc doc-contents ">
   
       <p>Create dictionary of command line arguments supplied.</p>
+
+
 
   <table>
     <thead>
@@ -2204,9 +2217,9 @@
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/input_handler.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-76"> 76</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/input_handler.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-76"> 76</a></span>
 <span class="normal"><a href="#__codelineno-0-77"> 77</a></span>
 <span class="normal"><a href="#__codelineno-0-78"> 78</a></span>
 <span class="normal"><a href="#__codelineno-0-79"> 79</a></span>
@@ -2266,21 +2279,23 @@
 </span><span id="__span-0-104"><a id="__codelineno-0-104" name="__codelineno-0-104"></a>
 </span><span id="__span-0-105"><a id="__codelineno-0-105" name="__codelineno-0-105"></a>    <span class="k">return</span> <span class="n">options</span><span class="p">,</span> <span class="n">cmd_input_okay</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.input_handler.load_inputs" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">load_inputs</span>
+          <span class="doc doc-object-name doc-function-name">load_inputs</span>
 
 
 <a href="#ptarcade.input_handler.load_inputs" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">load_inputs</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">load_inputs</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">input_options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ModuleType</span><span class="p">]</span>
 </span></code></pre></div>
@@ -2289,11 +2304,13 @@
   
       <p>Load the input parameters from the relevant files.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -2313,6 +2330,8 @@
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -2337,9 +2356,9 @@
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/input_handler.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-108">108</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/input_handler.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-108">108</a></span>
 <span class="normal"><a href="#__codelineno-0-109">109</a></span>
 <span class="normal"><a href="#__codelineno-0-110">110</a></span>
 <span class="normal"><a href="#__codelineno-0-111">111</a></span>
@@ -2393,32 +2412,36 @@
 </span><span id="__span-0-133"><a id="__codelineno-0-133" name="__codelineno-0-133"></a>            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="n">config_mod</span>
 </span><span id="__span-0-134"><a id="__codelineno-0-134" name="__codelineno-0-134"></a>            <span class="p">}</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.input_handler.check_config" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">check_config</span>
+          <span class="doc doc-object-name doc-function-name">check_config</span>
 
 
 <a href="#ptarcade.input_handler.check_config" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">check_config</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ModuleType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">check_config</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ModuleType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </span></code></pre></div>
 
   <div class="doc doc-contents ">
   
       <p>Validate the config file.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -2438,6 +2461,8 @@
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -2470,9 +2495,9 @@ If the path in <code>config.pta_data['psrs_data']</code> doesn't exist.</li>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/input_handler.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-137">137</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/input_handler.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-137">137</a></span>
 <span class="normal"><a href="#__codelineno-0-138">138</a></span>
 <span class="normal"><a href="#__codelineno-0-139">139</a></span>
 <span class="normal"><a href="#__codelineno-0-140">140</a></span>
@@ -2784,21 +2809,23 @@ If the path in <code>config.pta_data['psrs_data']</code> doesn't exist.</li>
 </span><span id="__span-0-291"><a id="__codelineno-0-291" name="__codelineno-0-291"></a>        <span class="p">)</span>
 </span><span id="__span-0-292"><a id="__codelineno-0-292" name="__codelineno-0-292"></a>        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">warning</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
+
 <h3 id="ptarcade.input_handler.check_model" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">check_model</span>
+          <span class="doc doc-object-name doc-function-name">check_model</span>
 
 
 <a href="#ptarcade.input_handler.check_model" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">check_model</span><span class="p">(</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">check_model</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">model</span><span class="p">:</span> <span class="n">ModuleType</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">psrs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Pulsar</span><span class="p">],</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">red_components</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -2811,11 +2838,13 @@ If the path in <code>config.pta_data['psrs_data']</code> doesn't exist.</li>
   
       <p>Validate model file.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
@@ -2837,12 +2866,12 @@ If the path in <code>config.pta_data['psrs_data']</code> doesn't exist.</li>
           <td><code>psrs</code></td>
           <td class="doc-param-details">
             <div class="doc-md-description">
-              <p>List of <a class="autorefs autorefs-external" href="https://enterprise.readthedocs.io/en/latest/enterprise.html#enterprise.pulsar.Pulsar">enterprise.pulsar.Pulsar</a> objects.</p>
+              <p>List of [enterprise.pulsar.Pulsar][] objects.</p>
             </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" title="enterprise.pulsar.Pulsar" href="https://enterprise.readthedocs.io/en/latest/enterprise.html#enterprise.pulsar.Pulsar">Pulsar</a>]</code>
+                    <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<span title="enterprise.pulsar.Pulsar">Pulsar</span>]</code>
                 </span>
             </p>
           </td>
@@ -2878,6 +2907,8 @@ If the path in <code>config.pta_data['psrs_data']</code> doesn't exist.</li>
     </tbody>
   </table>
 
+
+
   <table>
     <thead>
       <tr>
@@ -2909,9 +2940,9 @@ If the path in <code>config.pta_data['psrs_data']</code> doesn't exist.</li>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/ptarcade/input_handler.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-295">295</a></span>
+          <details class="quote">
+            <summary>Source code in <code>src/ptarcade/input_handler.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-295">295</a></span>
 <span class="normal"><a href="#__codelineno-0-296">296</a></span>
 <span class="normal"><a href="#__codelineno-0-297">297</a></span>
 <span class="normal"><a href="#__codelineno-0-298">298</a></span>
@@ -3211,7 +3242,7 @@ If the path in <code>config.pta_data['psrs_data']</code> doesn't exist.</li>
 </span><span id="__span-0-443"><a id="__codelineno-0-443" name="__codelineno-0-443"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
 </span><span id="__span-0-444"><a id="__codelineno-0-444" name="__codelineno-0-444"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span>
 </span></code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
