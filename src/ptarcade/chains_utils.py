@@ -830,7 +830,7 @@ def get_max_pos(params: list[str],
 
         density =  MCSamples.get1DDensity(sample, par, normalized=False)
 
-        mind = lambda x: -density(x)[0]
+        mind = lambda x: -density(x)
         if not bounds:
             x = minimize(mind, np.array(bayes_est.get(par)[0]))
             x0 = x.x
