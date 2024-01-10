@@ -100,7 +100,7 @@ exclude = [
 
 [tool.poetry]
 name = "PTArcade"
-version = "0.1.8"
+version = "0.1.9"
 description = "PTArcade provides an interface to the ENTERPRISE analysis suite and allows for simple implementation of new-physics searches in PTA data."
 readme = "README.md"
 authors = ["Andrea Mitridate <andrea.mitridate@nanograv.org>",]
@@ -139,7 +139,7 @@ scipy = "^1.10.1"
 setuptools = "^67.8.0"
 encor = "^1.1.2"
 llvmlite = "^0.40.0"
-ceffyl = "^1.26"
+ceffyl = "~1.26"
 numba = "^0.57.0"
 tables = "^3.8.0"
 rich = {extras = ["jupyter"], version = "^13.4.2"}
