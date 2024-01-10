@@ -25,6 +25,7 @@ from enterprise_extensions.sampler import get_parameter_groups
 from numpy.typing import NDArray
 
 import ptarcade.models_utils as aux
+import ptarcade.ent_mod as mods
 
 log = logging.getLogger("rich")
 
@@ -339,15 +340,30 @@ def ent_builder(
             spectrum = aux.omega2cross(model.spectrum)
             cpl_np = spectrum(**model.parameters)
 
-            if corr:
+            if corr and hasattr(model, "orf"):
+                orf = function(model.orf)
+                orf = orf(**model.parameters)
+
+                np_gwb = mods.FourierBasisCommonGP(
+                    spectrum=cpl_np,
+                    orf=orf,
+                    components=gwb_components,
+                    Tspan=Tspan,
+                    name=model.name)
+            elif corr:
                 orf = utils.hd_orf()
                 np_gwb = gp_signals.FourierBasisCommonGP(
-                    spectrum=cpl_np, orf=orf, components=gwb_components, Tspan=Tspan, name=model.name
-                )
+                    spectrum=cpl_np,
+                    orf=orf,
+                    components=gwb_components,
+                    Tspan=Tspan,
+                    name=model.name)
             else:
                 np_gwb = gp_signals.FourierBasisGP(
-                    spectrum=cpl_np, components=gwb_components, Tspan=Tspan, name=model.name
-                )
+                    spectrum=cpl_np,
+                    components=gwb_components,
+                    Tspan=Tspan,
+                    name=model.name)
 
             s += np_gwb
 
