@@ -394,6 +394,15 @@ def ent_builder(
 def ceffyl_builder(inputs):
 
     if inputs["config"].pta_data == "IPTA2":
+
+        if inputs["config"].corr:
+            warning = (
+            "For the IPTA DR2 data set, ceffyl mode is only "
+            "available without spatial correlations. But do not worry, for this data set, "
+            "including or not spatial correlations should not make a significant difference."
+            "The code will default to 'corr=False'.\n"
+            )
+            log.warning(warning)
         # download from zenodo
         ceffyldl = download_file(
             "https://zenodo.org/record/8092873/files/ipta-dr2_fftkde_10k%5B94%5D_epa_sj.zip?download=1",
@@ -469,6 +478,14 @@ def ceffyl_builder(inputs):
             datadir = (ceffyldl / "30f_fs{cp}_ceffyl")
 
     elif inputs["config"].pta_data == "NG12":
+        if inputs["config"].corr:
+            warning = (
+            "For the NANOGrav 12.5-year data set, ceffyl mode is only "
+            "available without spatial correlations. But do not worry, for this data set, "
+            "including or not spatial correlations should not make a significant difference."
+            "The code will default to 'corr=False'.\n"
+            )
+            log.warning(warning)
         # download from zenodo
         ceffyldl = download_file(
             "https://zenodo.org/record/8096699/files/ng12p5_ceffyl.zip?download=1",
