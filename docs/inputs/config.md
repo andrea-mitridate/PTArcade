@@ -131,8 +131,13 @@ file are:
         When `mode = "enterprise"`, running with `corr = True` is approximately one order
         of magnitude slower than running with `corr = False`. If you want to run with 
         `corr = True`, we suggest either using `mode = "ceffyl"` or running the code on a cluster.
-    
 
+    !!! warning "NG12 and IPTA2 in ceffyl mode"
+        For the NANOGrav 12.5-year and IPTA DR2 data sets, the KDEs for the free spectra were 
+        derived only without spatial correlations (for these data sets the inclusion
+        of pulsar-correlations is not expected to impact the spectral reconstruction significantly). 
+        Therefore, for these datasets, ceffyl mode can run only with `corr=False`.
+    
 [`red_components`](#+config.red_components){ #+config.red_components }
 
 :   :octicons-milestone-24: Default: `30` –
