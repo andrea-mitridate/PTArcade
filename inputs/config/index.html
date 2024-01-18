@@ -1579,6 +1579,13 @@ Hellings &amp; Downs correlations are assumed..</p>
 of magnitude slower than running with <code>corr = False</code>. If you want to run with 
 <code>corr = True</code>, we suggest either using <code>mode = "ceffyl"</code> or running the code on a cluster.</p>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">NG12 and IPTA2 in ceffyl mode</p>
+<p>For the NANOGrav 12.5-year and IPTA DR2 data sets, the KDEs for the free spectra were 
+derived only without spatial correlations (for these data sets the inclusion
+of pulsar-correlations is not expected to impact the spectral reconstruction significantly). 
+Therefore, for these datasets, ceffyl mode can run only with <code>corr=False</code>.</p>
+</div>
 </dd>
 <dt><a href="#+config.red_components" id="+config.red_components"><code>red_components</code></a></dt>
 <dd>
