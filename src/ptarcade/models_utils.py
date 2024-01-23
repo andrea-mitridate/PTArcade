@@ -76,6 +76,9 @@ omega_m : float = 0.3153 # matter density today Planck 2018
 omega_r : float = 9.2188e-5 # radiation density today Planck 2018
 A_s : np.float64 = np.exp(3.044)*10**-10 # Planck 2018 amplitude of primordial scalar power spectrum
 f_cmb : float = 7.7314e-17 # CMB pivot scale (Hz)
+rho_0 : np.float64 = 0.4 * nat.convert(nat.GeV * nat.cm**-3, nat.GeV**4) # local DM abundance in (Gev**4)
+l_speed : np.float64 = 299792 # speed of light (km/s)
+v_dm : np.float64 = 232. # local DM velocity (km/s)
 gev_to_hz : np.float64 = nat.convert(nat.GeV, nat.Hz) # conversion from gev to Hz
 
 # tabulated values for the number of relativistic degrees of

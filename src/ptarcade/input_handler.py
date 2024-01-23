@@ -442,3 +442,31 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
 
             log.error(error)
             raise SystemExit
+        
+    if hasattr(model, "orf"):
+        if mode == "ceffyl":
+            error = ("It is not possible to use user-specified ORF in ceffyl mode"
+                 ", please use PTArcade in enterprise mode to do this.")
+            log.error(error)
+            raise SystemExit
+        
+        args = inspect.getfullargspec(model.orf)[0]
+        if ['f', 'pos1', 'pos2'] != args[:3]:
+            error = ("The first three arguments of the orf function should"
+                 " be `f`, `pos1`, and `pos2` (even if the orf is not"
+                 " frequency-dependent).")
+            log.error(error)
+            raise SystemExit
+        args = [e for e in args if e not in ('f', 'pos1', 'pos2')]
+        if list(model.parameters.keys()) != args:
+            error = (
+                "In addition to the parameters 'f', 'pos1', and 'pos2', the "
+                "'orf' provided in the model file also needs to have as "
+                "parameters all the ones contained in the 'parameter' dictionary."
+                " (even if they are not used by the orf function)\n"
+                f"The parameter dictionary contains {list(model.parameters.keys())}\n"
+                "while the 'orf' function has the parameters ="
+                f" {['f', 'pos1', 'pos2']+ args}"
+            )
+            log.error(error)
+            raise SystemExit
