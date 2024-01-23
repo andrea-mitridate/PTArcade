@@ -195,7 +195,7 @@ The model file can also contain additional (optional) variables that can be used
 
 [`orf`](#+model.orf){ #+model.smbhb }
 
-:   :octicons-milestone-24: Default: _`HD`_ – 
+:   :octicons-beaker-24: &nbsp; __Experimental__ – 
     This function can be used to specify the Overlap Reduction Function (ORF) of stochastic signals. The first parameter of this function should be named `f` and it is supposed to be a [NumPy array][numpy] containing the frequencies (in units of Hz) at which the ORF will be evaluated (this parameter should be present in the definition of the `orf` function even if the ORF that the user wants to specify does not depend on the frequency). The second and third parameters of the `orf` function should be named `pos1` and `pos2` respectively, and are supposed to represent the unit vectors pointing from Earth to a given pair of pulsars. The names of the remaining parameters should match the keys of the `parameters` dictionary (even if the ORF does not depend on them). The `spectrum` function should return a [NumPy array][numpy] containing the value of ORF for the given pulsar pair at each of the frequencies in `f`. If no `orf` is specified in the model file, the ORF for the GWB is assumed to be the Hellings & Downs (HD) correlation. Notice that an ORF different from HD can be used only in `enterprise` mode.
 
 !!! info "NG15 Model Files"

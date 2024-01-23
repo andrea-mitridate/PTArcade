@@ -125,7 +125,7 @@ file are:
     This parameter controls the inter-pulsar correlations for any user-specified
     stochastic signal. If `corr=False`, spatial correlations between pulsars are set to zero and the 
     overlap reduction function is taken to be a delta function in the pulsar space. If `corr=True`,
-    Hellings & Downs correlations are assumed..
+    Hellings & Downs correlations are assumed.
 
     !!! warning "Running time"
         When `mode = "enterprise"`, running with `corr = True` is approximately one order
