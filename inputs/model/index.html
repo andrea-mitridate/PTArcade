@@ -1082,6 +1082,8 @@
       
         
       
+        
+      
     
     
       
@@ -1279,6 +1281,32 @@
           </ul>
         </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/ptarcade/ent_mod/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    ent_mod
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1754,6 +1782,11 @@ This variable can be assigned to a string to specify the model name. This will b
 <dd>
 <p><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11.75 1a.75.75 0 0 1 .75.75V4h6.532c.42 0 .826.15 1.143.425l3.187 2.75a1.75 1.75 0 0 1 0 2.65l-3.187 2.75a1.75 1.75 0 0 1-1.143.425H12.5v9.25a.75.75 0 0 1-1.5 0V13H3.75A1.75 1.75 0 0 1 2 11.25v-5.5C2 4.783 2.784 4 3.75 4H11V1.75a.75.75 0 0 1 .75-.75Zm7.282 4.5H3.75a.25.25 0 0 0-.25.25v5.5c0 .138.112.25.25.25h15.282c.06 0 .118-.021.163-.06l3.188-2.75a.248.248 0 0 0 0-.38l-3.188-2.75a.249.249 0 0 0-.163-.06Z"/></svg></span> Default: <em><code>False</code></em> – 
 If set to <code>True</code>, the expected signal from SMBHBs will be added to the user-specified signal.</p>
+</dd>
+<dt><a href="#+model.orf" id="+model.smbhb"><code>orf</code></a></dt>
+<dd>
+<p><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 8.807V3.5h-.563a.75.75 0 0 1 0-1.5h9.125a.75.75 0 0 1 0 1.5H16v5.307l5.125 9.301c.964 1.75-.302 3.892-2.299 3.892H5.174c-1.998 0-3.263-2.142-2.3-3.892ZM4.189 18.832a1.123 1.123 0 0 0 .985 1.668h13.652a1.123 1.123 0 0 0 .985-1.668L17.7 15H6.3ZM14.5 3.5h-5V9a.75.75 0 0 1-.093.362L7.127 13.5h9.746l-2.28-4.138A.75.75 0 0 1 14.5 9Z"/></svg></span> &nbsp; <strong>Experimental</strong> – 
+This function can be used to specify the Overlap Reduction Function (ORF) of stochastic signals. The first parameter of this function should be named <code>f</code> and it is supposed to be a <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html">NumPy array</a> containing the frequencies (in units of Hz) at which the ORF will be evaluated (this parameter should be present in the definition of the <code>orf</code> function even if the ORF that the user wants to specify does not depend on the frequency). The second and third parameters of the <code>orf</code> function should be named <code>pos1</code> and <code>pos2</code> respectively, and are supposed to represent the unit vectors pointing from Earth to a given pair of pulsars. The names of the remaining parameters should match the keys of the <code>parameters</code> dictionary (even if the ORF does not depend on them). The <code>spectrum</code> function should return a <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html">NumPy array</a> containing the value of ORF for the given pulsar pair at each of the frequencies in <code>f</code>. If no <code>orf</code> is specified in the model file, the ORF for the GWB is assumed to be the Hellings &amp; Downs (HD) correlation. Notice that an ORF different from HD can be used only in <code>enterprise</code> mode.</p>
 </dd>
 </dl>
 <div class="admonition info">
