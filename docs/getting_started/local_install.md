@@ -3,8 +3,6 @@ can install PTArcade with [`pip`][pip] or [`conda`][conda], the Python package m
 If not, we recommend using a [`docker`][docker] or [`singularity`][singularity] virtual environment.
 
 ### With conda <small>(recommended)</small> { #with-pip data-toc-label="with conda" }
-~~We are in the process of submitting PTArcade to the conda-forge-channel~~
-
 PTArcade is now available on [conda-forge](https://anaconda.org/conda-forge/ptarcade)! you can install PTArcade using conda by typing in a terminal (1)
 { .annotate }
 
