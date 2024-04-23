@@ -265,7 +265,7 @@ def ent_builder(
     # add pulsar intrinsic red noise
     s += red_noise_block(psd="powerlaw", prior="log-uniform", Tspan=Tspan, components=red_components)
 
-    # add common red noise
+    # add common red noise from SMBHB
     if model is None or model.smbhb:
         if corr:
             orf = "hd"
@@ -380,22 +380,16 @@ def ent_builder(
     for p in psrs:
         if "NANOGrav" in p.flags["pta"]:
             s2 = s + white_noise_block(vary=white_vary, inc_ecorr=True, tnequad=tnequad, select="backend")
-            if "1713" in p.name and not any(dm_var):
-                s3 = s2 + chrom.dm_exponential_dip(tmin=54500, tmax=55000, idx=2, sign=False, name="dmexp_1")
-                if p.toas.max() / const.day > 57850:
-                    s3 += chrom.dm_exponential_dip(tmin=57300, tmax=57850, idx=2, sign=False, name="dmexp_2")
-                models.append(s3(p))
-            else:
-                models.append(s2(p))
         else:
-            s4 = s + white_noise_block(vary=white_vary, inc_ecorr=False, tnequad=tnequad, select="backend")
-            if "1713" in p.name and not any(dm_var):
-                s5 = s4 + chrom.dm_exponential_dip(tmin=54500, tmax=55000, idx=2, sign=False, name="dmexp_1")
-                if p.toas.max() / const.day > 57850:
-                    s5 += chrom.dm_exponential_dip(tmin=57300, tmax=57850, idx=2, sign=False, name="dmexp_2")
-                models.append(s5(p))
-            else:
-                models.append(s4(p))
+            s2 = s + white_noise_block(vary=white_vary, inc_ecorr=False, tnequad=tnequad, select="backend")
+
+        # add DM dip for J1713
+        if "1713" in p.name and not any(dm_var):
+            s2 += chrom.dm_exponential_dip(tmin=54500, tmax=55000, idx=2, sign=False, name="dmexp_1")
+            if p.toas.max() / const.day > 57850:
+                s2 += chrom.dm_exponential_dip(tmin=57300, tmax=57850, idx=2, sign=False, name="dmexp_2")
+        
+        models.append(s2(p))
 
     # set up PTA
     pta = signal_base.PTA(models)
