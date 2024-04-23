@@ -224,7 +224,11 @@ def get_dmn(dmn_data:str | None) -> dict | None:
         raise SystemExit
     
 
-def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, array_like | None]:
+def pta_data_importer(
+    pta_data: str | dict,
+) -> tuple[
+    list[Pulsar], dict | None, array_like | None, dict | None, dict | None, dict | None
+]:
     """Import PTA pulsars objects, white noise parameters, and empirical distributions.
 
     Parameters
