@@ -91,10 +91,28 @@ singularity pull ptarcade.sif docker://ngnewphy/ptarcade:latest
 ```
 This will create a Singularity image and save it as `ptarcade.sif` in the current working directory.
 
+
+### On Apple silicon
+If you're using a Mac with Apple silicon, there are some dependencies of PTArcade that are not available for your architecture.
+We recommend using `conda` and specifying `osx-64` as your platform so that the dependencies can be installed.
+
+If you have a recent version of `conda` (>=23.10.0), you can use the following to set up your environment:
+```sh
+conda create -n ptarcade --platform osx-64 -c conda-forge python=3.10 ptarcade
+```
+If you are on an older version, modify the previous command as such:
+```sh
+CONDA_SUBDIR=osx-64 conda create -n ptarcade -c conda-forge python=3.10 ptarcade
+ 
+# After environment is created, activate it and run
+conda config --env --set subdir osx-64
+```
+
   [pip]: #with-pip
   [conda]: #with-conda
   [docker]: #with-docker
   [singularity]: #with-singularity
+  [apple]: #on-apple-silicon
   [Python package]: https://pypi.org/project/PTArcade/
   [conda_env]: https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
   [NG12]: https://nanograv.org/science/data/125-year-pulsar-timing-array-data-release
