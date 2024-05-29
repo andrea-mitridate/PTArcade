@@ -613,6 +613,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#on-apple-silicon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On Apple silicon
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1577,6 +1588,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#on-apple-silicon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On Apple silicon
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1610,7 +1632,6 @@
 can install PTArcade with <a href="#with-pip"><code>pip</code></a> or <a href="#with-conda"><code>conda</code></a>, the Python package manager.
 If not, we recommend using a <a href="https://hub.docker.com/r/ngnewphy/ptarcade"><code>docker</code></a> or <a href="#with-singularity"><code>singularity</code></a> virtual environment.</p>
 <h3 id="with-pip">With conda <small>(recommended)</small><a class="headerlink" href="#with-pip" title="Permanent link">&para;</a></h3>
-<p><del>We are in the process of submitting PTArcade to the conda-forge-channel</del></p>
 <p class="annotate">PTArcade is now available on <a href="https://anaconda.org/conda-forge/ptarcade">conda-forge</a>! you can install PTArcade using conda by typing in a terminal (1)</p>
 <ol>
 <li>See <a href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html">here</a> for conda installation info.</li>
@@ -1694,6 +1715,18 @@ and pull the image with:
 <div class="language-sh highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>singularity<span class="w"> </span>pull<span class="w"> </span>ptarcade.sif<span class="w"> </span>docker://ngnewphy/ptarcade:latest
 </span></code></pre></div>
 This will create a Singularity image and save it as <code>ptarcade.sif</code> in the current working directory.</p>
+<h3 id="on-apple-silicon">On Apple silicon<a class="headerlink" href="#on-apple-silicon" title="Permanent link">&para;</a></h3>
+<p>If you're using a Mac with Apple silicon, there are some dependencies of PTArcade that are not available for your architecture.
+We recommend using <code>conda</code> and specifying <code>osx-64</code> as your platform so that the dependencies can be installed.</p>
+<p>If you have a recent version of <code>conda</code> (&gt;=23.10.0), you can use the following to set up your environment:
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>ptarcade<span class="w"> </span>--platform<span class="w"> </span>osx-64<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10<span class="w"> </span>ptarcade
+</span></code></pre></div>
+If you are on an older version, modify the previous command as such:
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nv">CONDA_SUBDIR</span><span class="o">=</span>osx-64<span class="w"> </span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>ptarcade<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10<span class="w"> </span>ptarcade
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="c1"># After environment is created, activate it and run</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>conda<span class="w"> </span>config<span class="w"> </span>--env<span class="w"> </span>--set<span class="w"> </span>subdir<span class="w"> </span>osx-64
+</span></code></pre></div></p>
 
 
 
