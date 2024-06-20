@@ -379,14 +379,15 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
     if hasattr(model, "spectrum"):
         if mode == "enterprise":
             T = model_utils.get_tspan(psrs)
+            N_f = max(red_components, gwb_components)
         else:
             T = 12.5 * 3.154 * 10**7
-        N_f = max(red_components, gwb_components)
+            N_f = gwb_components
         f_tab = np.linspace(1 / T, N_f / T, N_f)
 
         try:
             spectrum_tab = model.spectrum(f=f_tab, **x0)
-        except AttributeError:
+        except AttributeError or IndexError:
             error = (
                 "I tried to evaluate the spectrum function on the array of "
                 "frequency components you selected and for random values of "
