@@ -242,7 +242,8 @@ def setup_sampler(
         sampler = Sampler.setup_sampler(pta,
             outdir=out_dir,
             logL=pta.ln_likelihood,
-            logp=pta.ln_prior)
+            logp=pta.ln_prior,
+            jump=False)
 
         x0 = pta.initial_samples()
 
