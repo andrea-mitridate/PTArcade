@@ -183,12 +183,12 @@ def check_config(config: ModuleType) -> None:
 
     # checks PTA data
     if isinstance(config.pta_data, str):
-        if config.pta_data in ["NG15", "NG12", "EPTA2_full", "EPTA2_new", "IPTA2"]:
+        if config.pta_data in ["NG15", "NG12", "IPTA2"]:
             pass
         else:
             error = (
                 f"The pta dataset [red]{config.pta_data}[/] is not included in PTArcade. "
-                "Please, choose between 'NG15', 'NG12', 'EPTA2_full', 'EPTA2_new', 'IPTA2' "
+                "Please, choose between 'NG15', 'NG12', 'IPTA2' "
                 "or load your own data."
             )
             log.error(error, extra={"markup":True})
@@ -214,7 +214,7 @@ def check_config(config: ModuleType) -> None:
     else:
         error = (
             "The 'pta_data' variable in the configuration file needs to be "
-            "either a string between 'NG15', 'NG12', 'EPTA2_full', 'EPTA2_new', 'IPTA2', "
+            "either a string between 'NG15', 'NG12', 'IPTA2', "
             "or a dictionary pointing to a set of PTA data.\n"
             f"You supplied pta_data={config.pta_data}"
         )
