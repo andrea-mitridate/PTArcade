@@ -134,96 +134,6 @@ def get_wn(wn_data: str | None) -> dict | None :
         raise SystemExit
 
 
-def get_rn(rn_data:str | None) -> dict | None:
-    """
-    Get intrinsic red (spin) noise frequencies
-
-    Parameters
-    ----------
-    rn_data : str, optional
-        File or directory containing intrinsic red noise data.
-
-    Returns    
-    -------
-    dict | None
-        If `rn_data` isn't `None`, then the red noise data is returned as a
-        `dict`
-    """
-
-    red_dict = {}
-    if rn_data is None:
-        return None
-    elif os.path.isfile(rn_data):
-        with open(rn_data) as fp:
-            red_dict.update(json.load(fp))
-        return red_dict
-
-    else:
-        err = f"'rn_data' is not correct. Must be file or None.\nCurrent value is {rn_data=}."
-        log.error(err)
-        raise SystemExit
-    
-
-def get_cn(cn_data:str | None) -> dict | None:
-    """
-    Get chromatic noise frequencies
-
-    Parameters
-    ----------
-    cn_data : str, optional
-        File or directory containing chromatic noise data.
-
-    Returns    
-    -------
-    dict | None
-        If `cn_data` isn't `None`, then the chromatic noise data is returned as a
-        `dict`
-    """
-
-    chrom_dict = {}
-    if cn_data is None:
-        return None
-    elif os.path.isfile(cn_data):
-        with open(cn_data) as fp:
-            chrom_dict.update(json.load(fp))
-        return chrom_dict
-
-    else:
-        err = f"'cn_data' is not correct. Must be file or None.\nCurrent value is {cn_data=}."
-        log.error(err)
-        raise SystemExit
-    
-
-def get_dmn(dmn_data:str | None) -> dict | None:
-    """
-    Get dm noise frequencies
-
-    Parameters
-    ----------
-    dmn_data : str, optional
-        File or directory containing dm noise data.
-
-    Returns    
-    -------
-    dict | None
-        If `dmn_data` isn't `None`, then the dm noise data is returned as a
-        `dict`
-    """
-
-    dm_dict = {}
-    if dmn_data is None:
-        return None
-    elif os.path.isfile(dmn_data):
-        with open(dmn_data) as fp:
-            dm_dict.update(json.load(fp))
-        return dm_dict
-
-    else:
-        err = f"'dmn_data' is not correct. Must be file or None.\nCurrent value is {dmn_data=}."
-        log.error(err)
-        raise SystemExit
-    
-
 def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, array_like | None]:
     """Import PTA pulsars objects, white noise parameters, and empirical distributions.
 
@@ -271,17 +181,11 @@ def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, 
                 cache=True,
                 pkgname="ptarcade",
             ),
-            "chrom_dict": None,
-            "red_dict": None,
-            "dm_dict": None,
         }
 
         psrs = get_pulsars(ng15_dic["psrs_data"])
         params = get_wn(ng15_dic["noise_data"])
         emp_dist = ng15_dic["emp_dist"]
-        chrom_dict = get_cn(ng15_dic["chrom_dict"])
-        red_dict = get_rn(ng15_dic["red_dict"])
-        dm_dict = get_dmn(ng15_dic["dm_dict"])
 
     elif pta_data == "NG12":
         ng12_dic = {
@@ -296,17 +200,11 @@ def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, 
                 pkgname="ptarcade",
             ),
             "emp_dist": None,
-            "chrom_dict": None,
-            "red_dict": None,
-            "dm_dict": None,
         }
 
         psrs = get_pulsars(ng12_dic["psrs_data"])
         params = get_wn(ng12_dic["noise_data"])
         emp_dist = ng12_dic["emp_dist"]
-        chrom_dict = get_cn(ng12_dic["chrom_dict"])
-        red_dict = get_rn(ng12_dic["red_dict"])
-        dm_dict = get_dmn(ng12_dic["dm_dict"])
 
     elif pta_data == "IPTA2":
         ipta2_dic = {
@@ -321,81 +219,20 @@ def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, 
                 pkgname="ptarcade",
             ),
             "emp_dist": None,
-            "chrom_dict": None,
-            "red_dict": None,
-            "dm_dict": None,
         }
 
         psrs = get_pulsars(ipta2_dic["psrs_data"])
         params = get_wn(ipta2_dic["noise_data"])
         emp_dist = ipta2_dic["emp_dist"]
-        chrom_dict = get_cn(ipta2_dic["chrom_dict"])
-        red_dict = get_rn(ipta2_dic["red_dict"])
-        dm_dict = get_dmn(ipta2_dic["dm_dict"])
-    
-    elif pta_data == "EPTA2_full" or pta_data == "EPTA2_new":
-        # This returns a path in the astropy cache that points to these files, otherwise
-        # it downloads them there and returns the path
-
-        version = pta_data.split('_')[-1]
-
-        epta2_dic = {
-            "psrs_data": download_file(
-                f"https://zenodo.org/record/8102748/files/epta2_{version}_psrs.pkl.gz?download=1",
-                show_progress=True,
-                cache=True,
-                pkgname="ptarcade",
-            ),
-            "noise_data": download_file(
-                f"https://zenodo.org/record/8102748/files/epta2_{version}_wn.json?download=1",
-                show_progress=True,
-                cache=True,
-                pkgname="ptarcade",
-            ),
-            "emp_dist": download_file(
-                f"https://zenodo.org/record/8102748/files/epta2_{version}_emp.pkl?download=1",
-                show_progress=True,
-                cache=True,
-                pkgname="ptarcade",
-            ),
-            "chrom_dict": download_file(
-                f"https://zenodo.org/record/8102748/files/epta2_{version}_cn.pkl?download=1",
-                show_progress=True,
-                cache=True,
-                pkgname="ptarcade",
-            ),
-            "red_dict": download_file(
-                f"https://zenodo.org/record/8102748/files/epta2_{version}_rn.pkl?download=1",
-                show_progress=True,
-                cache=True,
-                pkgname="ptarcade",
-            ),
-            "dm_dict": download_file(
-                f"https://zenodo.org/record/8102748/files/epta2_{version}_dm.pkl?download=1",
-                show_progress=True,
-                cache=True,
-                pkgname="ptarcade",
-            ),
-        }
-
-        psrs = get_pulsars(epta2_dic["psrs_data"])
-        params = get_wn(epta2_dic["noise_data"])
-        emp_dist = epta2_dic["emp_dist"]
-        chrom_dict = get_cn(epta2_dic["chrom_dict"])
-        red_dict = get_rn(epta2_dic["red_dict"])
-        dm_dict = get_dmn(epta2_dic["dm_dict"])
 
     elif isinstance(pta_data, dict):
         psrs = get_pulsars(pta_data["psrs_data"])
         params = get_wn(pta_data["noise_data"])
         emp_dist = pta_data["emp_dist"]
-        chrom_dict = get_cn(pta_data["chrom_dict"])
-        red_dict = get_rn(pta_data["red_dict"])
-        dm_dict = get_dmn(pta_data["dm_dict"])
 
     else:
         err = f"'pta_data' is not correct\n.Current value is {pta_data=}."
         log.error(err)
         raise SystemExit
 
-    return psrs, params, emp_dist, chrom_dict, red_dict, dm_dict
+    return psrs, params, emp_dist
