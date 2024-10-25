@@ -91,11 +91,7 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
     return inputs, input_options
 
 
-def get_user_pta_data(
-    inputs: dict[str, Any]
-) -> tuple[
-    list[Pulsar], dict | None, array_like | None, dict | None, dict | None, dict | None
-]:
+def get_user_pta_data(inputs: dict[str, Any]) -> tuple[list[Pulsar], dict | None, array_like | None ]:
     """Import user-specified PTA data.
 
     Parameters
@@ -111,21 +107,15 @@ def get_user_pta_data(
         Dictionary containing noise data
     emp_dist : array_like | None
         The empirical distribution to use for sampling
-    chrom_dict: dict | None
-        Dictionary containing chromatic noise data
-    red_dict: dict | None
-        Dictionary containing spin noise data
-    dm_dict: dict | None
-        Dictionary containing dm noise data
+
     """
     # import pta data
-    psrs, noise_params, emp_dist, chrom_dict, red_dict, dm_dict = (
-        pta_importer.pta_data_importer(inputs["config"].pta_data))
+    psrs, noise_params, emp_dist = pta_importer.pta_data_importer(inputs['config'].pta_data)
 
-    return psrs, noise_params, emp_dist, chrom_dict, red_dict, dm_dict
+    return psrs, noise_params, emp_dist
 
 
-def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_params : dict | None, chrom_dict : dict | None , red_dict : dict | None, dm_dict : dict | None ) -> dict[int, PTA]:
+def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_params : dict | None ) -> dict[int, PTA]:
     """Initialize the PTA with the user input
 
     Parameters
@@ -136,12 +126,6 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
         User specified modules
     noise_params : dict, optional
         User specified noise params
-    chrom_dict: dict, optional
-        User specified chromatic noise frequencies
-    red_dict: dict, optional
-        User specified spin noise frequencies
-    dm_dict: dict, optional
-        User specified dm noise frequencies
 
     Returns
     -------
@@ -164,10 +148,7 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
         pta[0] = signal_builder.ent_builder(
             psrs=psrs,
             model=inputs['model'],
-            noise_dict=noise_params,
-            chrom_dict = chrom_dict,
-            red_dict = red_dict,
-            dm_dict = dm_dict,
+            noisedict=noise_params,
             pta_dataset=inputs['config'].pta_data,
             bhb_th_prior=inputs['config'].bhb_th_prior,
             gamma_bhb=inputs['config'].gamma_bhb,
@@ -183,10 +164,7 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
             pta[0] = signal_builder.ent_builder(
                 psrs=psrs,
                 model=None,
-                noise_dict=noise_params,
-                chrom_dict = chrom_dict,
-                red_dict = red_dict,
-                dm_dict = dm_dict,
+                noisedict=noise_params,
                 pta_dataset=inputs['config'].pta_data,
                 bhb_th_prior=inputs['config'].bhb_th_prior,
                 gamma_bhb=inputs['config'].gamma_bhb,
@@ -245,7 +223,7 @@ def setup_sampler(
             idx_params = [super_model.param_names.index(pp) for pp in inputs["model"].group]
             [groups.append(idx_params) for _ in range(5)] # type: ignore
 
-        # adds nmodel index to group structure
+        # add nmodel index to group structure
         groups.extend([[len(super_model.param_names)-1]])
 
         sampler = super_model.setup_sampler(
@@ -357,21 +335,18 @@ def main():
     psrs = None
     noise_params = None
     emp_dist = None
-    chrom_dict = None
-    red_dict = None
-    dm_dict = None
 
     if inputs["config"].mode == "enterprise":
         with console.status("Loading Pulsars and noise data...", spinner="bouncingBall"):
 
             # import pta data
-            psrs, noise_params, emp_dist, chrom_dict, red_dict, dm_dict = get_user_pta_data(inputs)
+            psrs, noise_params, emp_dist = get_user_pta_data(inputs)
 
             console.print(f"[bold green]Done loading [blue]{len(psrs)}[/] Pulsars and noise data :heavy_check_mark:\n")
 
 
     with console.status("Initializing PTA...", spinner="bouncingBall"):
-        pta = initialize_pta(inputs, psrs, noise_params, chrom_dict, red_dict, dm_dict)
+        pta = initialize_pta(inputs, psrs, noise_params)
         console.print("[bold green]Done initializing PTA :heavy_check_mark:\n")
 
 
