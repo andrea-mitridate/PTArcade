@@ -345,7 +345,7 @@ def pta_data_importer(
 
         epta2_dic = {
             "psrs_data": download_file(
-                f"https://zenodo.org/record/8102748/files/epta2_{version}_psrs.pkl.gz?download=1",
+                f"https://zenodo.org/record/8102748/files/epta2_{version}_psrs_v1p3.pkl.gz?download=1",
                 show_progress=True,
                 cache=True,
                 pkgname="ptarcade",
@@ -363,19 +363,19 @@ def pta_data_importer(
                 pkgname="ptarcade",
             ),
             "chrom_dict": download_file(
-                f"https://zenodo.org/record/8102748/files/epta2_{version}_cn.pkl?download=1",
+                f"https://zenodo.org/record/8102748/files/epta2_{version}_cn.json?download=1",
                 show_progress=True,
                 cache=True,
                 pkgname="ptarcade",
             ),
             "red_dict": download_file(
-                f"https://zenodo.org/record/8102748/files/epta2_{version}_rn.pkl?download=1",
+                f"https://zenodo.org/record/8102748/files/epta2_{version}_rn.json?download=1",
                 show_progress=True,
                 cache=True,
                 pkgname="ptarcade",
             ),
             "dm_dict": download_file(
-                f"https://zenodo.org/record/8102748/files/epta2_{version}_dm.pkl?download=1",
+                f"https://zenodo.org/record/8102748/files/epta2_{version}_dm.json?download=1",
                 show_progress=True,
                 cache=True,
                 pkgname="ptarcade",

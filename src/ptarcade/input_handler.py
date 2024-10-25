@@ -380,7 +380,7 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
         if mode == "enterprise":
             T = model_utils.get_tspan(psrs)
         else:
-            T = 3 * 10**7
+            T = 12.5 * 3.154 * 10**7
         N_f = max(red_components, gwb_components)
         f_tab = np.linspace(1 / T, N_f / T, N_f)
 

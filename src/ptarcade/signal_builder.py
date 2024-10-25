@@ -13,14 +13,21 @@ from astropy.utils.data import download_file
 from ceffyl import Ceffyl
 from enterprise import constants as const
 from enterprise.pulsar import Pulsar
-from enterprise.signals import (deterministic_signals, gp_signals, parameter,
-                                signal_base, utils)
+from enterprise.signals import (
+    deterministic_signals,
+    gp_signals,
+    parameter,
+    signal_base,
+    utils)
 from enterprise.signals.parameter import function
 from enterprise_extensions import chromatic as chrom
 from enterprise_extensions import hypermodel, model_utils
-from enterprise_extensions.blocks import (common_red_noise_block,
-                                          dm_noise_block, red_noise_block,
-                                          white_noise_block)
+from enterprise_extensions.blocks import (
+    common_red_noise_block,
+    dm_noise_block,
+    red_noise_block,
+    white_noise_block,
+    chromatic_noise_block)
 from enterprise_extensions.sampler import get_parameter_groups
 from numpy.typing import NDArray
 
@@ -201,7 +208,10 @@ def tnequad_conv(noisedict: dict) -> bool:
 def ent_builder(
     psrs: list[Pulsar],
     model: ModuleType | None = None,
-    noisedict: dict | None = None,
+    noise_dict: dict | None = None,
+    chrom_dict: dict | None = None,
+    red_dict: dict | None = None,
+    dm_dict: dict | None = None,
     pta_dataset: str | None = None,
     bhb_th_prior: bool = False,
     gamma_bhb: float | None = None,
@@ -263,7 +273,8 @@ def ent_builder(
     Tspan = model_utils.get_tspan(psrs)
 
     # add pulsar intrinsic red noise
-    s += red_noise_block(psd="powerlaw", prior="log-uniform", Tspan=Tspan, components=red_components)
+    if not red_dict:
+        s += red_noise_block(psd="powerlaw", prior="log-uniform", Tspan=Tspan, components=red_components)
 
     # add common red noise from SMBHB
     if model is None or model.smbhb:
@@ -320,7 +331,7 @@ def ent_builder(
     # add DM variations
     dm_var = [hasattr(psr, "dmx") for psr in psrs]  # check if dmx parameters are present in pulsars objects
 
-    if all(dm_var):
+    if all(dm_var) or dm_dict:
         pass
     elif not any(dm_var):
         s += dm_noise_block(gp_kernel="diag", psd="powerlaw", prior="log-uniform", components=30, gamma_val=None)
@@ -370,12 +381,12 @@ def ent_builder(
     # add white-noise, and act on psr objects
     models = []
 
-    if noisedict is None:
+    if noise_dict is None:
         white_vary = True
         tnequad = False
     else:
         white_vary = False
-        tnequad = tnequad_conv(noisedict)
+        tnequad = tnequad_conv(noise_dict)
 
     for p in psrs:
         if "NANOGrav" in p.flags["pta"]:
@@ -388,6 +399,27 @@ def ent_builder(
             s2 += chrom.dm_exponential_dip(tmin=54500, tmax=55000, idx=2, sign=False, name="dmexp_1")
             if p.toas.max() / const.day > 57850:
                 s2 += chrom.dm_exponential_dip(tmin=57300, tmax=57850, idx=2, sign=False, name="dmexp_2")
+
+        if chrom_dict and chrom_dict[p.name]:
+            s2 += chromatic_noise_block(
+                gp_kernel="nondiag",
+                psd="powerlaw",
+                nondiag_kernel="periodic",
+                prior="log-uniform",
+                dt=15,
+                df=200,
+                idx=4,
+                include_quadratic=False,
+                Tspan=Tspan,
+                name="chrom",
+                components=chrom_dict[p.name],
+                coefficients=False)
+
+        if red_dict:
+            s2 += red_noise_block(psd="powerlaw", prior="log-uniform", Tspan=Tspan, components=red_dict[p.name])
+
+        if not any(dm_var) and dm_dict:
+            s2 += dm_noise_block(gp_kernel="diag", psd="powerlaw", prior="log-uniform", components=dm_dict[p.name], gamma_val=None)
         
         models.append(s2(p))
 
@@ -395,8 +427,8 @@ def ent_builder(
     pta = signal_base.PTA(models)
 
     # set white noise parameters
-    if noisedict is not None:
-        pta.set_default_params(noisedict)
+    if noise_dict is not None:
+        pta.set_default_params(noise_dict)
 
     return pta
 
@@ -518,6 +550,44 @@ def ceffyl_builder(inputs):
             tempdir.rename(ceffyldl)
         # find ipta data inside dir
         datadir = (ceffyldl / "ng12p5_30f_fs{cp}_ceffyl")
+
+    elif "EPTA2" in inputs["config"].pta_data:
+        
+        if inputs["config"].pta_data == 'EPTA_full':
+            warning = (
+            "For the EPTA DR2, ceffyl mode is only available for the 'new' data set."
+            "The code will keep running using 'EPTA DR2 new' instead of 'EPTA DR2 new'.\n"
+            )
+            log.warning(warning)
+        
+        if not inputs["config"].corr:
+            warning = (
+            "For the EPTA DR2 data set, ceffyl mode is only available only with spatial "
+            "correlations. The code will keep running turning spatial correlations on. \n"
+            )
+            log.warning(warning)
+        # download from zenodo
+        ceffyldl = download_file(
+            "https://zenodo.org/record/10495907/files/epta2_new_30f_fs%7Bhd%7D_ceffyl.zip?download=1",
+            cache=True,
+            pkgname="ptarcade",
+            )
+        # make a Path object for ease of use
+        ceffyldl = Path(ceffyldl)
+
+        # Check if we've unzipped or not
+        # If not, unzip and name the same as the original download so that astropy can find it again
+        if ceffyldl.is_file():
+            tempdir = (ceffyldl.parent / "temp")
+            # extract
+            with ZipFile(ceffyldl) as zf:
+                zf.extractall(tempdir)
+            # delete original zip
+            ceffyldl.unlink()
+            # rename unzipped dir to original zip name
+            tempdir.rename(ceffyldl)
+        # find ipta data inside dir
+        datadir = (ceffyldl / "epta2_new_30f_fs{hd}_ceffyl")
 
     ceffyl_pta = Ceffyl.ceffyl(datadir)
 
