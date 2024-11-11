@@ -319,9 +319,10 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
 
     """
     # checks that all the parameters are present in the config file
-    optional = ["name", "smbhb"]
+    optional = ["name", "smbhb", "mod_sel_wgt"]
 
-    optional_default = {"name": "np_model", "smbhb": False}
+    optional_default = {"name": "np_model", "smbhb": False,
+                        "mod_sel_wgt": 1.}
 
     if not (hasattr(model, "parameters")):
         error = "The model file needs to contain a parameter dictionary."
