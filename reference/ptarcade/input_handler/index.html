@@ -16,7 +16,7 @@
         <link rel="prev" href="../fast_interpolate/">
       
       
-        <link rel="next" href="../models_utils/">
+        <link rel="next" href="../models_utils%20%28gluon%27s%20conflicted%20copy%202024-04-05%29/">
       
       
         
@@ -1002,6 +1002,8 @@
       
         
       
+        
+      
     
     
       
@@ -1447,6 +1449,32 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models_utils%20%28gluon%27s%20conflicted%20copy%202024-04-05%29/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    models_utils (gluon's conflicted copy 2024-04-05)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -3147,7 +3175,8 @@ If the path in <code>config.pta_data['psrs_data']</code> doesn't exist.</li>
 <span class="normal"><a href="#__codelineno-0-469">469</a></span>
 <span class="normal"><a href="#__codelineno-0-470">470</a></span>
 <span class="normal"><a href="#__codelineno-0-471">471</a></span>
-<span class="normal"><a href="#__codelineno-0-472">472</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-295"><a id="__codelineno-0-295" name="__codelineno-0-295"></a><span class="k">def</span> <span class="nf">check_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">ModuleType</span><span class="p">,</span> <span class="n">psrs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Pulsar</span><span class="p">],</span> <span class="n">red_components</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">gwb_components</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-472">472</a></span>
+<span class="normal"><a href="#__codelineno-0-473">473</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-295"><a id="__codelineno-0-295" name="__codelineno-0-295"></a><span class="k">def</span> <span class="nf">check_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">ModuleType</span><span class="p">,</span> <span class="n">psrs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Pulsar</span><span class="p">],</span> <span class="n">red_components</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">gwb_components</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="__span-0-296"><a id="__codelineno-0-296" name="__codelineno-0-296"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate model file.</span>
 </span><span id="__span-0-297"><a id="__codelineno-0-297" name="__codelineno-0-297"></a>
 </span><span id="__span-0-298"><a id="__codelineno-0-298" name="__codelineno-0-298"></a><span class="sd">    Parameters</span>
@@ -3234,97 +3263,98 @@ If the path in <code>config.pta_data['psrs_data']</code> doesn't exist.</li>
 </span><span id="__span-0-379"><a id="__codelineno-0-379" name="__codelineno-0-379"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;spectrum&quot;</span><span class="p">):</span>
 </span><span id="__span-0-380"><a id="__codelineno-0-380" name="__codelineno-0-380"></a>        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;enterprise&quot;</span><span class="p">:</span>
 </span><span id="__span-0-381"><a id="__codelineno-0-381" name="__codelineno-0-381"></a>            <span class="n">T</span> <span class="o">=</span> <span class="n">model_utils</span><span class="o">.</span><span class="n">get_tspan</span><span class="p">(</span><span class="n">psrs</span><span class="p">)</span>
-</span><span id="__span-0-382"><a id="__codelineno-0-382" name="__codelineno-0-382"></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="__span-0-383"><a id="__codelineno-0-383" name="__codelineno-0-383"></a>            <span class="n">T</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">7</span>
-</span><span id="__span-0-384"><a id="__codelineno-0-384" name="__codelineno-0-384"></a>        <span class="n">N_f</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">red_components</span><span class="p">,</span> <span class="n">gwb_components</span><span class="p">)</span>
-</span><span id="__span-0-385"><a id="__codelineno-0-385" name="__codelineno-0-385"></a>        <span class="n">f_tab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">T</span><span class="p">,</span> <span class="n">N_f</span> <span class="o">/</span> <span class="n">T</span><span class="p">,</span> <span class="n">N_f</span><span class="p">)</span>
-</span><span id="__span-0-386"><a id="__codelineno-0-386" name="__codelineno-0-386"></a>
-</span><span id="__span-0-387"><a id="__codelineno-0-387" name="__codelineno-0-387"></a>        <span class="k">try</span><span class="p">:</span>
-</span><span id="__span-0-388"><a id="__codelineno-0-388" name="__codelineno-0-388"></a>            <span class="n">spectrum_tab</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="n">f_tab</span><span class="p">,</span> <span class="o">**</span><span class="n">x0</span><span class="p">)</span>
-</span><span id="__span-0-389"><a id="__codelineno-0-389" name="__codelineno-0-389"></a>        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-</span><span id="__span-0-390"><a id="__codelineno-0-390" name="__codelineno-0-390"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-391"><a id="__codelineno-0-391" name="__codelineno-0-391"></a>                <span class="s2">&quot;I tried to evaluate the spectrum function on the array of &quot;</span>
-</span><span id="__span-0-392"><a id="__codelineno-0-392" name="__codelineno-0-392"></a>                <span class="s2">&quot;frequency components you selected and for random values of &quot;</span>
-</span><span id="__span-0-393"><a id="__codelineno-0-393" name="__codelineno-0-393"></a>                <span class="s2">&quot;the parameter contained in the prior range but it failed. &quot;</span>
-</span><span id="__span-0-394"><a id="__codelineno-0-394" name="__codelineno-0-394"></a>                <span class="s2">&quot;Please, check that the spectrum function can take a numpy &quot;</span>
-</span><span id="__span-0-395"><a id="__codelineno-0-395" name="__codelineno-0-395"></a>                <span class="s2">&quot;list of frequencies as argument, and that it is well defined &quot;</span>
-</span><span id="__span-0-396"><a id="__codelineno-0-396" name="__codelineno-0-396"></a>                <span class="s2">&quot;within the entire prior volume.&quot;</span>
-</span><span id="__span-0-397"><a id="__codelineno-0-397" name="__codelineno-0-397"></a>            <span class="p">)</span>
-</span><span id="__span-0-398"><a id="__codelineno-0-398" name="__codelineno-0-398"></a>
-</span><span id="__span-0-399"><a id="__codelineno-0-399" name="__codelineno-0-399"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-</span><span id="__span-0-400"><a id="__codelineno-0-400" name="__codelineno-0-400"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span> <span class="kn">from</span> <span class="kc">None</span>
-</span><span id="__span-0-401"><a id="__codelineno-0-401" name="__codelineno-0-401"></a>
-</span><span id="__span-0-402"><a id="__codelineno-0-402" name="__codelineno-0-402"></a>        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">spectrum_tab</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">f_tab</span><span class="p">):</span>
-</span><span id="__span-0-403"><a id="__codelineno-0-403" name="__codelineno-0-403"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-404"><a id="__codelineno-0-404" name="__codelineno-0-404"></a>                <span class="s2">&quot;The output of the spectrum function needs to have the same &quot;</span>
-</span><span id="__span-0-405"><a id="__codelineno-0-405" name="__codelineno-0-405"></a>                <span class="s2">&quot;dimensions of the frequency list passed as argument.</span><span class="se">\n</span><span class="s2">&quot;</span>
-</span><span id="__span-0-406"><a id="__codelineno-0-406" name="__codelineno-0-406"></a>                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">spectrum_tab</span><span class="p">)</span><span class="si">=}</span><span class="s2"> != </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">f_tab</span><span class="p">)</span><span class="si">=}</span><span class="s2">.&quot;</span>
-</span><span id="__span-0-407"><a id="__codelineno-0-407" name="__codelineno-0-407"></a>            <span class="p">)</span>
-</span><span id="__span-0-408"><a id="__codelineno-0-408" name="__codelineno-0-408"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-</span><span id="__span-0-409"><a id="__codelineno-0-409" name="__codelineno-0-409"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span>
-</span><span id="__span-0-410"><a id="__codelineno-0-410" name="__codelineno-0-410"></a>
-</span><span id="__span-0-411"><a id="__codelineno-0-411" name="__codelineno-0-411"></a>    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;signal&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;ceffyl&quot;</span><span class="p">:</span>
-</span><span id="__span-0-412"><a id="__codelineno-0-412" name="__codelineno-0-412"></a>        <span class="n">error</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;You cannot use Ceffyl mode for deterministic signals.&quot;</span><span class="p">)</span>
-</span><span id="__span-0-413"><a id="__codelineno-0-413" name="__codelineno-0-413"></a>        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-</span><span id="__span-0-414"><a id="__codelineno-0-414" name="__codelineno-0-414"></a>        <span class="k">raise</span> <span class="ne">SystemExit</span>
-</span><span id="__span-0-415"><a id="__codelineno-0-415" name="__codelineno-0-415"></a>
-</span><span id="__span-0-416"><a id="__codelineno-0-416" name="__codelineno-0-416"></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="__span-0-417"><a id="__codelineno-0-417" name="__codelineno-0-417"></a>        <span class="n">tmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">toas</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">psrs</span><span class="p">])</span>
-</span><span id="__span-0-418"><a id="__codelineno-0-418" name="__codelineno-0-418"></a>        <span class="n">tmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">toas</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">psrs</span><span class="p">])</span>
-</span><span id="__span-0-419"><a id="__codelineno-0-419" name="__codelineno-0-419"></a>        <span class="n">toas_tab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">tmin</span><span class="p">,</span> <span class="n">tmax</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-</span><span id="__span-0-420"><a id="__codelineno-0-420" name="__codelineno-0-420"></a>
-</span><span id="__span-0-421"><a id="__codelineno-0-421" name="__codelineno-0-421"></a>        <span class="k">try</span><span class="p">:</span>
-</span><span id="__span-0-422"><a id="__codelineno-0-422" name="__codelineno-0-422"></a>            <span class="n">signal_tab</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">toas_tab</span><span class="p">,</span> <span class="o">**</span><span class="n">x0</span><span class="p">)</span>
-</span><span id="__span-0-423"><a id="__codelineno-0-423" name="__codelineno-0-423"></a>        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-</span><span id="__span-0-424"><a id="__codelineno-0-424" name="__codelineno-0-424"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-425"><a id="__codelineno-0-425" name="__codelineno-0-425"></a>                <span class="s2">&quot;I tried to evaluate the signal function on an array of &quot;</span>
-</span><span id="__span-0-426"><a id="__codelineno-0-426" name="__codelineno-0-426"></a>                <span class="s2">&quot;toas withing the observing time and for a set of model &quot;</span>
-</span><span id="__span-0-427"><a id="__codelineno-0-427" name="__codelineno-0-427"></a>                <span class="s2">&quot;parameters contained in the prior range but it failed. &quot;</span>
-</span><span id="__span-0-428"><a id="__codelineno-0-428" name="__codelineno-0-428"></a>                <span class="s2">&quot;Please, check that the signal function can take a numpy &quot;</span>
-</span><span id="__span-0-429"><a id="__codelineno-0-429" name="__codelineno-0-429"></a>                <span class="s2">&quot;list of toas as argument, and that it is well defined &quot;</span>
-</span><span id="__span-0-430"><a id="__codelineno-0-430" name="__codelineno-0-430"></a>                <span class="s2">&quot;within the entire prior volume.&quot;</span>
-</span><span id="__span-0-431"><a id="__codelineno-0-431" name="__codelineno-0-431"></a>            <span class="p">)</span>
-</span><span id="__span-0-432"><a id="__codelineno-0-432" name="__codelineno-0-432"></a>
-</span><span id="__span-0-433"><a id="__codelineno-0-433" name="__codelineno-0-433"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-</span><span id="__span-0-434"><a id="__codelineno-0-434" name="__codelineno-0-434"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span> <span class="kn">from</span> <span class="kc">None</span>
-</span><span id="__span-0-435"><a id="__codelineno-0-435" name="__codelineno-0-435"></a>
-</span><span id="__span-0-436"><a id="__codelineno-0-436" name="__codelineno-0-436"></a>        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">signal_tab</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">toas_tab</span><span class="p">):</span>
-</span><span id="__span-0-437"><a id="__codelineno-0-437" name="__codelineno-0-437"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-438"><a id="__codelineno-0-438" name="__codelineno-0-438"></a>                <span class="s2">&quot;The output of the signal function needs to have the same &quot;</span>
-</span><span id="__span-0-439"><a id="__codelineno-0-439" name="__codelineno-0-439"></a>                <span class="s2">&quot;dimensions of the toas list passed as argument.</span><span class="se">\n</span><span class="s2">&quot;</span>
-</span><span id="__span-0-440"><a id="__codelineno-0-440" name="__codelineno-0-440"></a>                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">signal_tab</span><span class="p">)</span><span class="si">=}</span><span class="s2"> != </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">toas_tab</span><span class="p">)</span><span class="si">=}</span><span class="s2">.&quot;</span>
-</span><span id="__span-0-441"><a id="__codelineno-0-441" name="__codelineno-0-441"></a>            <span class="p">)</span>
-</span><span id="__span-0-442"><a id="__codelineno-0-442" name="__codelineno-0-442"></a>
-</span><span id="__span-0-443"><a id="__codelineno-0-443" name="__codelineno-0-443"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-</span><span id="__span-0-444"><a id="__codelineno-0-444" name="__codelineno-0-444"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span>
-</span><span id="__span-0-445"><a id="__codelineno-0-445" name="__codelineno-0-445"></a>
-</span><span id="__span-0-446"><a id="__codelineno-0-446" name="__codelineno-0-446"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;orf&quot;</span><span class="p">):</span>
-</span><span id="__span-0-447"><a id="__codelineno-0-447" name="__codelineno-0-447"></a>        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;ceffyl&quot;</span><span class="p">:</span>
-</span><span id="__span-0-448"><a id="__codelineno-0-448" name="__codelineno-0-448"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;It is not possible to use user-specified ORF in ceffyl mode&quot;</span>
-</span><span id="__span-0-449"><a id="__codelineno-0-449" name="__codelineno-0-449"></a>                 <span class="s2">&quot;, please use PTArcade in enterprise mode to do this.&quot;</span><span class="p">)</span>
-</span><span id="__span-0-450"><a id="__codelineno-0-450" name="__codelineno-0-450"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-</span><span id="__span-0-451"><a id="__codelineno-0-451" name="__codelineno-0-451"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span>
-</span><span id="__span-0-452"><a id="__codelineno-0-452" name="__codelineno-0-452"></a>
-</span><span id="__span-0-453"><a id="__codelineno-0-453" name="__codelineno-0-453"></a>        <span class="n">args</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getfullargspec</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">orf</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-</span><span id="__span-0-454"><a id="__codelineno-0-454" name="__codelineno-0-454"></a>        <span class="k">if</span> <span class="p">[</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;pos1&#39;</span><span class="p">,</span> <span class="s1">&#39;pos2&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">args</span><span class="p">[:</span><span class="mi">3</span><span class="p">]:</span>
-</span><span id="__span-0-455"><a id="__codelineno-0-455" name="__codelineno-0-455"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;The first three arguments of the orf function should&quot;</span>
-</span><span id="__span-0-456"><a id="__codelineno-0-456" name="__codelineno-0-456"></a>                 <span class="s2">&quot; be `f`, `pos1`, and `pos2` (even if the orf is not&quot;</span>
-</span><span id="__span-0-457"><a id="__codelineno-0-457" name="__codelineno-0-457"></a>                 <span class="s2">&quot; frequency-dependent).&quot;</span><span class="p">)</span>
-</span><span id="__span-0-458"><a id="__codelineno-0-458" name="__codelineno-0-458"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-</span><span id="__span-0-459"><a id="__codelineno-0-459" name="__codelineno-0-459"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span>
-</span><span id="__span-0-460"><a id="__codelineno-0-460" name="__codelineno-0-460"></a>        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">args</span> <span class="k">if</span> <span class="n">e</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;pos1&#39;</span><span class="p">,</span> <span class="s1">&#39;pos2&#39;</span><span class="p">)]</span>
-</span><span id="__span-0-461"><a id="__codelineno-0-461" name="__codelineno-0-461"></a>        <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">!=</span> <span class="n">args</span><span class="p">:</span>
-</span><span id="__span-0-462"><a id="__codelineno-0-462" name="__codelineno-0-462"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-463"><a id="__codelineno-0-463" name="__codelineno-0-463"></a>                <span class="s2">&quot;In addition to the parameters &#39;f&#39;, &#39;pos1&#39;, and &#39;pos2&#39;, the &quot;</span>
-</span><span id="__span-0-464"><a id="__codelineno-0-464" name="__codelineno-0-464"></a>                <span class="s2">&quot;&#39;orf&#39; provided in the model file also needs to have as &quot;</span>
-</span><span id="__span-0-465"><a id="__codelineno-0-465" name="__codelineno-0-465"></a>                <span class="s2">&quot;parameters all the ones contained in the &#39;parameter&#39; dictionary.&quot;</span>
-</span><span id="__span-0-466"><a id="__codelineno-0-466" name="__codelineno-0-466"></a>                <span class="s2">&quot; (even if they are not used by the orf function)</span><span class="se">\n</span><span class="s2">&quot;</span>
-</span><span id="__span-0-467"><a id="__codelineno-0-467" name="__codelineno-0-467"></a>                <span class="sa">f</span><span class="s2">&quot;The parameter dictionary contains </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-</span><span id="__span-0-468"><a id="__codelineno-0-468" name="__codelineno-0-468"></a>                <span class="s2">&quot;while the &#39;orf&#39; function has the parameters =&quot;</span>
-</span><span id="__span-0-469"><a id="__codelineno-0-469" name="__codelineno-0-469"></a>                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="p">[</span><span class="s1">&#39;f&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;pos1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;pos2&#39;</span><span class="p">]</span><span class="o">+</span><span class="w"> </span><span class="n">args</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="__span-0-470"><a id="__codelineno-0-470" name="__codelineno-0-470"></a>            <span class="p">)</span>
-</span><span id="__span-0-471"><a id="__codelineno-0-471" name="__codelineno-0-471"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-</span><span id="__span-0-472"><a id="__codelineno-0-472" name="__codelineno-0-472"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span>
+</span><span id="__span-0-382"><a id="__codelineno-0-382" name="__codelineno-0-382"></a>            <span class="n">N_f</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">red_components</span><span class="p">,</span> <span class="n">gwb_components</span><span class="p">)</span>
+</span><span id="__span-0-383"><a id="__codelineno-0-383" name="__codelineno-0-383"></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-0-384"><a id="__codelineno-0-384" name="__codelineno-0-384"></a>            <span class="n">T</span> <span class="o">=</span> <span class="mf">12.5</span> <span class="o">*</span> <span class="mf">3.154</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">7</span>
+</span><span id="__span-0-385"><a id="__codelineno-0-385" name="__codelineno-0-385"></a>            <span class="n">N_f</span> <span class="o">=</span> <span class="n">gwb_components</span>
+</span><span id="__span-0-386"><a id="__codelineno-0-386" name="__codelineno-0-386"></a>        <span class="n">f_tab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">T</span><span class="p">,</span> <span class="n">N_f</span> <span class="o">/</span> <span class="n">T</span><span class="p">,</span> <span class="n">N_f</span><span class="p">)</span>
+</span><span id="__span-0-387"><a id="__codelineno-0-387" name="__codelineno-0-387"></a>
+</span><span id="__span-0-388"><a id="__codelineno-0-388" name="__codelineno-0-388"></a>        <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-0-389"><a id="__codelineno-0-389" name="__codelineno-0-389"></a>            <span class="n">spectrum_tab</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="n">f_tab</span><span class="p">,</span> <span class="o">**</span><span class="n">x0</span><span class="p">)</span>
+</span><span id="__span-0-390"><a id="__codelineno-0-390" name="__codelineno-0-390"></a>        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="ow">or</span> <span class="ne">IndexError</span><span class="p">:</span>
+</span><span id="__span-0-391"><a id="__codelineno-0-391" name="__codelineno-0-391"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-392"><a id="__codelineno-0-392" name="__codelineno-0-392"></a>                <span class="s2">&quot;I tried to evaluate the spectrum function on the array of &quot;</span>
+</span><span id="__span-0-393"><a id="__codelineno-0-393" name="__codelineno-0-393"></a>                <span class="s2">&quot;frequency components you selected and for random values of &quot;</span>
+</span><span id="__span-0-394"><a id="__codelineno-0-394" name="__codelineno-0-394"></a>                <span class="s2">&quot;the parameter contained in the prior range but it failed. &quot;</span>
+</span><span id="__span-0-395"><a id="__codelineno-0-395" name="__codelineno-0-395"></a>                <span class="s2">&quot;Please, check that the spectrum function can take a numpy &quot;</span>
+</span><span id="__span-0-396"><a id="__codelineno-0-396" name="__codelineno-0-396"></a>                <span class="s2">&quot;list of frequencies as argument, and that it is well defined &quot;</span>
+</span><span id="__span-0-397"><a id="__codelineno-0-397" name="__codelineno-0-397"></a>                <span class="s2">&quot;within the entire prior volume.&quot;</span>
+</span><span id="__span-0-398"><a id="__codelineno-0-398" name="__codelineno-0-398"></a>            <span class="p">)</span>
+</span><span id="__span-0-399"><a id="__codelineno-0-399" name="__codelineno-0-399"></a>
+</span><span id="__span-0-400"><a id="__codelineno-0-400" name="__codelineno-0-400"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</span><span id="__span-0-401"><a id="__codelineno-0-401" name="__codelineno-0-401"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span> <span class="kn">from</span> <span class="kc">None</span>
+</span><span id="__span-0-402"><a id="__codelineno-0-402" name="__codelineno-0-402"></a>
+</span><span id="__span-0-403"><a id="__codelineno-0-403" name="__codelineno-0-403"></a>        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">spectrum_tab</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">f_tab</span><span class="p">):</span>
+</span><span id="__span-0-404"><a id="__codelineno-0-404" name="__codelineno-0-404"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-405"><a id="__codelineno-0-405" name="__codelineno-0-405"></a>                <span class="s2">&quot;The output of the spectrum function needs to have the same &quot;</span>
+</span><span id="__span-0-406"><a id="__codelineno-0-406" name="__codelineno-0-406"></a>                <span class="s2">&quot;dimensions of the frequency list passed as argument.</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-0-407"><a id="__codelineno-0-407" name="__codelineno-0-407"></a>                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">spectrum_tab</span><span class="p">)</span><span class="si">=}</span><span class="s2"> != </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">f_tab</span><span class="p">)</span><span class="si">=}</span><span class="s2">.&quot;</span>
+</span><span id="__span-0-408"><a id="__codelineno-0-408" name="__codelineno-0-408"></a>            <span class="p">)</span>
+</span><span id="__span-0-409"><a id="__codelineno-0-409" name="__codelineno-0-409"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</span><span id="__span-0-410"><a id="__codelineno-0-410" name="__codelineno-0-410"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span>
+</span><span id="__span-0-411"><a id="__codelineno-0-411" name="__codelineno-0-411"></a>
+</span><span id="__span-0-412"><a id="__codelineno-0-412" name="__codelineno-0-412"></a>    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;signal&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;ceffyl&quot;</span><span class="p">:</span>
+</span><span id="__span-0-413"><a id="__codelineno-0-413" name="__codelineno-0-413"></a>        <span class="n">error</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;You cannot use Ceffyl mode for deterministic signals.&quot;</span><span class="p">)</span>
+</span><span id="__span-0-414"><a id="__codelineno-0-414" name="__codelineno-0-414"></a>        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</span><span id="__span-0-415"><a id="__codelineno-0-415" name="__codelineno-0-415"></a>        <span class="k">raise</span> <span class="ne">SystemExit</span>
+</span><span id="__span-0-416"><a id="__codelineno-0-416" name="__codelineno-0-416"></a>
+</span><span id="__span-0-417"><a id="__codelineno-0-417" name="__codelineno-0-417"></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-0-418"><a id="__codelineno-0-418" name="__codelineno-0-418"></a>        <span class="n">tmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">toas</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">psrs</span><span class="p">])</span>
+</span><span id="__span-0-419"><a id="__codelineno-0-419" name="__codelineno-0-419"></a>        <span class="n">tmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">toas</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">psrs</span><span class="p">])</span>
+</span><span id="__span-0-420"><a id="__codelineno-0-420" name="__codelineno-0-420"></a>        <span class="n">toas_tab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">tmin</span><span class="p">,</span> <span class="n">tmax</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+</span><span id="__span-0-421"><a id="__codelineno-0-421" name="__codelineno-0-421"></a>
+</span><span id="__span-0-422"><a id="__codelineno-0-422" name="__codelineno-0-422"></a>        <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-0-423"><a id="__codelineno-0-423" name="__codelineno-0-423"></a>            <span class="n">signal_tab</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">toas_tab</span><span class="p">,</span> <span class="o">**</span><span class="n">x0</span><span class="p">)</span>
+</span><span id="__span-0-424"><a id="__codelineno-0-424" name="__codelineno-0-424"></a>        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+</span><span id="__span-0-425"><a id="__codelineno-0-425" name="__codelineno-0-425"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-426"><a id="__codelineno-0-426" name="__codelineno-0-426"></a>                <span class="s2">&quot;I tried to evaluate the signal function on an array of &quot;</span>
+</span><span id="__span-0-427"><a id="__codelineno-0-427" name="__codelineno-0-427"></a>                <span class="s2">&quot;toas withing the observing time and for a set of model &quot;</span>
+</span><span id="__span-0-428"><a id="__codelineno-0-428" name="__codelineno-0-428"></a>                <span class="s2">&quot;parameters contained in the prior range but it failed. &quot;</span>
+</span><span id="__span-0-429"><a id="__codelineno-0-429" name="__codelineno-0-429"></a>                <span class="s2">&quot;Please, check that the signal function can take a numpy &quot;</span>
+</span><span id="__span-0-430"><a id="__codelineno-0-430" name="__codelineno-0-430"></a>                <span class="s2">&quot;list of toas as argument, and that it is well defined &quot;</span>
+</span><span id="__span-0-431"><a id="__codelineno-0-431" name="__codelineno-0-431"></a>                <span class="s2">&quot;within the entire prior volume.&quot;</span>
+</span><span id="__span-0-432"><a id="__codelineno-0-432" name="__codelineno-0-432"></a>            <span class="p">)</span>
+</span><span id="__span-0-433"><a id="__codelineno-0-433" name="__codelineno-0-433"></a>
+</span><span id="__span-0-434"><a id="__codelineno-0-434" name="__codelineno-0-434"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</span><span id="__span-0-435"><a id="__codelineno-0-435" name="__codelineno-0-435"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span> <span class="kn">from</span> <span class="kc">None</span>
+</span><span id="__span-0-436"><a id="__codelineno-0-436" name="__codelineno-0-436"></a>
+</span><span id="__span-0-437"><a id="__codelineno-0-437" name="__codelineno-0-437"></a>        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">signal_tab</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">toas_tab</span><span class="p">):</span>
+</span><span id="__span-0-438"><a id="__codelineno-0-438" name="__codelineno-0-438"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-439"><a id="__codelineno-0-439" name="__codelineno-0-439"></a>                <span class="s2">&quot;The output of the signal function needs to have the same &quot;</span>
+</span><span id="__span-0-440"><a id="__codelineno-0-440" name="__codelineno-0-440"></a>                <span class="s2">&quot;dimensions of the toas list passed as argument.</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-0-441"><a id="__codelineno-0-441" name="__codelineno-0-441"></a>                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">signal_tab</span><span class="p">)</span><span class="si">=}</span><span class="s2"> != </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">toas_tab</span><span class="p">)</span><span class="si">=}</span><span class="s2">.&quot;</span>
+</span><span id="__span-0-442"><a id="__codelineno-0-442" name="__codelineno-0-442"></a>            <span class="p">)</span>
+</span><span id="__span-0-443"><a id="__codelineno-0-443" name="__codelineno-0-443"></a>
+</span><span id="__span-0-444"><a id="__codelineno-0-444" name="__codelineno-0-444"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</span><span id="__span-0-445"><a id="__codelineno-0-445" name="__codelineno-0-445"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span>
+</span><span id="__span-0-446"><a id="__codelineno-0-446" name="__codelineno-0-446"></a>
+</span><span id="__span-0-447"><a id="__codelineno-0-447" name="__codelineno-0-447"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;orf&quot;</span><span class="p">):</span>
+</span><span id="__span-0-448"><a id="__codelineno-0-448" name="__codelineno-0-448"></a>        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;ceffyl&quot;</span><span class="p">:</span>
+</span><span id="__span-0-449"><a id="__codelineno-0-449" name="__codelineno-0-449"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;It is not possible to use user-specified ORF in ceffyl mode&quot;</span>
+</span><span id="__span-0-450"><a id="__codelineno-0-450" name="__codelineno-0-450"></a>                 <span class="s2">&quot;, please use PTArcade in enterprise mode to do this.&quot;</span><span class="p">)</span>
+</span><span id="__span-0-451"><a id="__codelineno-0-451" name="__codelineno-0-451"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</span><span id="__span-0-452"><a id="__codelineno-0-452" name="__codelineno-0-452"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span>
+</span><span id="__span-0-453"><a id="__codelineno-0-453" name="__codelineno-0-453"></a>
+</span><span id="__span-0-454"><a id="__codelineno-0-454" name="__codelineno-0-454"></a>        <span class="n">args</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getfullargspec</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">orf</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="__span-0-455"><a id="__codelineno-0-455" name="__codelineno-0-455"></a>        <span class="k">if</span> <span class="p">[</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;pos1&#39;</span><span class="p">,</span> <span class="s1">&#39;pos2&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">args</span><span class="p">[:</span><span class="mi">3</span><span class="p">]:</span>
+</span><span id="__span-0-456"><a id="__codelineno-0-456" name="__codelineno-0-456"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;The first three arguments of the orf function should&quot;</span>
+</span><span id="__span-0-457"><a id="__codelineno-0-457" name="__codelineno-0-457"></a>                 <span class="s2">&quot; be `f`, `pos1`, and `pos2` (even if the orf is not&quot;</span>
+</span><span id="__span-0-458"><a id="__codelineno-0-458" name="__codelineno-0-458"></a>                 <span class="s2">&quot; frequency-dependent).&quot;</span><span class="p">)</span>
+</span><span id="__span-0-459"><a id="__codelineno-0-459" name="__codelineno-0-459"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</span><span id="__span-0-460"><a id="__codelineno-0-460" name="__codelineno-0-460"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span>
+</span><span id="__span-0-461"><a id="__codelineno-0-461" name="__codelineno-0-461"></a>        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">args</span> <span class="k">if</span> <span class="n">e</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;pos1&#39;</span><span class="p">,</span> <span class="s1">&#39;pos2&#39;</span><span class="p">)]</span>
+</span><span id="__span-0-462"><a id="__codelineno-0-462" name="__codelineno-0-462"></a>        <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">!=</span> <span class="n">args</span><span class="p">:</span>
+</span><span id="__span-0-463"><a id="__codelineno-0-463" name="__codelineno-0-463"></a>            <span class="n">error</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-464"><a id="__codelineno-0-464" name="__codelineno-0-464"></a>                <span class="s2">&quot;In addition to the parameters &#39;f&#39;, &#39;pos1&#39;, and &#39;pos2&#39;, the &quot;</span>
+</span><span id="__span-0-465"><a id="__codelineno-0-465" name="__codelineno-0-465"></a>                <span class="s2">&quot;&#39;orf&#39; provided in the model file also needs to have as &quot;</span>
+</span><span id="__span-0-466"><a id="__codelineno-0-466" name="__codelineno-0-466"></a>                <span class="s2">&quot;parameters all the ones contained in the &#39;parameter&#39; dictionary.&quot;</span>
+</span><span id="__span-0-467"><a id="__codelineno-0-467" name="__codelineno-0-467"></a>                <span class="s2">&quot; (even if they are not used by the orf function)</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-0-468"><a id="__codelineno-0-468" name="__codelineno-0-468"></a>                <span class="sa">f</span><span class="s2">&quot;The parameter dictionary contains </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-0-469"><a id="__codelineno-0-469" name="__codelineno-0-469"></a>                <span class="s2">&quot;while the &#39;orf&#39; function has the parameters =&quot;</span>
+</span><span id="__span-0-470"><a id="__codelineno-0-470" name="__codelineno-0-470"></a>                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="p">[</span><span class="s1">&#39;f&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;pos1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;pos2&#39;</span><span class="p">]</span><span class="o">+</span><span class="w"> </span><span class="n">args</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="__span-0-471"><a id="__codelineno-0-471" name="__codelineno-0-471"></a>            <span class="p">)</span>
+</span><span id="__span-0-472"><a id="__codelineno-0-472" name="__codelineno-0-472"></a>            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</span><span id="__span-0-473"><a id="__codelineno-0-473" name="__codelineno-0-473"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span>
 </span></code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -3424,13 +3454,13 @@ If the path in <code>config.pta_data['psrs_data']</code> doesn't exist.</li>
         
         
           
-          <a href="../models_utils/" class="md-footer__link md-footer__link--next" aria-label="Next: models_utils" rel="next">
+          <a href="../models_utils%20%28gluon%27s%20conflicted%20copy%202024-04-05%29/" class="md-footer__link md-footer__link--next" aria-label="Next: models_utils (gluon&#39;s conflicted copy 2024-04-05)" rel="next">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                models_utils
+                models_utils (gluon's conflicted copy 2024-04-05)
               </div>
             </div>
             <div class="md-footer__button md-icon">
