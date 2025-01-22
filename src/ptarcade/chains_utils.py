@@ -487,8 +487,8 @@ def compute_bf(chain: NDArray, params: list[str], bootstrap: bool = False) -> tu
     Returns
     -------
     bf : float
-        The computed Bayes factor. This gives the evidence for model 0 over model 1. A higher value provides
-        stronger evidence for model 0.
+        The computed Bayes factor. This gives the evidence for model 1 over model 0. A higher value provides
+        stronger evidence for model 1.
     unc : float
         The computed uncertainty of the Bayes factor.
 
