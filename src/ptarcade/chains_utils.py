@@ -53,7 +53,10 @@ def params_loader(file: str | Path) -> dict[str, tuple[float, float] | None]:
                 params[key] = (minimum, maximum)
 
             elif "Normal" in line:
-                dim = len(re.search('\\[(.*?)\\]', line).group(1).split()) # type: ignore
+                if '[' in line:
+                    dim = len(re.search('\\[(.*?)\\]', line).group(1).split()) # type: ignore
+                else:
+                    dim = 1
                 for i in range(dim):
                     params[f"{key}_{i}"] = None # type: ignore
 
