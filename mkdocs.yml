@@ -6,6 +6,8 @@ site_description: >-
   never been easier. 
 
 repo_url: https://github.com/andrea-mitridate/PTArcade
+repo_name: andrea-mitridate/PTArcade
+edit_uri: edit/master/docs/
 
 theme:
   name: material
@@ -13,9 +15,12 @@ theme:
   icon:
     logo: simple/applearcade
     repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
   features:
     - announce.dismiss
     - content.action.view
+    - content.action.edit
     - content.code.annotate
     - content.code.copy
     - content.code.select
@@ -99,7 +104,11 @@ plugins:
             group_by_category: true
             show_category_heading: true
             members_order: source
-
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - git-committers:
+      repository: andrea-mitridate/PTArcade
+      branch: master
 
 # Extensions
 markdown_extensions:
@@ -118,8 +127,8 @@ markdown_extensions:
   - pymdownx.caret
   - pymdownx.details
   - pymdownx.emoji:
-      emoji_generator: !!python/name:materialx.emoji.to_svg
-      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
