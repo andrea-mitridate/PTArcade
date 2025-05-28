@@ -63,6 +63,7 @@ def unique_sampling_groups(super_model: hypermodel.Hypermodel) -> list[list[int]
 
     return unique_groups
 
+
 @parameter.function
 def powerlaw2(f: NDArray, log10_Agamma: NDArray, components: int = 2) -> NDArray:
     """Modified powerlaw function.
@@ -197,6 +198,7 @@ def tnequad_conv(noisedict: dict) -> bool:
         raise SystemExit(err)
 
     return tnequad
+
 
 def ent_builder(
     psrs: list[Pulsar],

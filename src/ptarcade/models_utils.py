@@ -82,7 +82,7 @@ v_dm : np.float64 = 232. # local DM velocity (km/s)
 gev_to_hz : np.float64 = nat.convert(nat.GeV, nat.Hz) # conversion from gev to Hz
 
 # tabulated values for the number of relativistic degrees of
-# freedom from reference 1803.01038
+# freedom from reference 2005.03544
 gs = np.loadtxt(files('ptarcade.data').joinpath('g_star.dat')) # type: ignore
 
 # type to use for priors-building functions
