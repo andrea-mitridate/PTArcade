@@ -23,7 +23,7 @@ dependencies = [
     "scipy>=1.10.1,<2.0.0",
     "encor>=1.1.5,<2.0.0",
     "rich[jupyter]>=13.4.2,<15.0.0",
-    "ceffyl>=1.41,<1.50",
+    "ceffyl>=1.41.1,<1.50",
     "setuptools>=80.0.0",
     "astropy>=5.3.4",
 ]
