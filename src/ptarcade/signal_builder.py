@@ -567,5 +567,5 @@ def ceffyl_builder(inputs):
                           params=bhb_params,
                           name=''))
 
-
-    return ceffyl_pta.add_signals(model)
+    ceffyl_pta.add_signals(model)
+    return ceffyl_pta
