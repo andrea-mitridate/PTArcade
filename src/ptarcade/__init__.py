@@ -17,7 +17,7 @@ from rich.logging import RichHandler
 
 FORMAT = "%(message)s"
 logging.basicConfig(
-    level="INFO",
+    level="ERROR",
     format=FORMAT,
     datefmt="[%X]",
     handlers=[
@@ -28,3 +28,4 @@ logging.basicConfig(
         ),
     ],
 )
+logging.captureWarnings(True)
