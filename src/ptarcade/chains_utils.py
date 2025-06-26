@@ -207,18 +207,9 @@ def import_to_dataframe(
         # import and merge all the chains removing the burn-in
         name_list = list(params.keys())
 
-        red_noise_filter = re.compile(".*red_noise.*")
-
-        if quick_import and any(filter(red_noise_filter.match, name_list)): # type: ignore
-            # Search reversed list for first occurence of "red_noise"
-            # Return the index (remember, the list is reversed!)
-            # The use of `next` and a generator makes it so that we don't have to
-            # search the whole list, we stop when we get the first match
-            red_noise_ind = next(i for i in enumerate(name_list[::-1]) if "red_noise" in i[1])[0]
-
-            # Slice the list so that we begin directly after the index found above
-            usecols = name_list[-1 * red_noise_ind :]
-
+        # Do not import pulsar red noise parameters
+        if quick_import and any(filter(lambda x: "red_noise" in x, name_list)): # type: ignore
+            usecols = [name for name in name_list if "red_noise" not in name]
             params = {name: params[name] for name in usecols}
         else:
             usecols = name_list
