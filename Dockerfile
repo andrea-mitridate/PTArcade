@@ -1,4 +1,4 @@
-FROM python:3.10-bookworm
+FROM python:3.12-bookworm
 LABEL maintainer="David C. Wright <david.wright@nanograv.org>"
 RUN apt update && apt install -y --no-install-recommends libsuitesparse-dev gfortran openmpi-bin libopenmpi-dev
 RUN curl -sSL https://raw.githubusercontent.com/vallis/libstempo/master/install_tempo2.sh | sh -s /usr/local
