@@ -65,9 +65,18 @@ If you want an interactive shell, run the following command
 singularity shell ptarcade.sif
 ```
 
+## Using Parallel Tempering
+PTArcade can use [parallel tempering] with a simple modification to your run command. Just prefix `ptarcade` with `mpirun -n <number-of-temperatures>`. For example,
+```sh
+mpirun -n 5 ptarcade -m ./model.py
+```
+will sample your model with 5 temperatures using a geometrically-spaced temperature ladder. This is configurable, see the options in [ptmcmc_sampler_kwargs].
+
   
   [model file]: ../inputs/model.md
   [configuration file]: ../inputs/config.md
   [inputs]: ../inputs/index.md
   [out]: ../inputs/config.md#+config.out_dir
   [name]: ../inputs/model.md#+model.name
+  [parallel tempering]: https://en.wikipedia.org/wiki/Parallel_tempering
+  [ptmcmc_sampler_kwargs]: ../inputs/config.md#+config.ptmcmc_sampler_kwargs

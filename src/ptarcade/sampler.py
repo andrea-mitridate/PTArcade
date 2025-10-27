@@ -173,11 +173,11 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
                 corr=inputs['config'].corr,
                 red_components=inputs["config"].red_components,
                 gwb_components=inputs["config"].gwb_components)
-            
+
     elif inputs["config"].mode == "ceffyl":
 
         pta = signal_builder.ceffyl_builder(inputs)
-        
+
     return pta
 
 
@@ -210,7 +210,7 @@ def setup_sampler(
     """
     out_dir = os.path.join(
         inputs["config"].out_dir, inputs["model"].name, f'chain_{input_options["n"]}')
-    
+
     if not inputs["config"].resume and os.path.exists(out_dir):
         shutil.rmtree(out_dir)
 
@@ -299,6 +299,7 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
                 SCAMweight=inputs["config"].scam_weight,
                 AMweight=inputs["config"].am_weight,
                 DEweight=inputs["config"].de_weight,
+                **getattr(inputs["config"], "ptmcmc_sampler_kwargs", {})
             )
         except RuntimeError as e:
             err = ("There was an error while sampling. If this error involves autocorrelation time,\n"
