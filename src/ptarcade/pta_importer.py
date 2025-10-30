@@ -6,7 +6,10 @@ import json
 import logging
 import os
 import pickle
+from pathlib import Path
 
+import discovery as ds
+from astropy.config import get_cache_dir
 from astropy.utils.data import download_file, get_readable_fileobj
 from enterprise.pulsar import Pulsar
 from numpy._typing import _ArrayLikeFloat_co as array_like
@@ -236,3 +239,44 @@ def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, 
         raise SystemExit
 
     return psrs, params, emp_dist
+
+def convert_enterprise_pulsars_to_discovery(
+        enterprise_psrs: list[Pulsar], dataset_name: str,  noisedict: dict[str, array_like] | None = None
+) -> list[ds.Pulsar]:
+    """Convert enterprise Pulsar objects to discovery Pulsar objects.
+
+    This function transforms a list of enterprise Pulsar objects into discovery
+    Pulsar format by serializing them to feather format as an intermediate
+    representation. Each enterprise pulsar is converted individually using its
+    to_feather method along with optional noise parameters.
+
+    Parameters
+    ----------
+    enterprise_psrs : list[Pulsar]
+        List of enterprise Pulsar objects to be converted to discovery format.
+    noisedict : dict[str, array_like] or None, optional
+        Dictionary mapping noise parameter names to their values. If provided,
+        these noise parameters are included in the conversion. Default is None.
+
+    Returns
+    -------
+    list[ds.Pulsar]
+        List of discovery Pulsar objects converted from the input enterprise
+        pulsars.
+
+    """
+    discovery_psrs = []
+
+    out_dir = Path(get_cache_dir("ptarcade")) / "feather_pulsars" / dataset_name
+    out_dir.mkdir(exist_ok = True, parents=True)
+    for ep in enterprise_psrs:
+        output_file = out_dir / f"{ep.name}.feather"
+        if output_file.exists():
+            print(f"Loading cached {ep.name}")
+            # You can also pre-load these manually at this location
+            discovery_psrs.append(ds.Pulsar.read_feather(str(output_file)))
+        else:
+            print(f"Converting {ep.name}")
+            discovery_psrs.append(ds.Pulsar.save_feather(ep, str(output_file), noisedict))
+
+    return discovery_psrs

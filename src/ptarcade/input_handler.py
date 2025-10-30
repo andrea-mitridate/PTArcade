@@ -220,10 +220,10 @@ def check_config(config: ModuleType) -> None:
         )
         log.error(error)
         raise SystemExit
-            
+
     # checks mod
     if isinstance(config.pta_data, str):
-        if config.mode in ["enterprise", "ceffyl"]:
+        if config.mode in ["enterprise", "ceffyl", "discovery"]:
             pass
         else:
             error = (
@@ -370,11 +370,11 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
 
     for name, par in model.parameters.items():
         try:
-            x0[name] = par.sample()  # type: ignore
+            x0[name] = par["enterprise_prior_obj"].sample()  # type: ignore
         except AttributeError:
-            x0[name] = par.value  # type: ignore
+            x0[name] = par["enterprise_prior_obj"].value  # type: ignore
         except TypeError:
-            x0[name] = par(name).sample()
+            x0[name] = par["enterprise_prior_obj"](name).sample()
 
     if hasattr(model, "spectrum"):
         if mode == "enterprise":
@@ -443,14 +443,14 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
 
             log.error(error)
             raise SystemExit
-        
+
     if hasattr(model, "orf"):
         if mode == "ceffyl":
             error = ("It is not possible to use user-specified ORF in ceffyl mode"
                  ", please use PTArcade in enterprise mode to do this.")
             log.error(error)
             raise SystemExit
-        
+
         args = inspect.getfullargspec(model.orf)[0]
         if ['f', 'pos1', 'pos2'] != args[:3]:
             error = ("The first three arguments of the orf function should"

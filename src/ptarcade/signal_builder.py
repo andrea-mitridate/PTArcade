@@ -1,6 +1,7 @@
 """Module for building PTA signals."""
 from __future__ import annotations
 
+import inspect
 import logging
 import sys
 from importlib.resources import files
@@ -8,7 +9,9 @@ from pathlib import Path
 from types import ModuleType
 from zipfile import ZipFile
 
+import discovery as ds
 import numpy as np
+import numpyro
 from astropy.utils.data import download_file
 from ceffyl import Ceffyl
 from enterprise import constants as const
@@ -23,13 +26,15 @@ from enterprise_extensions.blocks import (common_red_noise_block,
                                           white_noise_block)
 from enterprise_extensions.sampler import get_parameter_groups
 from numpy.typing import NDArray
+from numpyro import distributions as dist
 
-import ptarcade.models_utils as aux
 import ptarcade.ent_mod as mods
+import ptarcade.models_utils as aux
 
 log = logging.getLogger("rich")
 
-# gaussian parameters for the SMBHB signal. 
+
+# gaussian parameters for the SMBHB signal.
 # NG15 parameters are extracted from the holodeck library astro-02-gw
 # IPTA2 parameters are taken from Middleton et al. 2021
 bhb_priors = {"NG15" : [np.array([-15.61492963, 4.70709637]), np.array([[0.27871359, -0.00263617], [-0.00263617, 0.12415383]])],
@@ -100,7 +105,7 @@ def powerlaw2(f: NDArray, log10_Agamma: NDArray, components: int = 2) -> NDArray
 
 @parameter.function
 def powerlaw(f, Tspan, log10_A, gamma):
-    
+
     """Modified powerlaw function.
 
     Powerlaw function modified to work with ceffyl.
@@ -122,7 +127,7 @@ def powerlaw(f, Tspan, log10_A, gamma):
         The modified powerlaw.
 
     """
-    
+
     return (
         (10**log10_A) ** 2 / 12.0 / np.pi**2 * const.fyr ** (gamma - 3) * f ** (-gamma) / Tspan  # divide by Tspan here
     )
@@ -276,7 +281,7 @@ def ent_builder(
 
         if bhb_th_prior and (pta_dataset == "NG15" or pta_dataset == "IPTA2"):
 
-            mu, sigma = bhb_priors[pta_dataset]            
+            mu, sigma = bhb_priors[pta_dataset]
 
             if model is None:
                 log10_Agamma_gw = parameter.Normal(mu=mu, sigma=sigma, size=2)("gw_bhb")
@@ -333,18 +338,18 @@ def ent_builder(
     if model:
         if hasattr(model, "signal"):
             signal = function(model.signal)
-            signal = signal(**model.parameters)
+            signal = signal(**{key:val["enterprise_prior_obj"] for key,val in model.parameters.items()})
             np_signal = deterministic_signals.Deterministic(signal, name=model.name)
 
             s += np_signal
 
         elif hasattr(model, "spectrum"):
-            spectrum = aux.omega2cross(model.spectrum)
-            cpl_np = spectrum(**model.parameters)
+            spectrum = aux.omega2cross(model.spectrum, likelihood="enterprise")
+            cpl_np = spectrum(**{key:val["enterprise_prior_obj"] for key,val in model.parameters.items()})
 
             if corr and hasattr(model, "orf"):
                 orf = function(model.orf)
-                orf = orf(**model.parameters)
+                orf = orf(**{key:val["enterprise_prior_obj"] for key,val in model.parameters.items()})
 
                 np_gwb = mods.FourierBasisCommonGP(
                     spectrum=cpl_np,
@@ -390,7 +395,7 @@ def ent_builder(
             s2 += chrom.dm_exponential_dip(tmin=54500, tmax=55000, idx=2, sign=False, name="dmexp_1")
             if p.toas.max() / const.day > 57850:
                 s2 += chrom.dm_exponential_dip(tmin=57300, tmax=57850, idx=2, sign=False, name="dmexp_2")
-        
+
         models.append(s2(p))
 
     # set up PTA
@@ -528,11 +533,11 @@ def ceffyl_builder(inputs):
     model = []
 
     model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
-                          psd=aux.omega2cross(inputs["model"].spectrum, ceffyl=True),  
+                          psd=aux.omega2cross(inputs["model"].spectrum, likelihood="ceffyl"),
                           params=params,
                           name=''))
-    
-    
+
+
     if inputs["model"].smbhb:
         mu, sigma = bhb_priors.get(inputs["config"].pta_data, np.array([False, False]))
 
@@ -561,11 +566,95 @@ def ceffyl_builder(inputs):
             bhb_params = [log10_A_bhb, gamma_bhb]
             bhb_signal = powerlaw
 
-            
+
         model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
-                          psd=bhb_signal,  
+                          psd=bhb_signal,
                           params=bhb_params,
                           name=''))
 
     ceffyl_pta.add_signals(model)
     return ceffyl_pta
+
+def discovery_builder(
+    psrs: list[ds.Pulsar],
+    model: ModuleType,
+    corr: bool = False,
+    red_components: int = 30,
+    gwb_components: int = 14,
+) -> ds.ArrayLikelihood:
+    globalgp_psd = aux.omega2cross(model.spectrum, likelihood="discovery")
+    globalgp_psd.__signature__ = inspect.signature(model.spectrum)
+
+    Tspan = ds.getspan(psrs)
+
+    pslmodels = (
+        ds.PulsarLikelihood(
+            [
+                psr.residuals,
+                ds.makenoise_measurement(psr, psr.noisedict),
+                ds.makegp_ecorr(psr, psr.noisedict),
+                ds.makegp_timing(psr, svd=True),
+            ]
+        )
+        for psr in psrs
+    )
+
+    rngp = ds.makecommongp_fourier(psrs, ds.powerlaw, red_components, T=Tspan, name="red_noise")
+    if corr:
+        hdgp = ds.makeglobalgp_fourier(psrs, globalgp_psd, ds.hd_orf, gwb_components, T=Tspan, name=model.name)
+        return ds.ArrayLikelihood(pslmodels, commongp=rngp, globalgp=hdgp)
+
+    curngp = ds.makecommongp_fourier(
+        psrs,
+        globalgp_psd,
+        gwb_components,
+        T=Tspan,
+        common=list(model.parameters),
+        name=model.name,
+    )
+    return ds.ArrayLikelihood(pslmodels, commongp=[rngp, curngp])
+
+
+def discovery_numpyro_model_builder(
+    psrs: list[ds.Pulsar],
+    inputs: dict[str, ModuleType],
+    likelihood_obj: ds.ArrayLikelihood,
+    noisedict: dict | None = None,
+    pta_dataset: str | None = None,
+    bhb_th_prior: bool = False,
+    gamma_bhb: float | None = None,
+    A_bhb_logmin: float | None = None,
+    A_bhb_logmax: float | None = None,
+) -> ds.ArrayLikelihood:
+    ln_likelihood = likelihood_obj.logL
+    params = ln_likelihood.params
+
+
+    red_noise_gamma_params = []
+    red_noise_amp_params = []
+
+    for p in params:
+        if "red_noise_log10_A" in p:
+            red_noise_amp_params.append(p)
+        elif "red_noise_gamma" in p:
+            red_noise_gamma_params.append(p)
+
+    def discovery_model():
+        # Get new physics priors
+        params = {
+            (f"{inputs['model'].name}_{par}" if inputs["config"].corr else par): numpyro.sample(par, aux.get_numpyro_prior(val["name"], *val["args"], **val["kwargs"]))
+            for par, val in inputs["model"].parameters.items()
+        }
+
+        # Pulsar red noise priors
+        for amp, gam in zip(red_noise_amp_params, red_noise_gamma_params, strict=True):
+            params.update(
+                {
+                    amp: numpyro.sample(amp, dist.Uniform(-20, -11)),
+                    gam: numpyro.sample(gam, dist.Uniform(0, 7)),
+                }
+            )
+
+        numpyro.factor("ll", ln_likelihood(params))
+
+    return discovery_model
