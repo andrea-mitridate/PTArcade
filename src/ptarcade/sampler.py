@@ -23,6 +23,7 @@ sys.modules["astropy.erfa"] = erfa
 
 import numpy as np
 import rich
+import types
 from ceffyl import Sampler
 from enterprise.pulsar import Pulsar
 from enterprise.signals.signal_base import PTA
@@ -37,6 +38,7 @@ from rich.panel import Panel
 from ptarcade import input_handler, pta_importer, signal_builder
 from ptarcade.input_handler import bcolors
 from ptarcade.models_utils import ParamDict
+from ptarcade.models_utils import cosmo_lnlikelihood
 from ptarcade import console
 
 log = logging.getLogger("rich")
@@ -139,7 +141,8 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
         psrs=psrs,
         red_components=inputs['config'].red_components,
         gwb_components=inputs['config'].gwb_components,
-        mode=inputs["config"].mode)
+        mode=inputs["config"].mode,
+        cosmo_constraints=inputs["config"].cosmo_constraints)
 
 
     if inputs["config"].mode == "enterprise":
@@ -232,6 +235,13 @@ def setup_sampler(
             sample_nmodel=inputs["config"].mod_sel,
             groups=groups,
             empirical_distr=emp_dist)
+        
+        if inputs["config"].cosmo_constraints:
+            super_model.get_lnlikelihood = types.MethodType(
+                cosmo_lnlikelihood(
+                    spectrum=inputs["model"].spectrum,
+                    cosmo_params_names=inputs["model"].parameters),
+                super_model)
 
         x0 = super_model.initial_sample()
 

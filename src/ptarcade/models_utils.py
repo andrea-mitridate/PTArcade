@@ -538,3 +538,88 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
     prior_obj.common = common
 
     return prior_obj
+
+
+def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...], f_bbn: float = 1e-12, f_max: float = 1e-8) -> float:
+    """Calculate the effective number of relativistic species from a GW spectrum.
+
+    Parameters
+    ----------
+    spectrum : Callable[..., NDArray]
+        The function that returns the GW energy density as a fraction of the closure density.
+    params : tuple[Any, ...]
+        The parameters to pass to `spectrum`.
+    f_bbn : float, optional
+        The frequency at BBN [Hz]. Defaults to 1e-12 Hz.
+    f_max : float, optional
+        The maximum frequency to integrate up to [Hz]. Defaults to 1e-8 Hz.
+
+    Returns
+    -------
+    float
+        The effective number of relativistic species contributed by the GW spectrum.
+
+    """
+    result, error = nat.integrate.quad(spectrum, f_bbn, f_max, args=params, weight='cauchy', wvar=0)
+
+    return result
+
+
+def bbn_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray], sm_neff: float = 3.044, mu_neff: float = 2.941, sigma_neff: float = 0.143) -> float:
+    """Calculate the cosmological log-likelihood based on N_eff measurements.
+    Parameters
+    ----------
+    x : NDArray
+        The array of parameter values.
+    param_names : NDArray
+        The names of the parameters in `x`.
+    cosmo_params : list[str]
+        The names of the cosmological parameters to use in the likelihood.
+    spectrum : Callable[..., NDArray]
+        The function that returns the GW energy density as a fraction of the closure density.
+    sm_neff : float, optional
+        The Standard Model value of N_eff. Defaults to 3.044.
+    mu_neff : float, optional
+        The mean value of N_eff from observations. Defaults to 2.941.
+    sigma_neff : float, optional
+        The standard deviation of N_eff from observations. Defaults to 0.143.
+
+    Returns
+    -------
+    float
+        The cosmological likelihood based on N_eff measurements.
+    """
+
+
+    d_neff = delta_neff(spectrum, x)
+
+    norm = np.exp(-0.5 * ((sm_neff - mu_neff) / sigma_neff) ** 2) * np.sqrt(2 * np.pi * sigma_neff**2)
+
+    return  np.exp(-0.5 * ((d_neff + sm_neff- mu_neff) / sigma_neff) ** 2) / norm
+
+
+def cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names):
+
+    # find model index variable
+    idx = list(self.param_names).index('nmodel')
+    nmodel = int(np.rint(x[idx]))
+
+    # find parameters of active model
+    q = []
+    for par in self.models[nmodel].param_names:
+        idx = self.param_names.index(par)
+        q.append(x[idx])
+
+    # only active parameters enter likelihood
+    active_lnlike = self.models[nmodel].get_lnlikelihood(q)
+
+    if self.log_weights is not None:
+        active_lnlike += self.log_weights[nmodel]
+
+    if nmodel == 0:
+        return active_lnlike
+    
+    mask = np.isin(self.param_names, cosmo_params_names)
+    cosmo_params = x[mask]
+
+    return active_lnlike + bbn_lnlikelihood(cosmo_params, spectrum)

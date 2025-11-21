@@ -163,6 +163,7 @@ def check_config(config: ModuleType) -> None:
            "out_dir" : './chains/',
            "resume" : False,
            "scam_weight" : 30,
+           "cosmo_constraints": False,
            "am_weight" : 15,
            "de_weight" : 50,
            "red_components" : 30,
@@ -241,6 +242,7 @@ def check_config(config: ModuleType) -> None:
         "resume": config.resume,
         "corr": config.corr,
         "bhb_th_prior": config.bhb_th_prior,
+        "cosmo_constraints": config.cosmo_constraints,
     }
 
     for key, value in bools.items():
@@ -292,7 +294,7 @@ def check_config(config: ModuleType) -> None:
         log.warning(warning)
 
 
-def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_components: int, mode: str) -> None:
+def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_components: int, mode: str, cosmo_constraints: bool) -> None:
     """Validate model file.
 
     Parameters
@@ -411,6 +413,12 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
 
     elif hasattr(model, "signal") and mode == "ceffyl":
         error = ("You cannot use Ceffyl mode for deterministic signals.")
+        log.error(error)
+        raise SystemExit
+    
+    elif hasattr(model, "signal") and cosmo_constraints:
+        error = ("You cannot set BBN constraints on a deterministic signal."
+                 " Please, set cosmo_constraints to False in the config file.")
         log.error(error)
         raise SystemExit
 
