@@ -39,6 +39,7 @@ g_s_0 : np.float64
     Entropic relativistic degrees of freedom today
 priors_type : typing.Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "Constant", "Gamma"]
     Type for parameter priors.
+
 """
 from __future__ import annotations
 
@@ -56,6 +57,7 @@ from enterprise.signals import parameter
 from enterprise.signals.parameter import function
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
+from scipy.integrate import quad  # ← add this
 
 from ptarcade import fast_interpolate
 
@@ -84,6 +86,7 @@ gev_to_hz : np.float64 = nat.convert(nat.GeV, nat.Hz) # conversion from gev to H
 # tabulated values for the number of relativistic degrees of
 # freedom from reference 2005.03544
 gs = np.loadtxt(files('ptarcade.data').joinpath('g_star.dat')) # type: ignore
+lvk_omega = np.loadtxt(files('ptarcade.data').joinpath('lvk.dat')) # type: ignore
 
 # type to use for priors-building functions
 priors_type = Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "Constant", "Gamma"]
@@ -345,6 +348,7 @@ def prep_data(path: str) -> tuple[list[NDArray], NDArray, NDArray]:
         The omega grid of the tabulated data.
     par_names : NDArray
         The names of the parameters in the tabulated data.
+
     """
     par_names = np.loadtxt(path, max_rows=1, dtype='str')
     data = np.loadtxt(path, skiprows=1)
@@ -383,6 +387,7 @@ def spec_importer(path: str) -> Callable[[NDArray, Any],  NDArray]:
     Callable[[NDArray, P], NDArray]
         A callable object that interpolates the GWB power spectrum at a given frequency `f` and with given
         parameters `kwargs`.
+
     """
     info, data = fast_interpolate.load_data(path)
     # info is a list of (name, start, step)
@@ -411,6 +416,7 @@ def freq_at_temp(T: array_like) -> array_like:
     -------
     NDArray
         The GW frequency [Hz] today that was of horizon size when the universe was at temperature `T` [GeV].
+
     """
     f_0 = H_0_Hz / (2 * np.pi)
 
@@ -422,7 +428,7 @@ def freq_at_temp(T: array_like) -> array_like:
     sqr_term = np.sqrt(
         omega_v
         + (gs_ratio**-1 * T_ratio**-3 * omega_m)
-        + (g_ratio**-1 * T_ratio**-4 * omega_r)
+        + (g_ratio**-1 * T_ratio**-4 * omega_r),
     )
 
     return prefactor * sqr_term
@@ -540,7 +546,7 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
     return prior_obj
 
 
-def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...], f_bbn: float = 1e-12, f_max: float = 1e-8) -> float:
+def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...], f_bbn: float = 1e-12, f_max: float = 1e3) -> float:
     """Calculate the effective number of relativistic species from a GW spectrum.
 
     Parameters
@@ -560,13 +566,18 @@ def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...], f_bbn:
         The effective number of relativistic species contributed by the GW spectrum.
 
     """
-    result, error = nat.integrate.quad(spectrum, f_bbn, f_max, args=params, weight='cauchy', wvar=0)
+    def integrand(u):
+        f = np.exp(u)
+        return spectrum(f, *params)
 
-    return result
+    result, _ = quad(integrand, np.log(f_bbn), np.log(f_max))
+
+    return 1.78 * 10**5 *result
 
 
 def bbn_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray], sm_neff: float = 3.044, mu_neff: float = 2.941, sigma_neff: float = 0.143) -> float:
     """Calculate the cosmological log-likelihood based on N_eff measurements.
+
     Parameters
     ----------
     x : NDArray
@@ -588,14 +599,18 @@ def bbn_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray], sm_neff: floa
     -------
     float
         The cosmological likelihood based on N_eff measurements.
+
     """
-
-
     d_neff = delta_neff(spectrum, x)
 
     norm = np.exp(-0.5 * ((sm_neff - mu_neff) / sigma_neff) ** 2) * np.sqrt(2 * np.pi * sigma_neff**2)
 
-    return  np.exp(-0.5 * ((d_neff + sm_neff- mu_neff) / sigma_neff) ** 2) / norm
+    return  np.log(np.exp(-0.5 * ((d_neff + sm_neff- mu_neff) / sigma_neff) ** 2) / norm)
+
+
+def lvk_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray]) -> float:
+
+    return -0.5 * np.sum((lvk_omega[:,1] - spectrum(lvk_omega[:,0], *x))**2 / lvk_omega[:,2]**2)
 
 
 def cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names):
@@ -616,10 +631,10 @@ def cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names):
     if self.log_weights is not None:
         active_lnlike += self.log_weights[nmodel]
 
-    if nmodel == 0:
+    if nmodel == 0 and self.num_models > 1:
         return active_lnlike
-    
+
     mask = np.isin(self.param_names, cosmo_params_names)
     cosmo_params = x[mask]
 
-    return active_lnlike + bbn_lnlikelihood(cosmo_params, spectrum)
+    return active_lnlike + bbn_lnlikelihood(cosmo_params, spectrum) + lvk_lnlikelihood(cosmo_params, spectrum)

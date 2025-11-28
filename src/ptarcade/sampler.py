@@ -118,7 +118,7 @@ def get_user_pta_data(inputs: dict[str, Any]) -> tuple[list[Pulsar], dict | None
 
 
 def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_params : dict | None ) -> dict[int, PTA]:
-    """Initialize the PTA with the user input
+    """Initialize the PTA with the user input.
 
     Parameters
     ----------
@@ -135,7 +135,6 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
         Dictionary of [enterprise.signals.signal_base.PTA][] objects configured with user inputs
 
     """
-
     input_handler.check_model(
         model=inputs['model'],
         psrs=psrs,
@@ -176,11 +175,11 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
                 corr=inputs['config'].corr,
                 red_components=inputs["config"].red_components,
                 gwb_components=inputs["config"].gwb_components)
-            
+
     elif inputs["config"].mode == "ceffyl":
 
         pta = signal_builder.ceffyl_builder(inputs)
-        
+
     return pta
 
 
@@ -190,7 +189,7 @@ def setup_sampler(
         pta: dict[int, PTA] | None,
         emp_dist: array_like | None,
 ) -> tuple[PTSampler, NDArray]:
-    """Setup the PTMCMC sampler
+    """Set up the PTMCMC sampler.
 
     Parameters
     ----------
@@ -213,7 +212,7 @@ def setup_sampler(
     """
     out_dir = os.path.join(
         inputs["config"].out_dir, inputs["model"].name, f'chain_{input_options["n"]}')
-    
+
     if not inputs["config"].resume and os.path.exists(out_dir):
         shutil.rmtree(out_dir)
 
@@ -229,19 +228,21 @@ def setup_sampler(
         # add nmodel index to group structure
         groups.extend([[len(super_model.param_names)-1]])
 
+        if inputs["config"].cosmo_constraints:
+            spectrum = inputs["model"].spectrum
+            cosmo_params_names = list(inputs["model"].parameters)
+
+            def _cosmo_lnlikelihood(self, x):
+                return cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names)
+
+            super_model.get_lnlikelihood = types.MethodType(_cosmo_lnlikelihood, super_model)
+
         sampler = super_model.setup_sampler(
             resume=inputs["config"].resume,
             outdir=out_dir,
             sample_nmodel=inputs["config"].mod_sel,
             groups=groups,
             empirical_distr=emp_dist)
-        
-        if inputs["config"].cosmo_constraints:
-            super_model.get_lnlikelihood = types.MethodType(
-                cosmo_lnlikelihood(
-                    spectrum=inputs["model"].spectrum,
-                    cosmo_params_names=inputs["model"].parameters),
-                super_model)
 
         x0 = super_model.initial_sample()
 
