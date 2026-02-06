@@ -247,7 +247,7 @@ g_s_0: np.float64 = __g_s_0(T_0)  # entropic relativistic degrees of freedom tod
 # -----------------------------------------------------------
 
 
-def GammaPrior(value: float, a: float, loc: float, scale: float) -> float:
+def GammaPrior(value: float, a: float, beta: float) -> float:
     """Prior function for Gamma parameters.
 
     Parameters
@@ -267,9 +267,9 @@ def GammaPrior(value: float, a: float, loc: float, scale: float) -> float:
         The probability density of the Gamma distribution at `value`.
 
     """
-    return ss.gamma.pdf(value, a, loc, scale)
+    return ss.gamma.pdf(value, a, scale=1/beta)
 
-def GammaSampler(a: float, loc: float, scale: float, size: int | None  = None) -> NDArray:
+def GammaSampler(a: float, beta: float, size: int | None  = None) -> NDArray:
     """Sampling function for Gamma parameters.
 
     Parameters
@@ -289,10 +289,10 @@ def GammaSampler(a: float, loc: float, scale: float, size: int | None  = None) -
         A NumPy array of size `size` containing samples from the Gamma distribution.
 
     """
-    return ss.gamma.rvs(a, loc, scale, size=size)
+    return ss.gamma.rvs(a, scale=1/beta, size=size)
 
 
-def Gamma(a: float, loc: float, scale: float, size: int | None = None):
+def Gamma(a: float,  beta: float, size: int | None = None):
     """Class factory for Gamma parameters.
 
     Parameters
@@ -316,9 +316,9 @@ def Gamma(a: float, loc: float, scale: float, size: int | None = None):
         """Child class of enterprise.signals.parameter.Parameter."""
 
         _size = size
-        _prior = parameter.Function(GammaPrior, a=a, loc=loc, scale=scale)
+        _prior = parameter.Function(GammaPrior, a=a,  beta=beta)
         _sampler = staticmethod(GammaSampler)
-        _typename = parameter._argrepr("Gamma", a=a, loc=loc, scale=scale)
+        _typename = parameter._argrepr("Gamma", a=a, beta=beta)
 
     return Gamma
 
@@ -440,7 +440,7 @@ def prep_data(path: str) -> tuple[list[NDArray], NDArray, NDArray]:
     return grids, omega_grid, par_names
 
 
-def spec_importer(path: str) -> Callable[[NDArray, Any],  NDArray]:
+def spec_importer(path: str, kind:Literal["numpy", "jax"]="numpy") -> Callable[[NDArray, Any],  NDArray]:
     """Import data and create a fast interpolation function.
 
     Interpolate the GWB power spectrum from tabulated data. Return a function that interpolates
@@ -460,12 +460,21 @@ def spec_importer(path: str) -> Callable[[NDArray, Any],  NDArray]:
     info, data = fast_interpolate.load_data(path)
     # info is a list of (name, start, step)
 
-    def spectrum(f: NDArray, **kwargs: Any) -> NDArray:
+    if kind.lower() == "numpy":
+        def spectrum(f: NDArray, **kwargs: Any) -> NDArray:
 
-        # Construct right information format for interpolation
-        return fast_interpolate.interp([(start, step, f if name == 'f' else kwargs[name])
-                                         for (name, start, step) in info],
-                                        data)
+            # Construct right information format for interpolation
+            return fast_interpolate.interp([(start, step, f if name == 'f' else kwargs[name])
+                                            for (name, start, step) in info],
+                                           data)
+    elif kind.lower() == "jax":
+        def spectrum(f: NDArray, **kwargs: Any) -> NDArray:
+
+            # Construct right information format for interpolation
+            return fast_interpolate.jax_interp([(start, step, f if name == 'f' else kwargs[name])
+                                            for (name, start, step) in info],
+                                           data)
+
     return spectrum # type: ignore
 
 

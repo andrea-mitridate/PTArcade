@@ -254,6 +254,8 @@ def convert_enterprise_pulsars_to_discovery(
     ----------
     enterprise_psrs : list[Pulsar]
         List of enterprise Pulsar objects to be converted to discovery format.
+    dataset_name: str
+        Name of PTA dataset.
     noisedict : dict[str, array_like] or None, optional
         Dictionary mapping noise parameter names to their values. If provided,
         these noise parameters are included in the conversion. Default is None.
@@ -269,14 +271,24 @@ def convert_enterprise_pulsars_to_discovery(
 
     out_dir = Path(get_cache_dir("ptarcade")) / "feather_pulsars" / dataset_name
     out_dir.mkdir(exist_ok = True, parents=True)
+
     for ep in enterprise_psrs:
         output_file = out_dir / f"{ep.name}.feather"
         if output_file.exists():
-            print(f"Loading cached {ep.name}")
             # You can also pre-load these manually at this location
-            discovery_psrs.append(ds.Pulsar.read_feather(str(output_file)))
-        else:
-            print(f"Converting {ep.name}")
-            discovery_psrs.append(ds.Pulsar.save_feather(ep, str(output_file), noisedict))
+            # Not going to load them now. Some pulsars take a large amount of memory to convert.
+            # So, we'll hold off on actually loading anything until after we convert.
+            continue
+        msg = f"Converting {ep.name}"
+        log.info(msg)
+        ds.Pulsar.save_feather(ep, str(output_file), noisedict)
+
+    for ep in enterprise_psrs:
+        output_file = out_dir / f"{ep.name}.feather"
+        msg = f"Loading {ep.name}"
+        log.info(msg)
+        # You can also pre-load these manually at this location
+        # Load now that everything is done being converted to feather.
+        discovery_psrs.append(ds.Pulsar.read_feather(str(output_file)))
 
     return discovery_psrs

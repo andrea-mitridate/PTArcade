@@ -582,10 +582,43 @@ def discovery_builder(
     red_components: int = 30,
     gwb_components: int = 14,
 ) -> ds.ArrayLikelihood:
-    globalgp_psd = aux.omega2cross(model.spectrum, likelihood="discovery")
-    globalgp_psd.__signature__ = inspect.signature(model.spectrum)
 
     Tspan = ds.getspan(psrs)
+
+    # stochastic process
+    if hasattr(model, "spectrum"):
+        globalgp_psd = aux.omega2cross(model.spectrum, likelihood="discovery")
+        globalgp_psd.__signature__ = inspect.signature(model.spectrum)
+        pslmodels = (
+            ds.PulsarLikelihood(
+                [
+                    psr.residuals,
+                    ds.makenoise_measurement(psr, psr.noisedict),
+                    ds.makegp_ecorr(psr, psr.noisedict),
+                    ds.makegp_timing(psr, svd=True),
+                ]
+            )
+            for psr in psrs
+        )
+
+        rngp = ds.makecommongp_fourier(psrs, ds.powerlaw, red_components, T=Tspan, name="red_noise")
+        if corr:
+            hdgp = ds.makeglobalgp_fourier(psrs, globalgp_psd, ds.hd_orf, gwb_components, T=Tspan, name=model.name)
+            return ds.ArrayLikelihood(pslmodels, commongp=rngp, globalgp=hdgp)
+
+        curngp = ds.makecommongp_fourier(
+            psrs,
+            globalgp_psd,
+            gwb_components,
+            T=Tspan,
+            common=list(model.parameters),
+            name=model.name,
+        )
+        return ds.ArrayLikelihood(pslmodels, commongp=[rngp, curngp])
+
+    # deterministic delays
+    delay_func = model.signal
+    delay_func.__signature__ = inspect.signature(model.signal)
 
     pslmodels = (
         ds.PulsarLikelihood(
@@ -594,26 +627,23 @@ def discovery_builder(
                 ds.makenoise_measurement(psr, psr.noisedict),
                 ds.makegp_ecorr(psr, psr.noisedict),
                 ds.makegp_timing(psr, svd=True),
+                ds.makedelay(
+                    psr,
+                    delay_func,
+                    common=[
+                        par
+                        for par, val in model.parameters.items()
+                        if getattr(val["enterprise_prior_obj"], "common", True) # return false if no "common" attribute
+                    ],
+                    name=model.name,
+                ),
             ]
         )
         for psr in psrs
     )
 
     rngp = ds.makecommongp_fourier(psrs, ds.powerlaw, red_components, T=Tspan, name="red_noise")
-    if corr:
-        hdgp = ds.makeglobalgp_fourier(psrs, globalgp_psd, ds.hd_orf, gwb_components, T=Tspan, name=model.name)
-        return ds.ArrayLikelihood(pslmodels, commongp=rngp, globalgp=hdgp)
-
-    curngp = ds.makecommongp_fourier(
-        psrs,
-        globalgp_psd,
-        gwb_components,
-        T=Tspan,
-        common=list(model.parameters),
-        name=model.name,
-    )
-    return ds.ArrayLikelihood(pslmodels, commongp=[rngp, curngp])
-
+    return ds.ArrayLikelihood(pslmodels, commongp=rngp)
 
 def discovery_numpyro_model_builder(
     psrs: list[ds.Pulsar],
@@ -629,7 +659,6 @@ def discovery_numpyro_model_builder(
     ln_likelihood = likelihood_obj.logL
     params = ln_likelihood.params
 
-
     red_noise_gamma_params = []
     red_noise_amp_params = []
 
@@ -639,12 +668,26 @@ def discovery_numpyro_model_builder(
         elif "red_noise_gamma" in p:
             red_noise_gamma_params.append(p)
 
+    import ipdb; ipdb.set_trace()
     def discovery_model():
         # Get new physics priors
         params = {
-            (f"{inputs['model'].name}_{par}" if inputs["config"].corr else par): numpyro.sample(par, aux.get_numpyro_prior(val["name"], *val["args"], **val["kwargs"]))
+            (f"{inputs['model'].name}_{par}" if inputs["config"].corr else par): numpyro.sample(
+                par, aux.get_numpyro_prior(val["name"], *val["args"], **val["kwargs"])
+            )
             for par, val in inputs["model"].parameters.items()
+            if getattr(val["enterprise_prior_obj"], "common", True)
         }
+        params.update(
+            {
+                (name:=f"{psr.name}_{inputs['model'].name}_{par}"): numpyro.sample(
+                    name, aux.get_numpyro_prior(val["name"], *val["args"], **val["kwargs"])
+                )
+                for par, val in inputs["model"].parameters.items()
+                if not getattr(val["enterprise_prior_obj"], "common", False)
+                for psr in psrs
+            }
+        )
 
         # Pulsar red noise priors
         for amp, gam in zip(red_noise_amp_params, red_noise_gamma_params, strict=True):
@@ -656,5 +699,4 @@ def discovery_numpyro_model_builder(
             )
 
         numpyro.factor("ll", ln_likelihood(params))
-
     return discovery_model
