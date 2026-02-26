@@ -328,6 +328,8 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
         log.error(error)
         raise SystemExit
 
+    ## custom_prior_fix
+
     if not (hasattr(model, "signal") or hasattr(model, "spectrum")):
         error = (
             "The model file needs to contain either a 'spectrum' "
@@ -355,7 +357,7 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
         signal_type = "signal"
         if "pos" in args:
             args.remove("pos")
-    if list(model.parameters.keys()) != args:
+    if list(model.parameters.keys()) != args: ## custom_prior_fix
         error = (
             "In the model file, the keys of the 'parameter' dictionary need to "
             f"match the parameters of the {signal_type} function.\n"
@@ -368,7 +370,7 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
     # check spectrum/signal function
     x0 = {}
 
-    for name, par in model.parameters.items():
+    for name, par in model.parameters.items(): ## custom_prior_fix
         try:
             x0[name] = par.sample()  # type: ignore
         except AttributeError:
@@ -459,7 +461,7 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
             log.error(error)
             raise SystemExit
         args = [e for e in args if e not in ('f', 'pos1', 'pos2')]
-        if list(model.parameters.keys()) != args:
+        if list(model.parameters.keys()) != args: ## custom_prior_fix
             error = (
                 "In addition to the parameters 'f', 'pos1', and 'pos2', the "
                 "'orf' provided in the model file also needs to have as "

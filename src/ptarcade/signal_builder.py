@@ -333,7 +333,7 @@ def ent_builder(
     if model:
         if hasattr(model, "signal"):
             signal = function(model.signal)
-            signal = signal(**model.parameters)
+            signal = signal(**model.parameters) 
             np_signal = deterministic_signals.Deterministic(signal, name=model.name)
 
             s += np_signal
@@ -344,7 +344,7 @@ def ent_builder(
 
             if corr and hasattr(model, "orf"):
                 orf = function(model.orf)
-                orf = orf(**model.parameters)
+                orf = orf(**model.parameters) 
 
                 np_gwb = mods.FourierBasisCommonGP(
                     spectrum=cpl_np,
