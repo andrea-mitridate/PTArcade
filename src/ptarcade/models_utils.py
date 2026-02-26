@@ -87,6 +87,9 @@ gev_to_hz : np.float64 = nat.convert(nat.GeV, nat.Hz) # conversion from gev to H
 # freedom from reference 2005.03544
 gs = np.loadtxt(files('ptarcade.data').joinpath('g_star.dat')) # type: ignore
 lvk_omega = np.loadtxt(files('ptarcade.data').joinpath('lvk.dat')) # type: ignore
+_lvkv_freq = lvk_omega[:, 0].astype(float)             # frequencies
+_lvkv_data = h**2 * lvk_omega[:, 1].astype(float)             # measured omega
+_lvkv_invvar = (1.0 / h**2 / lvk_omega[:, 2]**2).astype(float)
 
 # type to use for priors-building functions
 priors_type = Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "Constant", "Gamma"]
@@ -609,8 +612,14 @@ def bbn_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray], sm_neff: floa
 
 
 def lvk_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray]) -> float:
+    """LVK log-likelihood: -½ Σ [(data - model)^2 / σ^2]."""
+    model = spectrum(_lvkv_freq, *x)           # h^2 Ω_GW(f; x)
+    resid = _lvkv_data - model                 # data - model
+    # χ² = Σ resid² / σ² = resid · (resid * invvar)
+    chi2 = np.dot(resid, resid * _lvkv_invvar)
 
-    return -0.5 * np.sum((lvk_omega[:,1] - spectrum(lvk_omega[:,0], *x))**2 / lvk_omega[:,2]**2)
+    return -0.5 * chi2
+
 
 
 def cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names):

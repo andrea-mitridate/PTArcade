@@ -531,8 +531,8 @@ def ceffyl_builder(inputs):
                           psd=aux.omega2cross(inputs["model"].spectrum, ceffyl=True),  
                           params=params,
                           name=''))
-    
-    
+
+
     if inputs["model"].smbhb:
         mu, sigma = bhb_priors.get(inputs["config"].pta_data, np.array([False, False]))
 

@@ -21,9 +21,9 @@ import erfa
 
 sys.modules["astropy.erfa"] = erfa
 
-import numpy as np
-import rich
 import types
+
+import rich
 from ceffyl import Sampler
 from enterprise.pulsar import Pulsar
 from enterprise.signals.signal_base import PTA
@@ -31,15 +31,10 @@ from enterprise_extensions import hypermodel
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
 from PTMCMCSampler.PTMCMCSampler import PTSampler
-from rich import print
-from rich.console import Console
 from rich.panel import Panel
 
-from ptarcade import input_handler, pta_importer, signal_builder
-from ptarcade.input_handler import bcolors
-from ptarcade.models_utils import ParamDict
-from ptarcade.models_utils import cosmo_lnlikelihood
-from ptarcade import console
+from ptarcade import console, input_handler, pta_importer, signal_builder
+from ptarcade.models_utils import ParamDict, cosmo_lnlikelihood, lvk_lnlikelihood, bbn_lnlikelihood
 
 log = logging.getLogger("rich")
 
@@ -73,7 +68,7 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
 
     if not cmd_input_okay:
 
-        error = (f"Model file must be present\n"
+        error = ("Model file must be present\n"
         "\t- This is added with the -[blue bold]m[/] input flags. Add -[blue bold]h[/] (--[blue bold]help[/]) flags for more help.\n")
 
         log.error(error, extra={"markup":True})
@@ -86,7 +81,7 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
         pars_dic = inputs["model"].parameters
         group = [par for par in pars_dic.keys() if pars_dic[par].common]
 
-        setattr(inputs["model"], "group", group)
+        inputs["model"].group = group
 
     inputs["model"].parameters = ParamDict(inputs["model"].parameters)
 
@@ -250,9 +245,20 @@ def setup_sampler(
 
     elif inputs["config"].mode == "ceffyl":
 
+        if inputs["config"].cosmo_constraints:
+            spectrum = inputs["model"].spectrum
+
+            def _cosmo_lnlikelihood(x):
+                return pta.ln_likelihood(x) + bbn_lnlikelihood(x, spectrum) + lvk_lnlikelihood(x, spectrum)
+
+            ln_likelihood = _cosmo_lnlikelihood
+
+        else:
+            ln_likelihood = pta.ln_likelihood
+
         sampler = Sampler.setup_sampler(pta,
             outdir=out_dir,
-            logL=pta.ln_likelihood,
+            logL=ln_likelihood,
             logp=pta.ln_prior,
             jump=False)
 
@@ -311,7 +317,7 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
                 AMweight=inputs["config"].am_weight,
                 DEweight=inputs["config"].de_weight,
             )
-        except RuntimeError as e:
+        except RuntimeError:
             err = ("There was an error while sampling. If this error involves autocorrelation time,\n"
                   "a temporary fix is to increase the number of samples in the configuration file.\n"
                   "We are actively working to upgrade the autocorrelation routines in our sampler.\n\n")
@@ -365,8 +371,7 @@ def main():
         sampler, x0 = setup_sampler(inputs, input_options, pta, emp_dist)
         console.print("[bold green]Done initializing Sampler :heavy_check_mark:\n")
 
-    console.print("Done with all initializtions.\nSetup times (including first sample) {:.2f} seconds real, {:.2f} seconds CPU\n".format(
-        time.perf_counter()-start_real, time.process_time()-start_cpu));
+    console.print(f"Done with all initializtions.\nSetup times (including first sample) {time.perf_counter()-start_real:.2f} seconds real, {time.process_time()-start_cpu:.2f} seconds CPU\n")
 
     start_cpu = time.process_time()
     start_real = time.perf_counter()
