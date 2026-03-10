@@ -5,7 +5,6 @@ import inspect
 import logging
 import optparse
 import os
-import warnings
 from dataclasses import dataclass
 from importlib import util
 from importlib.resources import files
@@ -130,7 +129,7 @@ def load_inputs(input_options: dict[str, Any]) -> dict[str, ModuleType]:
 
     return {
             "model": model_mod,
-            "config": config_mod
+            "config": config_mod,
             }
 
 
@@ -174,10 +173,10 @@ def check_config(config: ModuleType) -> None:
            "gamma_bhb" : None,
        }
 
-    for par in default.keys():
+    for par in default:
         if not hasattr(config, par):
             setattr(config, par, default[par])
-            message = ( f"[green bold]{par}[/] [underline]not found[/] in the configuration file, " +
+            message = ( f"[green bold]{par}[/] [underline]not found[/] in the configuration file, "
                         f"it [underline]will be set to[/] [green bold]{default[par]}[/].\n")
             log.info(message,extra={"markup": True, "highlighter": None})
 
@@ -204,13 +203,11 @@ def check_config(config: ModuleType) -> None:
             log.error(error)
             raise SystemExit
 
-        elif not os.path.exists(config.pta_data["psrs_data"]):
+        if not os.path.exists(config.pta_data["psrs_data"]):
             error = f"The path '[red]{config.pta_data['psrs_data']}[/]' specified in [green]pta_data['psrs_data'][/] does not exist."
             log.error(error, extra={"markup":True, "highlighter":False})
             raise SystemExit
 
-        else:
-            pass
     else:
         error = (
             "The 'pta_data' variable in the configuration file needs to be "
@@ -220,7 +217,7 @@ def check_config(config: ModuleType) -> None:
         )
         log.error(error)
         raise SystemExit
-            
+
     # checks mod
     if isinstance(config.pta_data, str):
         if config.mode in ["enterprise", "ceffyl"]:
@@ -247,7 +244,7 @@ def check_config(config: ModuleType) -> None:
         if not isinstance(value, bool):
             error = (
                 f"The variable '{key}' in the configuration file must be a boolean.\n"
-                f"You supplied {key}={bools[key]}."
+                f"You supplied {key}={value}."
             )
             log.error(error)
             raise SystemExit
@@ -266,7 +263,7 @@ def check_config(config: ModuleType) -> None:
         if not isinstance(value, int):
             error = (
                 f"variable '{key}' in the configuration file must be an integer.\n"
-                f"You supplied {key}={integers[key]}, type is {type(integers[key])}."
+                f"You supplied {key}={value}, type is {type(value)}."
             )
             log.error(error)
             raise SystemExit
@@ -279,7 +276,7 @@ def check_config(config: ModuleType) -> None:
             error = (
                 f"The variable '{key}' in the configuration file must "
                 "be a number (integer or float), or set to None.\n"
-                f"You supplied {key}={bhb_pars[key]}, type is {type(bhb_pars[key])}."
+                f"You supplied {key}={value}, type is {type(value)}."
             )
             log.error(error)
             raise SystemExit
@@ -422,7 +419,7 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
         toas_tab = np.linspace(tmin, tmax, 10)
 
         try:
-            signal_tab = model.signal(toas_tab, **x0)
+            signal_tab = model.signal(toas_tab, pos=[1,0,0], **x0)
         except AttributeError:
             error = (
                 "I tried to evaluate the signal function on an array of "
@@ -445,16 +442,16 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
 
             log.error(error)
             raise SystemExit
-        
+
     if hasattr(model, "orf"):
         if mode == "ceffyl":
             error = ("It is not possible to use user-specified ORF in ceffyl mode"
                  ", please use PTArcade in enterprise mode to do this.")
             log.error(error)
             raise SystemExit
-        
+
         args = inspect.getfullargspec(model.orf)[0]
-        if ['f', 'pos1', 'pos2'] != args[:3]:
+        if args[:3] != ['f', 'pos1', 'pos2']:
             error = ("The first three arguments of the orf function should"
                  " be `f`, `pos1`, and `pos2` (even if the orf is not"
                  " frequency-dependent).")
