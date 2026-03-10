@@ -222,14 +222,14 @@ def setup_sampler(
         if inputs["model"].group:
             # Build the list of parameter indices corresponding to the user-specified group.
             # Each entry in inputs["model"].group is a parameter name (or base name for
-            # per-pulsar parameters that are indexed as "{name}_0", "{name}_1", ...).
+            # multidimensional parameters that are indexed as "{name}_0", "{name}_1", ...).
             idx_params = []
             for pp in inputs["model"].group:
                 if pp in super_model.param_names:
                     # Shared parameter: appears exactly once in param_names
                     idx_params.append(super_model.param_names.index(pp))
                 else:
-                    # Per-pulsar parameter: collect all indexed variants "{pp}_0", "{pp}_1", ...
+                    # Multidimensional parameter: collect all indexed variants "{pp}_0", "{pp}_1", ...
                     i = 0
                     while f"{pp}_{i}" in super_model.param_names:
                         idx_params.append(super_model.param_names.index(f"{pp}_{i}"))
