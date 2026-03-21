@@ -419,7 +419,11 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
         toas_tab = np.linspace(tmin, tmax, 10)
 
         try:
-            signal_tab = model.signal(toas_tab, pos=[1,0,0], **x0)
+            args = inspect.getfullargspec(model.signal)[0]
+            if 'pos' in args:
+                signal_tab = model.signal(toas_tab, pos=[1,0,0], **x0)
+            else:
+                signal_tab = model.signal(toas_tab, **x0)
         except AttributeError:
             error = (
                 "I tried to evaluate the signal function on an array of "
