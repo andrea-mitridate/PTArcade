@@ -521,6 +521,10 @@ def ceffyl_builder(inputs):
         # find ipta data inside dir
         datadir = (ceffyldl / "ng12p5_30f_fs{cp}_ceffyl")
 
+    else:
+        datadir = Path(inputs["config"].pta_data["psrs_data"])
+
+
     ceffyl_pta = Ceffyl.ceffyl(datadir)
 
     params = list(inputs["model"].parameters.values())
