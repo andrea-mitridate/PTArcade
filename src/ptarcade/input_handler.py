@@ -355,7 +355,7 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
         signal_type = "signal"
         if "pos" in args:
             args.remove("pos")
-    if list(model.parameters.keys()) != args:
+    if set(model.parameters.keys()) != set(args):
         error = (
             "In the model file, the keys of the 'parameter' dictionary need to "
             f"match the parameters of the {signal_type} function.\n"
@@ -459,7 +459,7 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
             log.error(error)
             raise SystemExit
         args = [e for e in args if e not in ('f', 'pos1', 'pos2')]
-        if list(model.parameters.keys()) != args:
+        if set(model.parameters.keys()) != set(args):
             error = (
                 "In addition to the parameters 'f', 'pos1', and 'pos2', the "
                 "'orf' provided in the model file also needs to have as "
