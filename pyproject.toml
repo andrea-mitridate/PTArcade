@@ -26,6 +26,9 @@ dependencies = [
     "ceffyl>=1.41.1,<1.50",
     "setuptools>=80.0.0",
     "astropy>=5.3.4",
+    "discovery",
+    "numpyro>=0.19.0",
+    "jax>=0.4.30",
 ]
 name = "PTArcade"
 version = "1.1.5"
@@ -169,3 +172,6 @@ exclude = [
 line-length = 120
 target-version = ['py310']
 include = '\.pyi?$'
+
+[tool.uv.sources]
+discovery = { git = "https://github.com/nanograv/discovery.git" }

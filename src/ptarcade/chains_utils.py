@@ -1,6 +1,7 @@
 """Utilities to be used with output MCMC chains of PTArcade."""
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
@@ -268,6 +269,22 @@ def import_to_dataframe(
 
             chains = chains.dropna()
 
+    elif chain_ext == ".feather":
+        chains = pd.read_feather(chains_dir / chain_name)
+        with (chains_dir / "priors.json").open("r") as f:
+            params = json.load(f)
+
+        # this isn't "quicker" right now, but it matches the expected behavior
+        if not quick_import:
+            for col in chains.columns:
+                if "red_noise_log10_A" in col:
+                    params[col] = [-20, -11]
+                elif "red_noise_gamma" in col:
+                    params[col] = [0, 7]
+        else:
+            usecols = [col for col in chains.columns if "red_noise" not in col]
+            chains = chains[usecols]
+        params = pd.DataFrame(params)
 
     print(f"Finished importing   {chains_dir} in {time.time() - start_time:.2f}s")
 
