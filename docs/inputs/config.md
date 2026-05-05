@@ -10,6 +10,31 @@ file are:
     in PTArcade are NANOGrav 15-year (`pta_data = "NG15"`), NANOGrav 12.5-year
     (`pta_data = "NG12"`), and IPTA DR2 (`pta_data = "IPTA2"`).
 
+    ??? info "Custom data"
+        It is also possible to provide custom data by setting `pta_data` to a dictionary
+        instead of a string. The required keys depend on the run mode:
+
+        **Enterprise mode** — provide timing data, noise parameters, and (optionally)
+        an empirical distribution for jump proposals:
+        ```python
+        pta_data = {
+            "psrs_data": "/path/to/pulsars.pkl",   # pickle file with a list of enterprise Pulsar objects,
+                                                    # or a directory containing .par and .tim files
+            "noise_data": "/path/to/noise.json",   # path to a JSON file containing white noise parameters
+            "emp_dist":   "/path/to/emp_dist.pkl", # path to empirical distribution pickle, or None
+        }
+        ```
+
+        **Ceffyl mode** — provide the path to a directory containing pre-computed
+        Bayesian periodograms in the format expected by [Ceffyl]:
+        ```python
+        pta_data = {
+            "psrs_data": "/path/to/ceffyl_data/", # path to the ceffyl data directory
+            "noise_data": None,
+            "emp_dist":   None,
+        }
+        ```
+
 
 [`N_samples`](#+config.N_samples){ #+config.N_samples }
 
