@@ -529,6 +529,7 @@ def prior(name: priors_type | Callable, *args: Any, **kwargs: Any) -> parameter.
         # If they did, it creates a custom prior using enterprise's UserParameter class factory.
         x0 = kwargs.pop("x0")
         size = kwargs.pop("size", len(x0) if hasattr(x0, '__len__') else None)
+        size = None if size == 1 else size
         prior_obj = parameter.UserParameter(prior=function(name)(**kwargs), sampler=lambda **kw: x0, size=size)
 
 
