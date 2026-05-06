@@ -248,6 +248,22 @@ def setup_sampler(
             groups=groups,
             empirical_distr=emp_dist)
 
+        # Remove prior-draw proposals for UserParameter parameters. Their sampler
+        # is a fixed point (x0), which breaks detailed balance for that jump type.
+        _user_param_names = set()
+        for _p in super_model.params:
+            if "UserParameter" in str(_p):
+                _base = str(_p).split(":")[0]
+                _user_param_names.update(
+                    [f"{_base}_{i}" for i in range(_p.size)] if _p.size else [_base]
+                )
+        if _user_param_names:
+            sampler.propCycle = [
+                prop for prop in sampler.propCycle
+                if not (hasattr(prop, "name_list") and
+                        all(n in _user_param_names for n in prop.name_list))
+            ]
+
         x0 = super_model.initial_sample()
 
         super_model.get_lnlikelihood(x0) # Cache now to make timing more accurate
