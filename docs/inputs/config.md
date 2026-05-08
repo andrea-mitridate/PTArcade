@@ -220,6 +220,27 @@ with the following parameters in the configuration file:
     Can be assigned to a floating point or integer number to set the value of $\gamma_{\textrm{BHB}}$.
     If `gamma_bhb = None`, a uniform prior between $0$ and $7$ will be used instead.
 
+[`ptmcmc_sampler_kwargs`](#+config.ptmcmc_sampler_kwargs){ #+config.gamma_bhb }
+
+:   :octicons-milestone-24: Default: 
+        ```python
+        ptmcmc_sampler_kwargs = dict(
+            ladder=None,  # User defined temperature ladder
+            Tmin=1,  # Minimum temperature in ladder (default=1)
+            Tmax=1e8,  # Maximum temperature in ladder (default=None)
+            Tskip=100,  # Number of steps between proposed temperature swaps (default=100)
+            isave=1000,  # Write to file every isave samples (default=1000)
+            covUpdate=1000,  # Number of iterations between AM covariance updates (default=1000)
+            maxIter=None,  # Maximum number of iterations for high temperature chains (default=2*self.Niter)
+            thin=10,  # MCMC Samples are recorded every self.thin samples
+            neff=None,  # Number of effective samples to collect before terminating
+            writeHotChains=False,  # Write chains for T!=1
+            hotChain=False,  # Use 1/T=0 for hottest chain (sample from prior)
+        )
+        ```
+        The only option here that is not a default value for `PTMCMCSampler` is `Tmax`. We have set `Tmax` to a value approximating a typical PTA likelihood value. If you use parallel tempering, this ensures that your hottest chain samples mostly from the prior as you would expect.
+
+
 !!! example "Default Configuration File"
 
     If no configuration file is specified by the user, the following file will be 
