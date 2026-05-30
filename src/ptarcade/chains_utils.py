@@ -1,6 +1,7 @@
 """Utilities to be used with output MCMC chains of PTArcade."""
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
@@ -214,18 +215,9 @@ def import_to_dataframe(
         # import and merge all the chains removing the burn-in
         name_list = list(params.keys())
 
-        red_noise_filter = re.compile(".*red_noise.*")
-
-        if quick_import and any(filter(red_noise_filter.match, name_list)): # type: ignore
-            # Search reversed list for first occurence of "red_noise"
-            # Return the index (remember, the list is reversed!)
-            # The use of `next` and a generator makes it so that we don't have to
-            # search the whole list, we stop when we get the first match
-            red_noise_ind = next(i for i in enumerate(name_list[::-1]) if "red_noise" in i[1])[0]
-
-            # Slice the list so that we begin directly after the index found above
-            usecols = name_list[-1 * red_noise_ind :]
-
+        # Do not import pulsar red noise parameters
+        if quick_import and any(filter(lambda x: "red_noise" in x, name_list)): # type: ignore
+            usecols = [name for name in name_list if "red_noise" not in name]
             params = {name: params[name] for name in usecols}
         else:
             usecols = name_list
@@ -284,6 +276,22 @@ def import_to_dataframe(
 
             chains = chains.dropna()
 
+    elif chain_ext == ".feather":
+        chains = pd.read_feather(chains_dir / chain_name)
+        with (chains_dir / "priors.json").open("r") as f:
+            params = json.load(f)
+
+        # this isn't "quicker" right now, but it matches the expected behavior
+        if not quick_import:
+            for col in chains.columns:
+                if "red_noise_log10_A" in col:
+                    params[col] = [-20, -11]
+                elif "red_noise_gamma" in col:
+                    params[col] = [0, 7]
+        else:
+            usecols = [col for col in chains.columns if "red_noise" not in col]
+            chains = chains[usecols]
+        params = pd.DataFrame(params)
 
     print(f"Finished importing   {chains_dir} in {time.time() - start_time:.2f}s")
 

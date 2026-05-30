@@ -4,10 +4,15 @@ from __future__ import annotations
 import os
 import warnings
 
+import numpyro
+
 from astropy.utils.exceptions import AstropyDeprecationWarning
+
+from ptarcade import pta_importer
 
 warnings.filterwarnings('ignore', category=AstropyDeprecationWarning)
 
+import json
 import logging
 import platform
 import shutil
@@ -21,7 +26,11 @@ import erfa
 
 sys.modules["astropy.erfa"] = erfa
 
+from pathlib import Path
+
+import jax
 import numpy as np
+import pandas as pd
 import rich
 from ceffyl import Sampler
 from enterprise.pulsar import Pulsar
@@ -34,12 +43,12 @@ from rich import print
 from rich.console import Console
 from rich.panel import Panel
 
-from ptarcade import input_handler, pta_importer, signal_builder
+from ptarcade import console, input_handler, pta_importer, signal_builder
 from ptarcade.input_handler import bcolors
 from ptarcade.models_utils import ParamDict
-from ptarcade import console
 
 log = logging.getLogger("rich")
+numpyro.enable_x64(use_x64=True)
 
 def cpu_model() -> str:
     """Get CPU info."""
@@ -82,7 +91,7 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
 
     if not hasattr(inputs["model"], "group"):
         pars_dic = inputs["model"].parameters
-        group = [par for par in pars_dic.keys() if pars_dic[par].common]
+        group = [par for par in pars_dic if pars_dic[par]["enterprise_prior_obj"].common]
 
         setattr(inputs["model"], "group", group)
 
@@ -173,11 +182,24 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
                 corr=inputs['config'].corr,
                 red_components=inputs["config"].red_components,
                 gwb_components=inputs["config"].gwb_components)
-            
+
     elif inputs["config"].mode == "ceffyl":
 
         pta = signal_builder.ceffyl_builder(inputs)
-        
+
+    elif inputs["config"].mode == "discovery":
+        discovery_psrs = pta_importer.convert_enterprise_pulsars_to_discovery(
+            psrs, inputs["config"].pta_data, noisedict=noise_params
+        )
+        pta = signal_builder.discovery_builder(
+            psrs=discovery_psrs,
+            model=inputs["model"],
+            corr=inputs["config"].corr,
+            red_components=inputs["config"].red_components,
+            gwb_components=inputs["config"].gwb_components,
+        )
+        pta.psrs = discovery_psrs
+
     return pta
 
 
@@ -210,7 +232,7 @@ def setup_sampler(
     """
     out_dir = os.path.join(
         inputs["config"].out_dir, inputs["model"].name, f'chain_{input_options["n"]}')
-    
+
     if not inputs["config"].resume and os.path.exists(out_dir):
         shutil.rmtree(out_dir)
 
@@ -277,6 +299,10 @@ def setup_sampler(
             jump=False)
 
         x0 = pta.initial_samples()
+    elif inputs["config"].mode == "discovery":
+        numpyro_model = signal_builder.discovery_numpyro_model_builder(pta.psrs, inputs, pta)
+        sampler = numpyro.infer.NUTS(numpyro_model)
+        x0 = None
 
     return sampler, x0
 
@@ -323,21 +349,35 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
             module="enterprise.signals.parameter",
             lineno=62,
         )
-        try:
-            sampler.sample(
-                x0,
-                N_samples,
-                SCAMweight=inputs["config"].scam_weight,
-                AMweight=inputs["config"].am_weight,
-                DEweight=inputs["config"].de_weight,
+        if inputs["config"].mode in ["enteprise", "ceffyl"]:
+            try:
+                sampler.sample(
+                    x0,
+                    N_samples,
+                    SCAMweight=inputs["config"].scam_weight,
+                    AMweight=inputs["config"].am_weight,
+                    DEweight=inputs["config"].de_weight,
+                )
+            except RuntimeError as e:
+                err = ("There was an error while sampling. If this error involves autocorrelation time,\n"
+                      "a temporary fix is to increase the number of samples in the configuration file.\n"
+                      "We are actively working to upgrade the autocorrelation routines in our sampler.\n\n")
+                console.print("\n\n")
+                log.exception(err)
+                raise SystemExit from None
+        elif inputs["config"].mode == "discovery":
+            mcmc = numpyro.infer.MCMC(
+                sampler, num_chains=1, progress_bar=True, num_warmup=N_samples // 4, num_samples=N_samples
             )
-        except RuntimeError as e:
-            err = ("There was an error while sampling. If this error involves autocorrelation time,\n"
-                  "a temporary fix is to increase the number of samples in the configuration file.\n"
-                  "We are actively working to upgrade the autocorrelation routines in our sampler.\n\n")
-            console.print("\n\n")
-            log.exception(err)
-            raise SystemExit from None
+            mcmc.run(jax.random.key(42))
+            samples_df = pd.DataFrame(mcmc.get_samples())
+            parameter_dict = inputs["model"].parameters
+            prior_dict = {key: np.array(val["args"]).tolist() for key,val in parameter_dict.items()}
+            out_dir = Path(inputs["config"].out_dir)
+            out_dir.mkdir(exist_ok=True, parents=True)
+            samples_df.to_feather(out_dir / "chain_1.feather")
+            with (out_dir / "priors.json").open("w") as f:
+                json.dump(prior_dict, f)
 
     console.print()
     console.print(Panel.fit("[bold green]Done sampling[/]", border_style="green"))
@@ -367,7 +407,7 @@ def main():
     noise_params = None
     emp_dist = None
 
-    if inputs["config"].mode == "enterprise":
+    if inputs["config"].mode in ["enterprise", "discovery"]:
         with console.status("Loading Pulsars and noise data...", spinner="bouncingBall"):
 
             # import pta data
@@ -376,14 +416,14 @@ def main():
             console.print(f"[bold green]Done loading [blue]{len(psrs)}[/] Pulsars and noise data :heavy_check_mark:\n")
 
 
-    with console.status("Initializing PTA...", spinner="bouncingBall"):
-        pta = initialize_pta(inputs, psrs, noise_params)
-        console.print("[bold green]Done initializing PTA :heavy_check_mark:\n")
+    #with console.status("Initializing PTA...", spinner="bouncingBall"):
+    pta = initialize_pta(inputs, psrs, noise_params)
+    console.print("[bold green]Done initializing PTA :heavy_check_mark:\n")
 
 
-    with console.status("Initializing Sampler...", spinner="bouncingBall"):
-        sampler, x0 = setup_sampler(inputs, input_options, pta, emp_dist)
-        console.print("[bold green]Done initializing Sampler :heavy_check_mark:\n")
+    #with console.status("Initializing Sampler...", spinner="bouncingBall"):
+    sampler, x0 = setup_sampler(inputs, input_options, pta, emp_dist)
+    console.print("[bold green]Done initializing Sampler :heavy_check_mark:\n")
 
     console.print("Done with all initializtions.\nSetup times (including first sample) {:.2f} seconds real, {:.2f} seconds CPU\n".format(
         time.perf_counter()-start_real, time.process_time()-start_cpu));
