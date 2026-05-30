@@ -140,7 +140,7 @@ file are:
         using the function [`get_bf`][ptarcade.chains_utils.compute_bf] defined in the 
         PTArcade [`chains_utils`][chains_utils] module.
 
-    !!! Warning "Mod sel and Ceffyl"
+    !!! Warning "`mod_sel` and Ceffyl"
         At the moment `mod_sel` can only be used with `mode="enterprise"`. We are currently 
         working on adding the `mod_sel` option to the Ceffyl-mode. 
 
