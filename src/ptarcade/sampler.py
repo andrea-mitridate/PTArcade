@@ -242,7 +242,22 @@ def setup_sampler(
         groups = signal_builder.unique_sampling_groups(super_model)
 
         if inputs["model"].group:
-            idx_params = [super_model.param_names.index(pp) for pp in inputs["model"].group]
+            # Build the list of parameter indices corresponding to the user-specified group.
+            # Each entry in inputs["model"].group is a parameter name (or base name for
+            # multidimensional parameters that are indexed as "{name}_0", "{name}_1", ...).
+            idx_params = []
+            for pp in inputs["model"].group:
+                if pp in super_model.param_names:
+                    # Shared parameter: appears exactly once in param_names
+                    idx_params.append(super_model.param_names.index(pp))
+                else:
+                    # Multidimensional parameter: collect all indexed variants "{pp}_0", "{pp}_1", ...
+                    i = 0
+                    while f"{pp}_{i}" in super_model.param_names:
+                        idx_params.append(super_model.param_names.index(f"{pp}_{i}"))
+                        i += 1
+            # Add this parameter group to the sampler's group list multiple times so
+            # that it is proposed more frequently during sampling.
             [groups.append(idx_params) for _ in range(5)] # type: ignore
 
         # add nmodel index to group structure
@@ -254,6 +269,22 @@ def setup_sampler(
             sample_nmodel=inputs["config"].mod_sel,
             groups=groups,
             empirical_distr=emp_dist)
+
+        # Remove prior-draw proposals for UserParameter parameters. Their sampler
+        # is a fixed point (x0), which breaks detailed balance for that jump type.
+        _user_param_names = set()
+        for _p in super_model.params:
+            if "UserParameter" in str(_p):
+                _base = str(_p).split(":")[0]
+                _user_param_names.update(
+                    [f"{_base}_{i}" for i in range(_p.size)] if _p.size else [_base]
+                )
+        if _user_param_names:
+            sampler.propCycle = [
+                prop for prop in sampler.propCycle
+                if not (hasattr(prop, "name_list") and
+                        all(n in _user_param_names for n in prop.name_list))
+            ]
 
         x0 = super_model.initial_sample()
 

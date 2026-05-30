@@ -59,10 +59,17 @@ def params_loader(file: str | Path) -> dict[str, tuple[float, float] | None]:
                 else:
                     dim = 1
                 for i in range(dim):
-                    params[f"{key}_{i}"] = None # type: ignore
+                    params[f"{key}_{i}"] = (None, None) # type: ignore
 
+            elif 'UserParameter' in line:
+                if '[' in line:
+                    dim = int(re.search('\\[(\\d+)\\]', line).group(1)) # type: ignore
+                    for i in range(dim):
+                        params[f"{key}_{i}"] = (None, None) # type: ignore
+                else:
+                    params[key] = (None, None) # type: ignore
             else:
-                params[key] = None # type: ignore
+                params[key] = (None, None) # type: ignore
 
     return params # type: ignore
 

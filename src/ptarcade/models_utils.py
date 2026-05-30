@@ -56,7 +56,7 @@ import numpy as np
 import numpyro.distributions as dist
 import scipy.stats as ss
 from enterprise.signals import parameter
-from enterprise.signals.parameter import function
+from enterprise.signals.parameter import Function, function
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
 
@@ -606,13 +606,13 @@ class ParamDict(UserDict):
     def __setitem__(self, key: str, prior: parameter.Parameter):
         # The "or" here makes it backwards compatible with our old syntax
         # for the parameter dictionaries
-        if isinstance(prior, parameter.Parameter ) or getattr(prior, "common", False):
+        if isinstance(prior, parameter.Parameter) or getattr(prior, "common", False):
             super().__setitem__(key, prior(key))
         else:
             super().__setitem__(key, prior)
 
 
-def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
+def prior(name: priors_type | Callable, *args: Any, **kwargs: Any) -> parameter.Parameter:
     """Wrap enterprise prior creation.
 
     This function wraps the class factories in [enterprise.signals.parameter][].
@@ -624,14 +624,21 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
     then `common` defaults to `True`. This attribute will be used by
     [ptarcade.models_utils.ParamDict][] objects in the model files.
 
+    When `name` is a callable, the function uses
+    [enterprise.signals.parameter.UserParameter][] to create a parameter with an
+    arbitrary prior. In this case, an initial sample point `x0` must be provided
+    as a keyword argument.
+
     Parameters
     ----------
-    name : priors_type
-        The prior to use.
+    name : priors_type | Callable
+        The prior to use. Either a string naming a built-in prior or a callable
+        defining a custom prior pdf.
     *args
         Positional arguments passed to the prior factory.
     **kwargs
-        kwargs passed to the prior factory.
+        kwargs passed to the prior factory. When `name` is callable, `x0` (float)
+        must be provided as the initial sample point.
 
     Returns
     -------
@@ -648,22 +655,32 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
     # If it wasn't passed, set it to True
     common = kwargs.pop("common", True)
 
-    # Check if the user passed a correct prior name.
-    # If they didn't, print an informative message
-    try:
-        prior_factory = getattr(parameter, name)
-    except AttributeError:
+    if callable(name):
+        # Checks if the user passed a function as prior.
+        # If they did, it creates a custom prior using enterprise's UserParameter class factory.
+        x0 = kwargs.pop("x0")
+        size = kwargs.pop("size", len(x0) if hasattr(x0, '__len__') else None)
+        size = None if size == 1 else size
+        prior_obj = parameter.UserParameter(prior=function(name)(**kwargs), sampler=lambda **kw: x0, size=size)
+
+
+    else:
+        # Checks if the user passed a correct prior name.
+        # If they didn't, print an informative message
         try:
-            prior_factory = globals()[name]
-        except KeyError:
-            err = (f"The 'name' must be a string from the following list {priors_type=}.\n"
-            f"You supplied {name=}.")
+            prior_factory = getattr(parameter, name)
+        except AttributeError:
+            try:
+                prior_factory = globals()[name]
+            except KeyError:
+                err = (f"The 'name' must be a string from the following list {priors_type=}.\n"
+                f"You supplied {name=}.")
 
-            log.error(err)
-            raise SystemExit from None
+                log.error(err)
+                raise SystemExit from None
 
-    # Use enterprise's class factory
-    prior_obj = prior_factory(*args, **kwargs)
+        # Use enterprise's class factory
+        prior_obj = prior_factory(*args, **kwargs)
 
     # Store the `common` arg for later use
     prior_obj.common = common
