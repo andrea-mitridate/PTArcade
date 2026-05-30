@@ -80,10 +80,12 @@ As for pre-defined priors, by default, parameters are assumed to be common acros
     === "Exponential prior"
 
         ``` py
+        import ptarcade.models_utils as utils
+        
         def exponential(value, scale):
             return np.where(value >= 0, 1 / scale * np.exp(-value / scale), 0.0)
 
-        parameters = {'a' : aux.prior(exponential, x0=1., scale=5.)} # (1)!
+        parameters = {'a' : utils.prior(exponential, x0=1., scale=5.)} # (1)!
         ```
 
         1.  In this case, we have choosen `a=1` as the starting sampling point by setting `x0=1.`.
@@ -91,6 +93,8 @@ As for pre-defined priors, by default, parameters are assumed to be common acros
     === "2D custom prior"
 
         ``` py
+        import ptarcade.models_utils as utils
+
         def bivariate_exponential(value, scale):
             return np.where(
                 np.all(value >= 0),
@@ -98,7 +102,7 @@ As for pre-defined priors, by default, parameters are assumed to be common acros
                 0.0
             )
 
-        parameters = {'a' : aux.prior(bivariate_exponential, x0=np.array([1., 1.]), scale=5., size=2)} # (1)!
+        parameters = {'a' : utils.prior(bivariate_exponential, x0=np.array([1., 1.]), scale=5., size=2)} # (1)!
         ```
 
         1.  In this case, `a` is a 2-dimensional parameter. The initial sampling point is set to `[1., 1.]` via `x0`, and `size=2` tells PTArcade that the parameter has 2 components.
