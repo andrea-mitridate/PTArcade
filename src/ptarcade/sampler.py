@@ -215,7 +215,8 @@ def setup_sampler(
         shutil.rmtree(out_dir)
 
     if inputs['config'].mode == "enterprise":
-        super_model = hypermodel.HyperModel(pta)
+        log_weights = [0,inputs['config'].ln_modelweight]
+        super_model = hypermodel.HyperModel(pta, log_weights=log_weights)
 
         groups = signal_builder.unique_sampling_groups(super_model)
 
