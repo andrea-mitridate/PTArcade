@@ -34,7 +34,7 @@ from PTMCMCSampler.PTMCMCSampler import PTSampler
 from rich.panel import Panel
 
 from ptarcade import console, input_handler, pta_importer, signal_builder
-from ptarcade.models_utils import ParamDict, cosmo_lnlikelihood, lvk_lnlikelihood, bbn_lnlikelihood
+from ptarcade.models_utils import ParamDict, cosmo_lnlikelihood
 
 log = logging.getLogger("rich")
 
@@ -226,9 +226,10 @@ def setup_sampler(
         if inputs["config"].cosmo_constraints:
             spectrum = inputs["model"].spectrum
             cosmo_params_names = list(inputs["model"].parameters)
+            constraints = inputs["config"].cosmo_constraints
 
             def _cosmo_lnlikelihood(self, x):
-                return cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names)
+                return cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names, constraints)
 
             super_model.get_lnlikelihood = types.MethodType(_cosmo_lnlikelihood, super_model)
 
@@ -247,9 +248,11 @@ def setup_sampler(
 
         if inputs["config"].cosmo_constraints:
             spectrum = inputs["model"].spectrum
+            constraints = inputs["config"].cosmo_constraints
+            cosmo_params_names = list(inputs["model"].parameters)
 
             def _cosmo_lnlikelihood(x):
-                return pta.ln_likelihood(x) + bbn_lnlikelihood(x, spectrum) + lvk_lnlikelihood(x, spectrum)
+                return cosmo_lnlikelihood(pta, x, spectrum, cosmo_params_names, constraints)
 
             ln_likelihood = _cosmo_lnlikelihood
 

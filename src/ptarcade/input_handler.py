@@ -163,7 +163,7 @@ def check_config(config: ModuleType) -> None:
            "out_dir" : './chains/',
            "resume" : False,
            "scam_weight" : 30,
-           "cosmo_constraints": False,
+           "cosmo_constraints": [],
            "am_weight" : 15,
            "de_weight" : 50,
            "red_components" : 30,
@@ -242,7 +242,6 @@ def check_config(config: ModuleType) -> None:
         "resume": config.resume,
         "corr": config.corr,
         "bhb_th_prior": config.bhb_th_prior,
-        "cosmo_constraints": config.cosmo_constraints,
     }
 
     for key, value in bools.items():
@@ -253,6 +252,25 @@ def check_config(config: ModuleType) -> None:
             )
             log.error(error)
             raise SystemExit
+
+    # checks cosmo_constraints
+    valid_constraints = {"bbn", "lvk"}
+    if not isinstance(config.cosmo_constraints, list):
+        error = (
+            "The variable 'cosmo_constraints' in the configuration file must be a list.\n"
+            f"Valid entries are {sorted(valid_constraints)}.\n"
+            f"You supplied cosmo_constraints={config.cosmo_constraints}."
+        )
+        log.error(error)
+        raise SystemExit
+    invalid = set(config.cosmo_constraints) - valid_constraints
+    if invalid:
+        error = (
+            f"Unknown cosmo_constraints entries: {sorted(invalid)}.\n"
+            f"Valid entries are {sorted(valid_constraints)}."
+        )
+        log.error(error)
+        raise SystemExit
 
     # checks integers
     integers = {
@@ -294,7 +312,7 @@ def check_config(config: ModuleType) -> None:
         log.warning(warning)
 
 
-def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_components: int, mode: str, cosmo_constraints: bool) -> None:
+def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_components: int, mode: str, cosmo_constraints: list) -> None:
     """Validate model file.
 
     Parameters
@@ -417,8 +435,8 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
         raise SystemExit
     
     elif hasattr(model, "signal") and cosmo_constraints:
-        error = ("You cannot set BBN constraints on a deterministic signal."
-                 " Please, set cosmo_constraints to False in the config file.")
+        error = ("You cannot apply cosmo_constraints on a deterministic signal."
+                 " Please, set cosmo_constraints to [] in the config file.")
         log.error(error)
         raise SystemExit
 

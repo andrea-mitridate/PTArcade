@@ -57,7 +57,6 @@ from enterprise.signals import parameter
 from enterprise.signals.parameter import function
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
-from scipy.integrate import quad  # ← add this
 
 from ptarcade import fast_interpolate
 
@@ -90,6 +89,11 @@ lvk_omega = np.loadtxt(files('ptarcade.data').joinpath('lvk.dat')) # type: ignor
 _lvkv_freq = lvk_omega[:, 0].astype(float)             # frequencies
 _lvkv_data = h**2 * lvk_omega[:, 1].astype(float)             # measured omega
 _lvkv_invvar = (1.0 / h**2 / lvk_omega[:, 2]**2).astype(float)
+lvk_norm = - 0.5 * np.dot(_lvkv_data, _lvkv_data * _lvkv_invvar)
+
+# Fixed log-spaced quadrature grid for BBN delta_Neff integration
+_bbn_u = np.linspace(np.log(1e-12), np.log(1e3), 1000)
+_bbn_f = np.exp(_bbn_u)
 
 # type to use for priors-building functions
 priors_type = Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "Constant", "Gamma"]
@@ -549,7 +553,7 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
     return prior_obj
 
 
-def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...], f_bbn: float = 1e-12, f_max: float = 1e3) -> float:
+def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...]) -> float:
     """Calculate the effective number of relativistic species from a GW spectrum.
 
     Parameters
@@ -558,10 +562,6 @@ def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...], f_bbn:
         The function that returns the GW energy density as a fraction of the closure density.
     params : tuple[Any, ...]
         The parameters to pass to `spectrum`.
-    f_bbn : float, optional
-        The frequency at BBN [Hz]. Defaults to 1e-12 Hz.
-    f_max : float, optional
-        The maximum frequency to integrate up to [Hz]. Defaults to 1e-8 Hz.
 
     Returns
     -------
@@ -569,13 +569,7 @@ def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...], f_bbn:
         The effective number of relativistic species contributed by the GW spectrum.
 
     """
-    def integrand(u):
-        f = np.exp(u)
-        return spectrum(f, *params)
-
-    result, _ = quad(integrand, np.log(f_bbn), np.log(f_max))
-
-    return 1.78 * 10**5 *result
+    return 1.78e5 * np.trapz(spectrum(_bbn_f, *params), _bbn_u)
 
 
 def bbn_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray], sm_neff: float = 3.044, mu_neff: float = 2.941, sigma_neff: float = 0.143) -> float:
@@ -606,44 +600,50 @@ def bbn_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray], sm_neff: floa
     """
     d_neff = delta_neff(spectrum, x)
 
-    norm = np.exp(-0.5 * ((sm_neff - mu_neff) / sigma_neff) ** 2) * np.sqrt(2 * np.pi * sigma_neff**2)
+    bbn_norm = np.exp(-0.5 * ((sm_neff - mu_neff) / sigma_neff) ** 2)
 
-    return  np.log(np.exp(-0.5 * ((d_neff + sm_neff- mu_neff) / sigma_neff) ** 2) / norm)
+    return  np.log(np.exp(-0.5 * ((d_neff + sm_neff- mu_neff) / sigma_neff) ** 2) / bbn_norm)
 
 
 def lvk_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray]) -> float:
     """LVK log-likelihood: -½ Σ [(data - model)^2 / σ^2]."""
-    model = spectrum(_lvkv_freq, *x)           # h^2 Ω_GW(f; x)
+    model = spectrum(_lvkv_freq, *x)            # h^2 Ω_GW(f; x)
+
     resid = _lvkv_data - model                 # data - model
     # χ² = Σ resid² / σ² = resid · (resid * invvar)
     chi2 = np.dot(resid, resid * _lvkv_invvar)
 
-    return -0.5 * chi2
+    return -0.5 * chi2 - lvk_norm
 
 
 
-def cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names):
+def cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names, constraints):
+    param_names = list(self.param_names)
 
-    # find model index variable
-    idx = list(self.param_names).index('nmodel')
-    nmodel = int(np.rint(x[idx]))
+    if hasattr(self, 'ln_likelihood'):
+        # ceffyl: self is a ceffyl pta object
+        base_lnlike = self.ln_likelihood(x)
+    else:
+        # enterprise: self is a HyperModel — replicate get_lnlikelihood logic
+        idx = param_names.index('nmodel')
+        nmodel = int(np.rint(x[idx]))
 
-    # find parameters of active model
-    q = []
-    for par in self.models[nmodel].param_names:
-        idx = self.param_names.index(par)
-        q.append(x[idx])
+        q = [x[param_names.index(par)] for par in self.models[nmodel].param_names]
+        base_lnlike = self.models[nmodel].get_lnlikelihood(q)
 
-    # only active parameters enter likelihood
-    active_lnlike = self.models[nmodel].get_lnlikelihood(q)
+        if self.log_weights is not None:
+            base_lnlike += self.log_weights[nmodel]
 
-    if self.log_weights is not None:
-        active_lnlike += self.log_weights[nmodel]
+        if nmodel == 0 and self.num_models > 1:
+            return base_lnlike
 
-    if nmodel == 0 and self.num_models > 1:
-        return active_lnlike
-
-    mask = np.isin(self.param_names, cosmo_params_names)
+    mask = np.isin(param_names, cosmo_params_names)
     cosmo_params = x[mask]
 
-    return active_lnlike + bbn_lnlikelihood(cosmo_params, spectrum) + lvk_lnlikelihood(cosmo_params, spectrum)
+    extra = 0.0
+    if "bbn" in constraints:
+        extra += bbn_lnlikelihood(cosmo_params, spectrum)
+    if "lvk" in constraints:
+        extra += lvk_lnlikelihood(cosmo_params, spectrum)
+
+    return base_lnlike + extra
