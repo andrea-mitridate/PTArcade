@@ -50,11 +50,14 @@ from functools import cache
 from importlib.resources import files
 from typing import Any, Literal
 
+import jax
+import jax.numpy as jnp
 import natpy as nat
 import numpy as np
+import numpyro.distributions as dist
 import scipy.stats as ss
 from enterprise.signals import parameter
-from enterprise.signals.parameter import function
+from enterprise.signals.parameter import Function, function
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
 
@@ -124,6 +127,33 @@ def g_rho(x: array_like, is_freq: bool = False) -> array_like:  # noqa: FBT001, 
 
     return dof
 
+def g_rho_jax(x: jax.Array, is_freq: bool = False) -> jax.Array:  # noqa: FBT001, FBT002
+    """Return the number of relativistic degrees of freedom as a function of T/GeV or f/Hz.
+
+    Parameters
+    ----------
+    x : array_like
+        The temperature(s) [GeV] or frequency/frequencies [Hz].
+    is_freq : bool, optional
+        True if `x` is a frequency/frequencies, False if tempe
+rature(s).
+        Defaults to False.
+
+    Returns
+    -------
+    dof : array_like
+        The relativistic degrees of freedom at `x`.
+
+    """
+    if is_freq:
+        dof = jnp.interp(x, gs[:, 1], gs[:, 3])
+
+    else:
+        dof = jnp.interp(x, gs[:, 0], gs[:, 3])
+
+    return dof
+
+
 
 def g_s(x: array_like, is_freq: bool = False) -> array_like:  # noqa: FBT001, FBT002
     """Return the number of entropic relativistic degrees of freedom as a function of T/GeV or f/Hz.
@@ -147,6 +177,31 @@ def g_s(x: array_like, is_freq: bool = False) -> array_like:  # noqa: FBT001, FB
 
     else:
         dof = np.interp(x, gs[:, 0], gs[:, 2])
+
+    return dof
+
+def g_s_jax(x: jax.Array, is_freq: bool = False) -> jax.Array:  # noqa: FBT001, FBT002
+    """Return the number of entropic relativistic degrees of freedom as a function of T/GeV or f/Hz.
+
+    Parameters
+    ----------
+    x : array_like
+        The temperature(s) [GeV] or frequency/frequencies [Hz].
+    is_freq : bool, optional
+        True if `x` is a frequency/frequencies, False if temperature(s).
+        Defaults to False.
+
+    Returns
+    -------
+    dof : array_like
+        The entropic relativistic degrees of freedom at `x`.
+
+    """
+    if is_freq:
+        dof = jnp.interp(x, gs[:, 1], gs[:, 2])
+
+    else:
+        dof = jnp.interp(x, gs[:, 0], gs[:, 2])
 
     return dof
 
@@ -202,7 +257,7 @@ g_s_0: np.float64 = __g_s_0(T_0)  # entropic relativistic degrees of freedom tod
 # -----------------------------------------------------------
 
 
-def GammaPrior(value: float, a: float, loc: float, scale: float) -> float:
+def GammaPrior(value: float, a: float, beta: float) -> float:
     """Prior function for Gamma parameters.
 
     Parameters
@@ -222,9 +277,9 @@ def GammaPrior(value: float, a: float, loc: float, scale: float) -> float:
         The probability density of the Gamma distribution at `value`.
 
     """
-    return ss.gamma.pdf(value, a, loc, scale)
+    return ss.gamma.pdf(value, a, scale=1/beta)
 
-def GammaSampler(a: float, loc: float, scale: float, size: int | None  = None) -> NDArray:
+def GammaSampler(a: float, beta: float, size: int | None  = None) -> NDArray:
     """Sampling function for Gamma parameters.
 
     Parameters
@@ -244,10 +299,10 @@ def GammaSampler(a: float, loc: float, scale: float, size: int | None  = None) -
         A NumPy array of size `size` containing samples from the Gamma distribution.
 
     """
-    return ss.gamma.rvs(a, loc, scale, size=size)
+    return ss.gamma.rvs(a, scale=1/beta, size=size)
 
 
-def Gamma(a: float, loc: float, scale: float, size: int | None = None):
+def Gamma(a: float,  beta: float, size: int | None = None):
     """Class factory for Gamma parameters.
 
     Parameters
@@ -271,9 +326,9 @@ def Gamma(a: float, loc: float, scale: float, size: int | None = None):
         """Child class of enterprise.signals.parameter.Parameter."""
 
         _size = size
-        _prior = parameter.Function(GammaPrior, a=a, loc=loc, scale=scale)
+        _prior = parameter.Function(GammaPrior, a=a,  beta=beta)
         _sampler = staticmethod(GammaSampler)
-        _typename = parameter._argrepr("Gamma", a=a, loc=loc, scale=scale)
+        _typename = parameter._argrepr("Gamma", a=a, beta=beta)
 
     return Gamma
 
@@ -282,7 +337,11 @@ def Gamma(a: float, loc: float, scale: float, size: int | None = None):
 # Helper functions.
 # -----------------------------------------------------------
 
-def omega2cross(omega_hh: Callable[..., NDArray], ceffyl : bool = False) -> Callable[..., NDArray]:
+def omega2cross(
+    omega_hh: Callable[..., NDArray | jax.Array],
+    likelihood: Literal["enterprise", "ceffyl", "discovery"] = "enterprise",
+    model_name: str | None  = None,
+) -> Callable[..., NDArray]:
     """Convert GW energy density.
 
     Converts the GW energy density as a fraction of the closure density into the cross-power spectral density
@@ -291,50 +350,64 @@ def omega2cross(omega_hh: Callable[..., NDArray], ceffyl : bool = False) -> Call
 
     Parameters
     ----------
-    omega_hh : Callable[..., NDArray]
+    omega_hh : Callable[..., NDArray | jax.Array]
         The function that returns the GW energy density as a fraction of the closure density.
 
-    ceffyl: bool
-        If set to tru use a version compatible with ceffyl, if set to false a version compatible with 
-        ENTERPRISE
-
+    likelihood: str
+        Can be "enterprise", "ceffyl", or "discovery"
     Returns
     -------
-    Callable[..., NDArray]
+    Callable[..., NDArray | jax.Array]
         A function that returns the cross-power spectral density as a function of the frequency in Hz.
 
     """
-    if ceffyl:
-        @function
-        def cross(f: NDArray, Tspan: float, **kwargs):
+    match likelihood:
+        case "ceffyl":
 
-            # fraction of the critical density in GWs
-            h2_omega = omega_hh(f, **kwargs)
+            @function
+            def cross(f: NDArray, Tspan: float, **kwargs):
+                # fraction of the critical density in GWs
+                h2_omega = omega_hh(f, **kwargs)
 
-            # characteristic strain spectrum h_c(f)
-            hcf = H_0_Hz / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f)
+                # characteristic strain spectrum h_c(f)
+                hcf = H_0_Hz / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f)
 
-            # cross-power spectral density S(f) (s^3)
-            sf = (hcf**2 / (12 * np.pi**2 * f**3)) / Tspan
+                # cross-power spectral density S(f) (s^3)
+                sf = (hcf**2 / (12 * np.pi**2 * f**3)) / Tspan
 
-            return sf
+                return sf
 
-    else:
-        @function
-        def cross(f: NDArray, components: int = 2, **kwargs):
+        case "enterprise":
 
-            df = np.diff(np.concatenate((np.array([0]), f[::components])))
+            @function
+            def cross(f: NDArray, components: int = 2, **kwargs):
+                df = np.diff(np.concatenate((np.array([0]), f[::components])))
 
-            # fraction of the critical density in GWs
-            h2_omega = omega_hh(f, **kwargs)
+                # fraction of the critical density in GWs
+                h2_omega = omega_hh(f, **kwargs)
 
-            # characteristic strain spectrum h_c(f)
-            hcf = H_0_Hz / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f)
+                # characteristic strain spectrum h_c(f)
+                hcf = H_0_Hz / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f)
 
-            # cross-power spectral density S(f) (s^3)
-            sf = (hcf**2 / (12 * np.pi**2 * f**3)) * np.repeat(df, components)
+                # cross-power spectral density S(f) (s^3)
+                sf = (hcf**2 / (12 * np.pi**2 * f**3)) * np.repeat(df, components)
 
-            return sf
+                return sf
+
+        case "discovery":
+
+            def cross(f: jax.Array, df: jax.Array, *args, **kwargs):
+                kwargs = {key.removeprefix(f"{model.name}_"): val for key, val in kwargs.items()} if kwargs is not None else kwargs
+                # fraction of the critical density in GWs
+                h2_omega = omega_hh(f, *args, **kwargs)
+
+                # characteristic strain spectrum h_c(f)
+                hcf = H_0_Hz / h * jnp.sqrt(3 * h2_omega / 2) / (jnp.pi * f)
+
+                # cross-power spectral density S(f) (s^3)
+                sf = (hcf**2 / (12 * np.pi**2 * f**3)) * df
+
+                return sf
 
     return cross
 
@@ -378,7 +451,7 @@ def prep_data(path: str) -> tuple[list[NDArray], NDArray, NDArray]:
     return grids, omega_grid, par_names
 
 
-def spec_importer(path: str) -> Callable[[NDArray, Any],  NDArray]:
+def spec_importer(path: str, kind:Literal["numpy", "jax"]="numpy") -> Callable[[NDArray, Any],  NDArray]:
     """Import data and create a fast interpolation function.
 
     Interpolate the GWB power spectrum from tabulated data. Return a function that interpolates
@@ -399,12 +472,21 @@ def spec_importer(path: str) -> Callable[[NDArray, Any],  NDArray]:
     info, data = fast_interpolate.load_data(path)
     # info is a list of (name, start, step)
 
-    def spectrum(f: NDArray, **kwargs: Any) -> NDArray:
+    if kind.lower() == "numpy":
+        def spectrum(f: NDArray, **kwargs: Any) -> NDArray:
 
-        # Construct right information format for interpolation
-        return fast_interpolate.interp([(start, step, f if name == 'f' else kwargs[name])
-                                         for (name, start, step) in info],
-                                        data)
+            # Construct right information format for interpolation
+            return fast_interpolate.interp([(start, step, f if name == 'f' else kwargs[name])
+                                            for (name, start, step) in info],
+                                           data)
+    elif kind.lower() == "jax":
+        def spectrum(f: NDArray, **kwargs: Any) -> NDArray:
+
+            # Construct right information format for interpolation
+            return fast_interpolate.jax_interp([(start, step, f if name == 'f' else kwargs[name])
+                                            for (name, start, step) in info],
+                                           data)
+
     return spectrum # type: ignore
 
 
@@ -440,6 +522,37 @@ def freq_at_temp(T: array_like) -> array_like:
 
     return prefactor * sqr_term
 
+def freq_at_temp_jax(T: jax.Array) -> jax.Array:
+    """Find frequency today as function of temperature when GW was horizon size.
+
+    Calculates the GW frequency [Hz] today as a function of the universe temperature [GeV]
+    when the GW was of horizon size.
+
+    Parameters
+    ----------
+    T : array_like
+        The universe temperature [GeV] at the time when the GW was of horizon size.
+
+    Returns
+    -------
+    NDArray
+        The GW frequency [Hz] today that was of horizon size when the universe was at temperature `T` [GeV].
+    """
+    f_0 = H_0_Hz / (2 * np.pi)
+
+    T_ratio = T_0 / T # type: ignore
+    g_ratio = g_rho_0 / g_rho_jax(T) # type: ignore
+    gs_ratio = g_s_0 / g_s_jax(T) # type: ignore
+
+    prefactor = f_0 * (gs_ratio) ** (1 / 3) * T_ratio
+    sqr_term = jnp.sqrt(
+        omega_v
+        + (gs_ratio**-1 * T_ratio**-3 * omega_m)
+        + (g_ratio**-1 * T_ratio**-4 * omega_r)
+    )
+
+    return prefactor * sqr_term
+
 
 def temp_at_freq(f: array_like) -> NDArray:
     """Get the temperature [GeV] of the universe when a gravitational wave of a
@@ -457,6 +570,24 @@ def temp_at_freq(f: array_like) -> NDArray:
 
     """
     return np.interp(f, gs[:, 1], gs[:, 0], left=np.nan, right=np.nan)
+
+
+def temp_at_freq_jax(f: jax.Array) -> jax.Array:
+    """Get the temperature [GeV] of the universe when a gravitational wave of a
+    certain frequency [Hz] today was of horizon size.
+
+    Parameters
+    ----------
+    f : array_like
+        The frequency in Hz today.
+
+    Returns
+    -------
+    NDArray
+        The temperature [GeV] when the GW at frequency `f` [Hz] was of horizon size.
+
+    """
+    return jnp.interp(f, gs[:, 1], gs[:, 0], left=jnp.nan, right=jnp.nan)
 
 
 class ParamDict(UserDict):
@@ -488,13 +619,13 @@ class ParamDict(UserDict):
     def __setitem__(self, key: str, prior: parameter.Parameter):
         # The "or" here makes it backwards compatible with our old syntax
         # for the parameter dictionaries
-        if isinstance(prior, parameter.Parameter ) or getattr(prior, "common", False):
+        if isinstance(prior, parameter.Parameter) or getattr(prior, "common", False):
             super().__setitem__(key, prior(key))
         else:
             super().__setitem__(key, prior)
 
 
-def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
+def prior(name: priors_type | Callable, *args: Any, **kwargs: Any) -> parameter.Parameter:
     """Wrap enterprise prior creation.
 
     This function wraps the class factories in [enterprise.signals.parameter][].
@@ -506,14 +637,21 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
     then `common` defaults to `True`. This attribute will be used by
     [ptarcade.models_utils.ParamDict][] objects in the model files.
 
+    When `name` is a callable, the function uses
+    [enterprise.signals.parameter.UserParameter][] to create a parameter with an
+    arbitrary prior. In this case, an initial sample point `x0` must be provided
+    as a keyword argument.
+
     Parameters
     ----------
-    name : priors_type
-        The prior to use.
+    name : priors_type | Callable
+        The prior to use. Either a string naming a built-in prior or a callable
+        defining a custom prior pdf.
     *args
         Positional arguments passed to the prior factory.
     **kwargs
-        kwargs passed to the prior factory.
+        kwargs passed to the prior factory. When `name` is callable, `x0` (float)
+        must be provided as the initial sample point.
 
     Returns
     -------
@@ -530,22 +668,32 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
     # If it wasn't passed, set it to True
     common = kwargs.pop("common", True)
 
-    # Check if the user passed a correct prior name.
-    # If they didn't, print an informative message
-    try:
-        prior_factory = getattr(parameter, name)
-    except AttributeError:
+    if callable(name):
+        # Checks if the user passed a function as prior.
+        # If they did, it creates a custom prior using enterprise's UserParameter class factory.
+        x0 = kwargs.pop("x0")
+        size = kwargs.pop("size", len(x0) if hasattr(x0, '__len__') else None)
+        size = None if size == 1 else size
+        prior_obj = parameter.UserParameter(prior=function(name)(**kwargs), sampler=lambda **kw: x0, size=size)
+
+
+    else:
+        # Checks if the user passed a correct prior name.
+        # If they didn't, print an informative message
         try:
-            prior_factory = globals()[name]
-        except KeyError:
-            err = (f"The 'name' must be a string from the following list {priors_type=}.\n"
-            f"You supplied {name=}.")
+            prior_factory = getattr(parameter, name)
+        except AttributeError:
+            try:
+                prior_factory = globals()[name]
+            except KeyError:
+                err = (f"The 'name' must be a string from the following list {priors_type=}.\n"
+                f"You supplied {name=}.")
 
-            log.error(err)
-            raise SystemExit from None
+                log.error(err)
+                raise SystemExit from None
 
-    # Use enterprise's class factory
-    prior_obj = prior_factory(*args, **kwargs)
+        # Use enterprise's class factory
+        prior_obj = prior_factory(*args, **kwargs)
 
     # Store the `common` arg for later use
     prior_obj.common = common
