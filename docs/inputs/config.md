@@ -162,7 +162,30 @@ file are:
         derived only without spatial correlations (for these data sets the inclusion
         of pulsar-correlations is not expected to impact the spectral reconstruction significantly). 
         Therefore, for these datasets, ceffyl mode can run only with `corr=False`.
-    
+
+[`cosmo_constraints`](#+config.cosmo_constraints){ #+config.cosmo_constraints }
+
+:   :octicons-milestone-24: Default: `[]` –
+    This parameter controls whether additional cosmological constraints are applied
+    to the GW spectrum on top of the PTA likelihood. It must be a list, and can
+    contain any combination of the following entries:
+
+    * `"bbn"`: applies a Big Bang Nucleosynthesis (BBN) constraint by requiring
+    that the total GW energy density integrated over all frequencies does not
+    exceed the bound on extra relativistic degrees of freedom $\Delta N_{\rm eff}$
+    inferred from measurements of light-element abundances. The constraint uses
+    $N_{\rm eff} = 2.941 \pm 0.143$ (at 68% confidence).
+
+    * `"lvk"`: applies a constraint from the LIGO–Virgo–KAGRA (LVK) upper limits on
+    the stochastic GW background in the 20–1726 Hz frequency band [(LVK 2025)][lvk2025].
+
+    Setting `cosmo_constraints = []` (the default) disables all cosmological constraints.
+
+    !!! warning "Stochastic signals only"
+        Cosmological constraints can only be applied to stochastic signals defined
+        via a `spectrum` function in the model file. They cannot be used with
+        deterministic signals.
+
 [`red_components`](#+config.red_components){ #+config.red_components }
 
 :   :octicons-milestone-24: Default: `30` –
@@ -276,6 +299,7 @@ with the following parameters in the configuration file:
 [chains_utils]: ../utils/chain_utils.md
 [NG15newphys]: https://arxiv.org/abs/2306.16219
 [NG15astro]: https://arxiv.org/abs/2306.16220
+[lvk2025]: https://arxiv.org/abs/2508.20721
 [ENTERPRISE]: https://github.com/nanograv/enterprise
 [GFL]: https://arxiv.org/pdf/2303.15442.pdf
 [Ceffyl]: https://github.com/astrolamb/ceffyl

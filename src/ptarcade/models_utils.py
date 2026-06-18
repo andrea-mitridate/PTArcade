@@ -39,6 +39,7 @@ g_s_0 : np.float64
     Entropic relativistic degrees of freedom today
 priors_type : typing.Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "Constant", "Gamma"]
     Type for parameter priors.
+
 """
 from __future__ import annotations
 
@@ -87,6 +88,15 @@ gev_to_hz : np.float64 = nat.convert(nat.GeV, nat.Hz) # conversion from gev to H
 # tabulated values for the number of relativistic degrees of
 # freedom from reference 2005.03544
 gs = np.loadtxt(files('ptarcade.data').joinpath('g_star.dat')) # type: ignore
+lvk_omega = np.loadtxt(files('ptarcade.data').joinpath('lvk.dat')) # type: ignore
+_lvkv_freq = lvk_omega[:, 0].astype(float)             # frequencies
+_lvkv_data = h**2 * lvk_omega[:, 1].astype(float)             # measured omega
+_lvkv_invvar = (1.0 / h**2 / lvk_omega[:, 2]**2).astype(float)
+lvk_norm = - 0.5 * np.dot(_lvkv_data, _lvkv_data * _lvkv_invvar)
+
+# Fixed log-spaced quadrature grid for BBN delta_Neff integration
+_bbn_u = np.linspace(np.log(1e-12), np.log(1e3), 1000)
+_bbn_f = np.exp(_bbn_u)
 
 # type to use for priors-building functions
 priors_type = Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "Constant", "Gamma"]
@@ -418,6 +428,7 @@ def prep_data(path: str) -> tuple[list[NDArray], NDArray, NDArray]:
         The omega grid of the tabulated data.
     par_names : NDArray
         The names of the parameters in the tabulated data.
+
     """
     par_names = np.loadtxt(path, max_rows=1, dtype='str')
     data = np.loadtxt(path, skiprows=1)
@@ -456,6 +467,7 @@ def spec_importer(path: str, kind:Literal["numpy", "jax"]="numpy") -> Callable[[
     Callable[[NDArray, P], NDArray]
         A callable object that interpolates the GWB power spectrum at a given frequency `f` and with given
         parameters `kwargs`.
+
     """
     info, data = fast_interpolate.load_data(path)
     # info is a list of (name, start, step)
@@ -493,6 +505,7 @@ def freq_at_temp(T: array_like) -> array_like:
     -------
     NDArray
         The GW frequency [Hz] today that was of horizon size when the universe was at temperature `T` [GeV].
+
     """
     f_0 = H_0_Hz / (2 * np.pi)
 
@@ -504,7 +517,7 @@ def freq_at_temp(T: array_like) -> array_like:
     sqr_term = np.sqrt(
         omega_v
         + (gs_ratio**-1 * T_ratio**-3 * omega_m)
-        + (g_ratio**-1 * T_ratio**-4 * omega_r)
+        + (g_ratio**-1 * T_ratio**-4 * omega_r),
     )
 
     return prefactor * sqr_term
@@ -685,8 +698,100 @@ def prior(name: priors_type | Callable, *args: Any, **kwargs: Any) -> parameter.
     # Store the `common` arg for later use
     prior_obj.common = common
 
-    # return the args
-    return {"name": name, "args": args, "kwargs": kwargs, "enterprise_prior_obj": prior_obj}
+    return prior_obj
 
-def get_numpyro_prior(name, *args, **kwargs):
-    return getattr(dist, name)(*args, **kwargs)
+
+def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...]) -> float:
+    """Calculate the effective number of relativistic species from a GW spectrum.
+
+    Parameters
+    ----------
+    spectrum : Callable[..., NDArray]
+        The function that returns the GW energy density as a fraction of the closure density.
+    params : tuple[Any, ...]
+        The parameters to pass to `spectrum`.
+
+    Returns
+    -------
+    float
+        The effective number of relativistic species contributed by the GW spectrum.
+
+    """
+    return 1.78e5 * np.trapz(spectrum(_bbn_f, *params), _bbn_u)
+
+
+def bbn_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray], sm_neff: float = 3.044, mu_neff: float = 2.941, sigma_neff: float = 0.143) -> float:
+    """Calculate the cosmological log-likelihood based on N_eff measurements.
+
+    Parameters
+    ----------
+    x : NDArray
+        The array of parameter values.
+    param_names : NDArray
+        The names of the parameters in `x`.
+    cosmo_params : list[str]
+        The names of the cosmological parameters to use in the likelihood.
+    spectrum : Callable[..., NDArray]
+        The function that returns the GW energy density as a fraction of the closure density.
+    sm_neff : float, optional
+        The Standard Model value of N_eff. Defaults to 3.044.
+    mu_neff : float, optional
+        The mean value of N_eff from observations. Defaults to 2.941.
+    sigma_neff : float, optional
+        The standard deviation of N_eff from observations. Defaults to 0.143.
+
+    Returns
+    -------
+    float
+        The cosmological likelihood based on N_eff measurements.
+
+    """
+    d_neff = delta_neff(spectrum, x)
+
+    bbn_norm = np.exp(-0.5 * ((sm_neff - mu_neff) / sigma_neff) ** 2)
+
+    return  np.log(np.exp(-0.5 * ((d_neff + sm_neff- mu_neff) / sigma_neff) ** 2) / bbn_norm)
+
+
+def lvk_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray]) -> float:
+    """LVK log-likelihood: -½ Σ [(data - model)^2 / σ^2]."""
+    model = spectrum(_lvkv_freq, *x)            # h^2 Ω_GW(f; x)
+
+    resid = _lvkv_data - model                 # data - model
+    # χ² = Σ resid² / σ² = resid · (resid * invvar)
+    chi2 = np.dot(resid, resid * _lvkv_invvar)
+
+    return -0.5 * chi2 - lvk_norm
+
+
+
+def cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names, constraints):
+    param_names = list(self.param_names)
+
+    if hasattr(self, 'ln_likelihood'):
+        # ceffyl: self is a ceffyl pta object
+        base_lnlike = self.ln_likelihood(x)
+    else:
+        # enterprise: self is a HyperModel — replicate get_lnlikelihood logic
+        idx = param_names.index('nmodel')
+        nmodel = int(np.rint(x[idx]))
+
+        q = [x[param_names.index(par)] for par in self.models[nmodel].param_names]
+        base_lnlike = self.models[nmodel].get_lnlikelihood(q)
+
+        if self.log_weights is not None:
+            base_lnlike += self.log_weights[nmodel]
+
+        if nmodel == 0 and self.num_models > 1:
+            return base_lnlike
+
+    mask = np.isin(param_names, cosmo_params_names)
+    cosmo_params = x[mask]
+
+    extra = 0.0
+    if "bbn" in constraints:
+        extra += bbn_lnlikelihood(cosmo_params, spectrum)
+    if "lvk" in constraints:
+        extra += lvk_lnlikelihood(cosmo_params, spectrum)
+
+    return base_lnlike + extra

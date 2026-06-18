@@ -26,6 +26,8 @@ import erfa
 
 sys.modules["astropy.erfa"] = erfa
 
+import types
+
 from pathlib import Path
 
 import jax
@@ -39,11 +41,10 @@ from enterprise_extensions import hypermodel
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
 from PTMCMCSampler.PTMCMCSampler import PTSampler
-from rich import print
-from rich.console import Console
 from rich.panel import Panel
 
 from ptarcade import console, input_handler, pta_importer, signal_builder
+from ptarcade.models_utils import ParamDict, cosmo_lnlikelihood
 from ptarcade.input_handler import bcolors
 from ptarcade.models_utils import ParamDict
 
@@ -80,7 +81,7 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
 
     if not cmd_input_okay:
 
-        error = (f"Model file must be present\n"
+        error = ("Model file must be present\n"
         "\t- This is added with the -[blue bold]m[/] input flags. Add -[blue bold]h[/] (--[blue bold]help[/]) flags for more help.\n")
 
         log.error(error, extra={"markup":True})
@@ -93,7 +94,7 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
         pars_dic = inputs["model"].parameters
         group = [par for par in pars_dic if pars_dic[par]["enterprise_prior_obj"].common]
 
-        setattr(inputs["model"], "group", group)
+        inputs["model"].group = group
 
     inputs["model"].parameters = ParamDict(inputs["model"].parameters)
 
@@ -125,7 +126,7 @@ def get_user_pta_data(inputs: dict[str, Any]) -> tuple[list[Pulsar], dict | None
 
 
 def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_params : dict | None ) -> dict[int, PTA]:
-    """Initialize the PTA with the user input
+    """Initialize the PTA with the user input.
 
     Parameters
     ----------
@@ -142,13 +143,13 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
         Dictionary of [enterprise.signals.signal_base.PTA][] objects configured with user inputs
 
     """
-
     input_handler.check_model(
         model=inputs['model'],
         psrs=psrs,
         red_components=inputs['config'].red_components,
         gwb_components=inputs['config'].gwb_components,
-        mode=inputs["config"].mode)
+        mode=inputs["config"].mode,
+        cosmo_constraints=inputs["config"].cosmo_constraints)
 
 
     if inputs["config"].mode == "enterprise":
@@ -209,7 +210,7 @@ def setup_sampler(
         pta: dict[int, PTA] | None,
         emp_dist: array_like | None,
 ) -> tuple[PTSampler, NDArray]:
-    """Setup the PTMCMC sampler
+    """Set up the PTMCMC sampler.
 
     Parameters
     ----------
@@ -263,6 +264,16 @@ def setup_sampler(
         # add nmodel index to group structure
         groups.extend([[len(super_model.param_names)-1]])
 
+        if inputs["config"].cosmo_constraints:
+            spectrum = inputs["model"].spectrum
+            cosmo_params_names = list(inputs["model"].parameters)
+            constraints = inputs["config"].cosmo_constraints
+
+            def _cosmo_lnlikelihood(self, x):
+                return cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names, constraints)
+
+            super_model.get_lnlikelihood = types.MethodType(_cosmo_lnlikelihood, super_model)
+
         sampler = super_model.setup_sampler(
             resume=inputs["config"].resume,
             outdir=out_dir,
@@ -292,9 +303,22 @@ def setup_sampler(
 
     elif inputs["config"].mode == "ceffyl":
 
+        if inputs["config"].cosmo_constraints:
+            spectrum = inputs["model"].spectrum
+            constraints = inputs["config"].cosmo_constraints
+            cosmo_params_names = list(inputs["model"].parameters)
+
+            def _cosmo_lnlikelihood(x):
+                return cosmo_lnlikelihood(pta, x, spectrum, cosmo_params_names, constraints)
+
+            ln_likelihood = _cosmo_lnlikelihood
+
+        else:
+            ln_likelihood = pta.ln_likelihood
+
         sampler = Sampler.setup_sampler(pta,
             outdir=out_dir,
-            logL=pta.ln_likelihood,
+            logL=ln_likelihood,
             logp=pta.ln_prior,
             jump=False)
 
@@ -425,8 +449,7 @@ def main():
     sampler, x0 = setup_sampler(inputs, input_options, pta, emp_dist)
     console.print("[bold green]Done initializing Sampler :heavy_check_mark:\n")
 
-    console.print("Done with all initializtions.\nSetup times (including first sample) {:.2f} seconds real, {:.2f} seconds CPU\n".format(
-        time.perf_counter()-start_real, time.process_time()-start_cpu));
+    console.print(f"Done with all initializtions.\nSetup times (including first sample) {time.perf_counter()-start_real:.2f} seconds real, {time.process_time()-start_cpu:.2f} seconds CPU\n")
 
     start_cpu = time.process_time()
     start_real = time.perf_counter()
