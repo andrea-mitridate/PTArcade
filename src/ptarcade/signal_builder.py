@@ -4,12 +4,12 @@ from __future__ import annotations
 import inspect
 import logging
 import sys
-from importlib.resources import files
 from pathlib import Path
 from types import ModuleType
 from zipfile import ZipFile
 
 import discovery as ds
+import jax.numpy as jnp
 import numpy as np
 import numpyro
 from astropy.utils.data import download_file
@@ -91,7 +91,6 @@ def powerlaw2(f: NDArray, log10_Agamma: NDArray, components: int = 2) -> NDArray
         The modified powerlaw.
 
     """
-
     df = np.diff(np.concatenate((np.array([0]), f[::components])))
     return (
         (10 ** log10_Agamma[0]) ** 2
@@ -105,7 +104,6 @@ def powerlaw2(f: NDArray, log10_Agamma: NDArray, components: int = 2) -> NDArray
 
 @parameter.function
 def powerlaw(f, Tspan, log10_A, gamma):
-
     """Modified powerlaw function.
 
     Powerlaw function modified to work with ceffyl.
@@ -127,7 +125,6 @@ def powerlaw(f, Tspan, log10_A, gamma):
         The modified powerlaw.
 
     """
-
     return (
         (10**log10_A) ** 2 / 12.0 / np.pi**2 * const.fyr ** (gamma - 3) * f ** (-gamma) / Tspan  # divide by Tspan here
     )
@@ -218,7 +215,6 @@ def ent_builder(
     red_components: int = 30,
     gwb_components: int = 14,
 ) -> signal_base.PTA:
-
     """
     Reads in list of enterprise Pulsar instances and returns a PTA
     object instantiated with user-supplied options.
@@ -338,18 +334,18 @@ def ent_builder(
     if model:
         if hasattr(model, "signal"):
             signal = function(model.signal)
-            signal = signal(**{key:val["enterprise_prior_obj"] for key,val in model.parameters.items()})
+            signal = signal(**model.parameters)
             np_signal = deterministic_signals.Deterministic(signal, name=model.name)
 
             s += np_signal
 
         elif hasattr(model, "spectrum"):
             spectrum = aux.omega2cross(model.spectrum, likelihood="enterprise")
-            cpl_np = spectrum(**{key:val["enterprise_prior_obj"] for key,val in model.parameters.items()})
+            cpl_np = spectrum(**model.parameters)
 
             if corr and hasattr(model, "orf"):
                 orf = function(model.orf)
-                orf = orf(**{key:val["enterprise_prior_obj"] for key,val in model.parameters.items()})
+                orf = orf(**model.parameters)
 
                 np_gwb = mods.FourierBasisCommonGP(
                     spectrum=cpl_np,
@@ -591,7 +587,7 @@ def discovery_builder(
 
     # stochastic process
     if hasattr(model, "spectrum"):
-        globalgp_psd = aux.omega2cross(model.spectrum, likelihood="discovery")
+        globalgp_psd = aux.omega2cross(model.spectrum, likelihood="discovery", model_name=model.name)
         globalgp_psd.__signature__ = inspect.signature(model.spectrum)
         pslmodels = (
             ds.PulsarLikelihood(
@@ -600,7 +596,7 @@ def discovery_builder(
                     ds.makenoise_measurement(psr, psr.noisedict),
                     ds.makegp_ecorr(psr, psr.noisedict),
                     ds.makegp_timing(psr, svd=True),
-                ]
+                ],
             )
             for psr in psrs
         )
@@ -637,7 +633,7 @@ def discovery_builder(
                     common=[
                         par
                         for par, val in model.parameters.items()
-                        if getattr(val["enterprise_prior_obj"], "common", True) # return false if no "common" attribute
+                        if getattr(val, "common", True) # return false if no "common" attribute
                     ],
                     name=model.name,
                 ),
@@ -648,6 +644,18 @@ def discovery_builder(
 
     rngp = ds.makecommongp_fourier(psrs, ds.powerlaw, red_components, T=Tspan, name="red_noise")
     return ds.ArrayLikelihood(pslmodels, commongp=rngp)
+
+def _sample_numpyro_site(site_name: str, prior_spec):
+    """Register a single numpyro sample site from a translated prior."""
+    if isinstance(prior_spec, aux.LinearExpSpec):
+        lin = numpyro.sample(
+            f"{site_name}__lin", dist.Uniform(10.0**prior_spec.pmin, 10.0**prior_spec.pmax),
+        )
+        return numpyro.deterministic(site_name, jnp.log10(lin))
+    if isinstance(prior_spec, aux.ConstantSpec):
+        return numpyro.deterministic(site_name, jnp.asarray(prior_spec.value))
+    return numpyro.sample(site_name, prior_spec)
+
 
 def discovery_numpyro_model_builder(
     psrs: list[ds.Pulsar],
@@ -672,35 +680,54 @@ def discovery_numpyro_model_builder(
         elif "red_noise_gamma" in p:
             red_noise_gamma_params.append(p)
 
-    import ipdb; ipdb.set_trace()
-    def discovery_model():
-        # Get new physics priors
-        params = {
-            (f"{inputs['model'].name}_{par}" if inputs["config"].corr else par): numpyro.sample(
-                par, aux.get_numpyro_prior(val["name"], *val["args"], **val["kwargs"])
+    model_name = inputs["model"].name
+    corr = inputs["config"].corr
+    model_params = inputs["model"].parameters
+    constraints = inputs["config"].cosmo_constraints
+
+    if constraints:
+        # The cosmo constraints evaluate the spectrum once, globally, so a per-pulsar
+        # parameter has no single value to feed it. Fail here, rather than with a
+        # "missing argument" TypeError from inside the traced model.
+        uncommon = [par for par, val in model_params.items() if not getattr(val, "common", True)]
+        if uncommon:
+            msg = (
+                f"cosmo_constraints={constraints} cannot be used with the non-common model "
+                f"parameter(s) {uncommon}: the BBN/LVK likelihoods evaluate the spectrum once "
+                "for the whole array, so every model parameter must be common."
             )
-            for par, val in inputs["model"].parameters.items()
-            if getattr(val["enterprise_prior_obj"], "common", True)
-        }
-        params.update(
-            {
-                (name:=f"{psr.name}_{inputs['model'].name}_{par}"): numpyro.sample(
-                    name, aux.get_numpyro_prior(val["name"], *val["args"], **val["kwargs"])
-                )
-                for par, val in inputs["model"].parameters.items()
-                if not getattr(val["enterprise_prior_obj"], "common", False)
-                for psr in psrs
-            }
-        )
+            raise ValueError(msg)
+
+    def discovery_model():
+        # new physics priors
+        params = {}
+        for par, val in model_params.items():
+            prior_spec = aux.to_numpyro_prior(val)
+            if getattr(val, "common", True):
+                key = f"{model_name}_{par}" if corr else par
+                params[key] = _sample_numpyro_site(par, prior_spec)
+            else:
+                for psr in psrs:
+                    name = f"{psr.name}_{model_name}_{par}"
+                    params[name] = _sample_numpyro_site(name, prior_spec)
 
         # Pulsar red noise priors
         for amp, gam in zip(red_noise_amp_params, red_noise_gamma_params, strict=True):
-            params.update(
-                {
-                    amp: numpyro.sample(amp, dist.Uniform(-20, -11)),
-                    gam: numpyro.sample(gam, dist.Uniform(0, 7)),
-                }
-            )
+            params[amp] = numpyro.sample(amp, dist.Uniform(-20, -11))
+            params[gam] = numpyro.sample(gam, dist.Uniform(0, 7))
 
         numpyro.factor("ll", ln_likelihood(params))
+
+        if constraints:
+            # keyed by the unprefixed model parameter names, as spectrum(freqs, **kwargs)
+            # expects
+            cosmo_params = {
+                par: params[f"{model_name}_{par}" if corr else par]
+                for par in model_params
+            }
+            numpyro.factor(
+                "cosmo",
+                aux.cosmo_lnlikelihood_discovery(cosmo_params, inputs["model"].spectrum, constraints),
+            )
+
     return discovery_model

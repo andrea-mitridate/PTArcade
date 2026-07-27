@@ -44,8 +44,8 @@ priors_type : typing.Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "C
 from __future__ import annotations
 
 import logging
-from collections import UserDict
-from collections.abc import Callable
+from collections import UserDict, namedtuple
+from collections.abc import Callable, Mapping
 from functools import cache
 from importlib.resources import files
 from typing import Any, Literal
@@ -57,7 +57,7 @@ import numpy as np
 import numpyro.distributions as dist
 import scipy.stats as ss
 from enterprise.signals import parameter
-from enterprise.signals.parameter import Function, function
+from enterprise.signals.parameter import function
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
 
@@ -135,8 +135,7 @@ def g_rho_jax(x: jax.Array, is_freq: bool = False) -> jax.Array:  # noqa: FBT001
     x : array_like
         The temperature(s) [GeV] or frequency/frequencies [Hz].
     is_freq : bool, optional
-        True if `x` is a frequency/frequencies, False if tempe
-rature(s).
+        True if `x` is a frequency/frequencies, False if temperature(s).
         Defaults to False.
 
     Returns
@@ -355,6 +354,12 @@ def omega2cross(
 
     likelihood: str
         Can be "enterprise", "ceffyl", or "discovery"
+
+    model_name : str, optional
+        The model name. Used by the "discovery" backend to strip the model-name
+        prefix that is prepended to parameter names for correlated signals. Defaults
+        to None (no prefix stripping).
+
     Returns
     -------
     Callable[..., NDArray | jax.Array]
@@ -397,7 +402,9 @@ def omega2cross(
         case "discovery":
 
             def cross(f: jax.Array, df: jax.Array, *args, **kwargs):
-                kwargs = {key.removeprefix(f"{model.name}_"): val for key, val in kwargs.items()} if kwargs is not None else kwargs
+                # discovery prefixes parameter names with the model name when correlated
+                if model_name and kwargs:
+                    kwargs = {key.removeprefix(f"{model_name}_"): val for key, val in kwargs.items()}
                 # fraction of the critical density in GWs
                 h2_omega = omega_hh(f, *args, **kwargs)
 
@@ -617,9 +624,12 @@ class ParamDict(UserDict):
     """
 
     def __setitem__(self, key: str, prior: parameter.Parameter):
+        # numpyro distributions are not class factories, so don't call them
+        if isinstance(prior, dist.Distribution):
+            super().__setitem__(key, prior)
         # The "or" here makes it backwards compatible with our old syntax
         # for the parameter dictionaries
-        if isinstance(prior, parameter.Parameter) or getattr(prior, "common", False):
+        elif isinstance(prior, parameter.Parameter) or getattr(prior, "common", False):
             super().__setitem__(key, prior(key))
         else:
             super().__setitem__(key, prior)
@@ -668,6 +678,11 @@ def prior(name: priors_type | Callable, *args: Any, **kwargs: Any) -> parameter.
     # If it wasn't passed, set it to True
     common = kwargs.pop("common", True)
 
+    if isinstance(name, dist.Distribution):
+        # numpyro distribution, only meaningful for discovery mode
+        name.common = common
+        return name
+
     if callable(name):
         # Checks if the user passed a function as prior.
         # If they did, it creates a custom prior using enterprise's UserParameter class factory.
@@ -699,6 +714,68 @@ def prior(name: priors_type | Callable, *args: Any, **kwargs: Any) -> parameter.
     prior_obj.common = common
 
     return prior_obj
+
+
+# LinearExp has no single-distribution numpyro equivalent: sample Uniform(10**pmin, 10**pmax) and register log10 of it
+# as a deterministic instead.
+LinearExpSpec = namedtuple("LinearExpSpec", ["pmin", "pmax"])
+
+ConstantSpec = namedtuple("ConstantSpec", ["value"])
+
+
+def to_numpyro_prior(param: parameter.Parameter | dist.Distribution) -> dist.Distribution | LinearExpSpec:
+    """Translate a PTArcade prior into a numpyro distribution.
+
+    Used by the discovery backend to build sampling sites from the priors declared in a
+    model file.
+
+    Parameters
+    ----------
+    param : parameter.Parameter | numpyro.distributions.Distribution
+        The prior to translate. A numpyro distribution is returned unchanged. A bound
+        enterprise parameter is mapped via its ``.type`` and ``.prior.func_kwargs``.
+
+    Returns
+    -------
+    numpyro.distributions.Distribution | LinearExpSpec
+        The numpyro distribution to sample from, or a `LinearExpSpec`/`ConstantSpec`
+        for the priors that need special handling by the caller.
+
+    Raises
+    ------
+    NotImplementedError
+        If the parameter type has no numpyro translation (e.g. a callable custom prior).
+        Pass a numpyro distribution directly instead for discovery mode.
+
+    """
+    if isinstance(param, dist.Distribution):
+        return param
+
+    if isinstance(param, parameter.ConstantParameter):
+        return ConstantSpec(param.value)
+
+    kind = getattr(param, "type", None)
+    kw = getattr(getattr(param, "prior", None), "func_kwargs", {})
+
+    if kind == "uniform":
+        return dist.Uniform(kw["pmin"], kw["pmax"])
+    if kind == "normal":
+        return dist.Normal(kw["mu"], kw["sigma"])
+    if kind == "truncnormal":
+        return dist.TruncatedNormal(kw["mu"], kw["sigma"], low=kw["pmin"], high=kw["pmax"])
+    if kind == "gamma":
+        # PTArcade-custom Gamma: pdf is ss.gamma(a, scale=1/beta), i.e. shape a, rate beta.
+        return dist.Gamma(kw["a"], rate=kw["beta"])
+    if kind == "linearexp":
+        return LinearExpSpec(kw["pmin"], kw["pmax"])
+
+    msg = (
+        f"Cannot translate prior of type '{kind}' to a numpyro distribution for discovery mode. "
+        "Pass a numpyro distribution directly, e.g. prior(numpyro.distributions.Uniform(-9, -4))."
+    )
+    raise NotImplementedError(
+        msg,
+    )
 
 
 def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...]) -> float:
@@ -748,9 +825,12 @@ def bbn_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray], sm_neff: floa
     """
     d_neff = delta_neff(spectrum, x)
 
-    bbn_norm = np.exp(-0.5 * ((sm_neff - mu_neff) / sigma_neff) ** 2)
+    # Written as the difference of the two exponents rather than log(exp(...)/norm),
+    # the latter underflows to -inf
+    z = (d_neff + sm_neff - mu_neff) / sigma_neff
+    z_norm = (sm_neff - mu_neff) / sigma_neff
 
-    return  np.log(np.exp(-0.5 * ((d_neff + sm_neff- mu_neff) / sigma_neff) ** 2) / bbn_norm)
+    return -0.5 * z**2 + 0.5 * z_norm**2
 
 
 def lvk_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray]) -> float:
@@ -795,3 +875,72 @@ def cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names, constraints):
         extra += lvk_lnlikelihood(cosmo_params, spectrum)
 
     return base_lnlike + extra
+
+
+SpectrumParams = Mapping[str, Any] | tuple[Any, ...]
+"""Model parameters for a spectrum call: by name (preferred) or positional."""
+
+
+def _eval_spectrum(spectrum: Callable[..., jax.Array], f: jax.Array, params: SpectrumParams) -> jax.Array:
+    """Evaluate `spectrum` at `f`, binding parameters by name when they are given by name.
+
+    Positional binding is only correct when the model's `parameters` dict happens to be
+    ordered like the spectrum signature, so callers should pass a mapping.
+    """
+    if isinstance(params, Mapping):
+        return spectrum(f, **params)
+    return spectrum(f, *params)
+
+
+def delta_neff_jax(spectrum: Callable[..., jax.Array], params: SpectrumParams) -> jax.Array:
+    """JAX version of [ptarcade.models_utils.delta_neff][]."""
+    return 1.78e5 * jnp.trapezoid(_eval_spectrum(spectrum, jnp.asarray(_bbn_f), params), jnp.asarray(_bbn_u))
+
+
+def bbn_lnlikelihood_jax(x: SpectrumParams, spectrum: Callable[..., jax.Array], sm_neff: float = 3.044, mu_neff: float = 2.941, sigma_neff: float = 0.143) -> jax.Array:
+    """JAX version of [ptarcade.models_utils.bbn_lnlikelihood][].
+
+    Kept in the exponent-difference form so the value and its gradient stay finite for
+    arbitrarily large `d_neff` — NUTS needs a usable gradient there, not a NaN.
+    """
+    d_neff = delta_neff_jax(spectrum, x)
+    z = (d_neff + sm_neff - mu_neff) / sigma_neff
+    z_norm = (sm_neff - mu_neff) / sigma_neff
+    return -0.5 * z**2 + 0.5 * z_norm**2
+
+
+def lvk_lnlikelihood_jax(x: SpectrumParams, spectrum: Callable[..., jax.Array]) -> jax.Array:
+    """JAX version of [ptarcade.models_utils.lvk_lnlikelihood][]."""
+    model = _eval_spectrum(spectrum, jnp.asarray(_lvkv_freq), x)
+    resid = jnp.asarray(_lvkv_data) - model
+    chi2 = jnp.dot(resid, resid * jnp.asarray(_lvkv_invvar))
+    return -0.5 * chi2 - lvk_norm
+
+
+def cosmo_lnlikelihood_discovery(cosmo_params: SpectrumParams, spectrum: Callable[..., jax.Array], constraints: list[str]) -> jax.Array:
+    """Sum the requested BBN/LVK cosmo constraints for the discovery backend.
+
+    Parameters
+    ----------
+    cosmo_params : Mapping[str, Any] | tuple[Any, ...]
+        The new-physics parameter values. Prefer a ``{name: value}`` mapping keyed by the
+        model's (unprefixed) parameter names, which is bound to the spectrum signature by
+        name. A tuple is splatted positionally and is only correct if the model's
+        ``parameters`` order matches the ``spectrum(freqs, ...)`` signature order.
+    spectrum : Callable[..., jax.Array]
+        The (JAX) model spectrum returning the GW energy density.
+    constraints : list[str]
+        Any of ``"bbn"``, ``"lvk"``.
+
+    Returns
+    -------
+    jax.Array
+        The summed cosmo log-likelihood contribution, to be added as a `numpyro.factor`.
+
+    """
+    extra = 0.0
+    if "bbn" in constraints:
+        extra += bbn_lnlikelihood_jax(cosmo_params, spectrum)
+    if "lvk" in constraints:
+        extra += lvk_lnlikelihood_jax(cosmo_params, spectrum)
+    return extra

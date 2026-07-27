@@ -92,7 +92,7 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
 
     if not hasattr(inputs["model"], "group"):
         pars_dic = inputs["model"].parameters
-        group = [par for par in pars_dic if pars_dic[par]["enterprise_prior_obj"].common]
+        group = [par for par in pars_dic if getattr(pars_dic[par], "common", True)]
 
         inputs["model"].group = group
 

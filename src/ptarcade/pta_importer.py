@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import glob
+import hashlib
 import json
 import logging
 import os
@@ -241,7 +242,7 @@ def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, 
     return psrs, params, emp_dist
 
 def convert_enterprise_pulsars_to_discovery(
-        enterprise_psrs: list[Pulsar], dataset_name: str,  noisedict: dict[str, array_like] | None = None
+        enterprise_psrs: list[Pulsar], pta_data: str | dict,  noisedict: dict[str, array_like] | None = None
 ) -> list[ds.Pulsar]:
     """Convert enterprise Pulsar objects to discovery Pulsar objects.
 
@@ -254,8 +255,9 @@ def convert_enterprise_pulsars_to_discovery(
     ----------
     enterprise_psrs : list[Pulsar]
         List of enterprise Pulsar objects to be converted to discovery format.
-    dataset_name: str
-        Name of PTA dataset.
+    pta_data : str | dict
+        The ``pta_data`` config value: a built-in dataset name (``"NG15"``, ...) or a
+        dict pointing to custom data. Used only to name the feather cache directory.
     noisedict : dict[str, array_like] or None, optional
         Dictionary mapping noise parameter names to their values. If provided,
         these noise parameters are included in the conversion. Default is None.
@@ -268,6 +270,13 @@ def convert_enterprise_pulsars_to_discovery(
 
     """
     discovery_psrs = []
+
+    if isinstance(pta_data, str):
+        dataset_name = pta_data
+    else:
+        # Cache dirs are keyed by pulsar name, so custom datasets need distinct names.
+        psrs_path = Path(pta_data["psrs_data"]).resolve()
+        dataset_name = f"{psrs_path.stem}_{hashlib.sha1(str(psrs_path).encode()).hexdigest()[:8]}"
 
     out_dir = Path(get_cache_dir("ptarcade")) / "feather_pulsars" / dataset_name
     out_dir.mkdir(exist_ok = True, parents=True)

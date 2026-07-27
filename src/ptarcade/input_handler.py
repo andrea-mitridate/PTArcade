@@ -11,6 +11,7 @@ from importlib.resources import files
 from types import ModuleType
 from typing import Any
 
+import jax
 import numpy as np
 from enterprise.pulsar import Pulsar
 from enterprise_extensions import model_utils
@@ -387,13 +388,13 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
     # check spectrum/signal function
     x0 = {}
 
-    for name, par in model.parameters.items(): ## custom_prior_fix
+    for name, par in model.parameters.items():
         try:
-            x0[name] = par["enterprise_prior_obj"].sample()  # type: ignore
+            x0[name] = par.sample()  # type: ignore
         except AttributeError:
-            x0[name] = par["enterprise_prior_obj"].value  # type: ignore
+            x0[name] = par.value  # type: ignore
         except TypeError:
-            x0[name] = par["enterprise_prior_obj"](name).sample()
+            x0[name] = np.asarray(par.sample(jax.random.key(0)))  # type: ignore
 
     if hasattr(model, "spectrum"):
         if mode == "enterprise":
@@ -432,7 +433,7 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
         error = ("You cannot use Ceffyl mode for deterministic signals.")
         log.error(error)
         raise SystemExit
-    
+
     elif hasattr(model, "signal") and cosmo_constraints:
         error = ("You cannot apply cosmo_constraints on a deterministic signal."
                  " Please, set cosmo_constraints to [] in the config file.")
