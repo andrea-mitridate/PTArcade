@@ -9,6 +9,7 @@ from types import ModuleType
 from zipfile import ZipFile
 
 import discovery as ds
+import jax
 import jax.numpy as jnp
 import numpy as np
 import numpyro
@@ -583,12 +584,44 @@ def discovery_builder(
     gwb_components: int = 14,
 ) -> ds.ArrayLikelihood:
 
-    Tspan = ds.getspan(psrs)
+    with jax.default_device("cpu"):
+        Tspan = ds.getspan(psrs)
 
-    # stochastic process
-    if hasattr(model, "spectrum"):
-        globalgp_psd = aux.omega2cross(model.spectrum, likelihood="discovery", model_name=model.name)
-        globalgp_psd.__signature__ = inspect.signature(model.spectrum)
+        # stochastic process
+        if hasattr(model, "spectrum"):
+            globalgp_psd = aux.omega2cross(model.spectrum, likelihood="discovery", model_name=model.name)
+            globalgp_psd.__signature__ = inspect.signature(model.spectrum)
+            pslmodels = (
+                ds.PulsarLikelihood(
+                    [
+                        psr.residuals,
+                        ds.makenoise_measurement(psr, psr.noisedict),
+                        ds.makegp_ecorr(psr, psr.noisedict),
+                        ds.makegp_timing(psr, svd=True),
+                    ],
+                )
+                for psr in psrs
+            )
+
+            rngp = ds.makecommongp_fourier(psrs, ds.powerlaw, red_components, T=Tspan, name="red_noise")
+            if corr:
+                hdgp = ds.makeglobalgp_fourier(psrs, globalgp_psd, ds.hd_orf, gwb_components, T=Tspan, name=model.name)
+                return ds.ArrayLikelihood(pslmodels, commongp=rngp, globalgp=hdgp)
+
+            curngp = ds.makecommongp_fourier(
+                psrs,
+                globalgp_psd,
+                gwb_components,
+                T=Tspan,
+                common=list(model.parameters),
+                name=model.name,
+            )
+            return ds.ArrayLikelihood(pslmodels, commongp=[rngp, curngp])
+
+        # deterministic delays
+        delay_func = model.signal
+        delay_func.__signature__ = inspect.signature(model.signal)
+
         pslmodels = (
             ds.PulsarLikelihood(
                 [
@@ -596,54 +629,23 @@ def discovery_builder(
                     ds.makenoise_measurement(psr, psr.noisedict),
                     ds.makegp_ecorr(psr, psr.noisedict),
                     ds.makegp_timing(psr, svd=True),
-                ],
+                    ds.makedelay(
+                        psr,
+                        delay_func,
+                        common=[
+                            par
+                            for par, val in model.parameters.items()
+                            if getattr(val, "common", True) # return false if no "common" attribute
+                        ],
+                        name=model.name,
+                    ),
+                ]
             )
             for psr in psrs
         )
 
         rngp = ds.makecommongp_fourier(psrs, ds.powerlaw, red_components, T=Tspan, name="red_noise")
-        if corr:
-            hdgp = ds.makeglobalgp_fourier(psrs, globalgp_psd, ds.hd_orf, gwb_components, T=Tspan, name=model.name)
-            return ds.ArrayLikelihood(pslmodels, commongp=rngp, globalgp=hdgp)
-
-        curngp = ds.makecommongp_fourier(
-            psrs,
-            globalgp_psd,
-            gwb_components,
-            T=Tspan,
-            common=list(model.parameters),
-            name=model.name,
-        )
-        return ds.ArrayLikelihood(pslmodels, commongp=[rngp, curngp])
-
-    # deterministic delays
-    delay_func = model.signal
-    delay_func.__signature__ = inspect.signature(model.signal)
-
-    pslmodels = (
-        ds.PulsarLikelihood(
-            [
-                psr.residuals,
-                ds.makenoise_measurement(psr, psr.noisedict),
-                ds.makegp_ecorr(psr, psr.noisedict),
-                ds.makegp_timing(psr, svd=True),
-                ds.makedelay(
-                    psr,
-                    delay_func,
-                    common=[
-                        par
-                        for par, val in model.parameters.items()
-                        if getattr(val, "common", True) # return false if no "common" attribute
-                    ],
-                    name=model.name,
-                ),
-            ]
-        )
-        for psr in psrs
-    )
-
-    rngp = ds.makecommongp_fourier(psrs, ds.powerlaw, red_components, T=Tspan, name="red_noise")
-    return ds.ArrayLikelihood(pslmodels, commongp=rngp)
+        return ds.ArrayLikelihood(pslmodels, commongp=rngp)
 
 def _sample_numpyro_site(site_name: str, prior_spec):
     """Register a single numpyro sample site from a translated prior."""

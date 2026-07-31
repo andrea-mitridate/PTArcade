@@ -122,8 +122,8 @@ def jax_interp(info: list[tuple[float, float, array_like]], data: NDArray) -> ND
     index = index.astype(int)
     # Call ourselves to interpolate over remaining variables if any
     # then combine results linearly
-    return (interp(info[1:], data[index]) * (1-fract)
-            + interp(info[1:], data[index+1]) * fract)
+    return (jax_interp(info[1:], data[index]) * (1-fract)
+            + jax_interp(info[1:], data[index+1]) * fract)
 
 
 def reformat(infile: str, outfile: str) -> None:

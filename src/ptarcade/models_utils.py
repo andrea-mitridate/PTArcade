@@ -60,6 +60,7 @@ from enterprise.signals import parameter
 from enterprise.signals.parameter import function
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
+from scipy.integrate import trapezoid
 
 from ptarcade import fast_interpolate
 
@@ -493,6 +494,9 @@ def spec_importer(path: str, kind:Literal["numpy", "jax"]="numpy") -> Callable[[
             return fast_interpolate.jax_interp([(start, step, f if name == 'f' else kwargs[name])
                                             for (name, start, step) in info],
                                            data)
+    else:
+        msg = f"Unknown spec_importer kind {kind!r}; expected 'numpy' or 'jax'."
+        raise ValueError(msg)
 
     return spectrum # type: ignore
 
@@ -794,7 +798,7 @@ def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...]) -> flo
         The effective number of relativistic species contributed by the GW spectrum.
 
     """
-    return 1.78e5 * np.trapz(spectrum(_bbn_f, *params), _bbn_u)
+    return 1.78e5 * trapezoid(spectrum(_bbn_f, *params), _bbn_u)
 
 
 def bbn_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray], sm_neff: float = 3.044, mu_neff: float = 2.941, sigma_neff: float = 0.143) -> float:
