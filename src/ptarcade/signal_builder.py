@@ -446,7 +446,7 @@ def ceffyl_builder(inputs):
         if inputs["config"].corr:
             # download from zenodo
             ceffyldl = download_file(
-                "https://zenodo.org/record/10495907/files/ng15_30f_fs%7Bhd%7D_ceffyl.zip?download=1",
+                "https://zenodo.org/records/21844115/files/ceffyl_data.zip?download=1",
                 cache=True,
                 pkgname="ptarcade",
                 )
@@ -465,12 +465,12 @@ def ceffyl_builder(inputs):
                 # rename unzipped dir to original zip name
                 tempdir.rename(ceffyldl)
             # find ipta data inside dir
-            datadir = (ceffyldl / "ng15_30f_fs{hd}_ceffyl")
+            datadir = (ceffyldl / "ceffyl_data/30f_fs{hd}_ceffyl ")
         else:
 
             # download from zenodo
             ceffyldl = download_file(
-                "https://zenodo.org/record/10495907/files/ng15_30f_fs%7Bcp%7D_ceffyl.zip?download=1",
+                "https://zenodo.org/records/21844115/files/ceffyl_data.zip?download=1",
                 cache=True,
                 pkgname="ptarcade",
                 )
@@ -489,7 +489,7 @@ def ceffyl_builder(inputs):
                 # rename unzipped dir to original zip name
                 tempdir.rename(ceffyldl)
             # find ipta data inside dir
-            datadir = (ceffyldl / "ng15_30f_fs{cp}_ceffyl")
+            datadir = (ceffyldl / "ceffyl_data/30f_fs{cp}_ceffyl/")
 
     elif inputs["config"].pta_data == "NG12":
         if inputs["config"].corr:
