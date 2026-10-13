@@ -18,6 +18,7 @@ import platform
 import shutil
 import sys
 import time
+from collections.abc import Callable
 from types import ModuleType
 from typing import Any
 
@@ -205,6 +206,56 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
     return pta
 
 
+def ceffyl_prior_draw(pta: Any) -> Callable[[NDArray, int, float], tuple[NDArray, float]] | None:
+    """Build a PTMCMC jump proposal that redraws one ceffyl parameter from its prior.
+
+    ceffyl's own prior draws (`Sampler.setup_sampler(..., jump=True)`) redraw a single
+    component of a vector parameter but evaluate its logpdf on that scalar, which
+    enterprise broadcasts over every component. For the 2d gaussian SMBHB prior this
+    gives a wrong Hastings ratio and a biased posterior. Here a vector parameter is
+    redrawn whole, so the full logpdf is the right proposal density.
+
+    Parameters with a custom (callable) prior are left out, as in the enterprise branch of
+    `setup_sampler`: their `UserParameter` sampler is a fixed point (x0), which would
+    break detailed balance.
+
+    Parameters
+    ----------
+    pta : ceffyl.Ceffyl.ceffyl
+        ceffyl PTA object. Only its common-process signals are used, which are the only
+        ones [ptarcade.signal_builder.ceffyl_builder][] adds.
+
+    Returns
+    -------
+    Callable[[NDArray, int, float], tuple[NDArray, float]] | None
+        Jump proposal with the signature PTMCMC expects, or None if no parameter can be
+        drawn from its prior.
+
+    """
+    # (indices into the sample array, parameter) for every parameter
+    blocks = [
+        (idx, par)
+        for s in pta.signals
+        if s.CP
+        for idx, par in zip(s.pmap, s.params)
+        if "UserParameter" not in str(par)
+    ]
+    if not blocks:
+        return None
+
+    def draw_from_prior(x: NDArray, iter: int, beta: float) -> tuple[NDArray, float]:
+        q = x.copy()
+        idx, par = blocks[np.random.randint(len(blocks))]
+        idx = idx[0] if len(idx) == 1 else idx
+
+        q[idx] = par.sample()
+
+        # forward-backward jump probability
+        return q, float(par.get_logpdf(x[idx]) - par.get_logpdf(q[idx]))
+
+    return draw_from_prior
+
+
 def setup_sampler(
         inputs: dict[str, ModuleType],
         input_options: dict[str, Any],
@@ -322,6 +373,14 @@ def setup_sampler(
             logL=ln_likelihood,
             logp=pta.ln_prior,
             jump=False)
+
+        # ceffyl's prior draws are disabled above because they are wrong for vector
+        # parameters, see `ceffyl_prior_draw`. Without any, a chain that starts where the
+        # likelihood is -inf (spectrum above the top of the KDE grid) can stay there.
+        # Weight 15 matches ceffyl's draw_from_prior (5) + draw_from_gwb_priors (10)
+        prior_draw = ceffyl_prior_draw(pta)
+        if prior_draw is not None:
+            sampler.addProposalToCycle(prior_draw, 15)
 
         x0 = pta.initial_samples()
     elif inputs["config"].mode == "discovery":
