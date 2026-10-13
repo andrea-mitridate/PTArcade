@@ -373,6 +373,7 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
             module="enterprise.signals.parameter",
             lineno=62,
         )
+
         if inputs["config"].mode in ["enteprise", "ceffyl"]:
             try:
                 sampler.sample(
@@ -381,6 +382,7 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
                     SCAMweight=inputs["config"].scam_weight,
                     AMweight=inputs["config"].am_weight,
                     DEweight=inputs["config"].de_weight,
+                   **getattr(inputs["config"], "ptmcmc_sampler_kwargs", {}),
                 )
             except RuntimeError as e:
                 err = ("There was an error while sampling. If this error involves autocorrelation time,\n"
