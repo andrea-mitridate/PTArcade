@@ -310,7 +310,7 @@ def check_config(config: ModuleType) -> None:
         log.warning(warning)
 
 
-def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_components: int, mode: str, cosmo_constraints: list) -> None:
+def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_components: int, mode: str, cosmo_constraints: list, corr: bool = False) -> None:
     """Validate model file.
 
     Parameters
@@ -323,6 +323,8 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
         Number of red components.
     gwb_components : int
         Number of GWB components.
+    corr : bool, optional
+        Whether the new-physics signal is correlated across pulsars.
 
     Raises
     ------
@@ -334,6 +336,7 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
         * If model `spectrum` evaluation fails.
         * If model `signal` evaluation fails.
         * If the keys of the model file's parameter dictionary do not match the keys of the signal or spectrum function.
+        * If a `spectrum` model has a `common=False` parameter and `corr` is True.
 
     """
     # checks that all the parameters are present in the config file
@@ -386,10 +389,27 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
         log.error(error)
         raise SystemExit
 
+    # a correlated signal has a single spectrum for the whole array, so a per-pulsar
+    # spectral parameter is ill-defined. enterprise would silently make it common
+    uncommon = [par for par, val in model.parameters.items() if not getattr(val, "common", True)]
+    if corr and signal_type == "spectrum" and uncommon:
+        error = (
+            f"The model parameter(s) {uncommon} are declared with common=False, which "
+            "cannot be combined with corr=True: a correlated signal has a single spectrum "
+            "for the whole array. Set corr=False, or make the parameter(s) common."
+        )
+        log.error(error)
+        raise SystemExit
+
     # check spectrum/signal function
     x0 = {}
 
     for name, par in model.parameters.items():
+        # ParamDict leaves a non-common prior uninstantiated, because enterprise names it
+        # once per pulsar. Name a throwaway copy here so that it can be sampled.
+        if isinstance(par, type):
+            par = par(name)
+
         try:
             x0[name] = par.sample()  # type: ignore
         except AttributeError:

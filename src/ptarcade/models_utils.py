@@ -755,6 +755,12 @@ def to_numpyro_prior(param: parameter.Parameter | dist.Distribution) -> dist.Dis
     if isinstance(param, dist.Distribution):
         return param
 
+    # [ptarcade.models_utils.ParamDict][] leaves a non-common prior uninstantiated, since
+    # enterprise names it once per pulsar, and `type`/`prior` only exist on an instance.
+    # The name plays no part in the translation, so any will do
+    if isinstance(param, type):
+        param = param("_")
+
     if isinstance(param, parameter.ConstantParameter):
         return ConstantSpec(param.value)
 
@@ -809,6 +815,10 @@ def to_prior_range(param: parameter.Parameter | dist.Distribution) -> list[float
         if lower is None or upper is None:
             return unbounded
         return [float(lower), float(upper)]
+
+    # a non-common prior is stored uninstantiated, see `to_numpyro_prior`
+    if isinstance(param, type):
+        param = param("_")
 
     kind = getattr(param, "type", None)
     kw = getattr(getattr(param, "prior", None), "func_kwargs", {})

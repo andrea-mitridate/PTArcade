@@ -659,17 +659,24 @@ def discovery_builder(
                 for psr in psrs
             )
 
+            uncommon = [par for par, val in model.parameters.items() if not getattr(val, "common", True)]
+
             rngp = ds.makecommongp_fourier(psrs, ds.powerlaw, red_components, T=Tspan, name="red_noise")
             if corr:
+                # a common=False parameter is rejected by input_handler.check_model here
                 hdgp = ds.makeglobalgp_fourier(psrs, globalgp_psd, ds.hd_orf, gwb_components, T=Tspan, name=model.name)
                 return ds.ArrayLikelihood(pslmodels, commongp=rngp, globalgp=hdgp)
+
+            # only the common parameters are shared across pulsars. The rest keep the
+            # per-pulsar names that discovery_numpyro_model_builder samples them under
+            common = [par for par in model.parameters if par not in uncommon]
 
             curngp = ds.makecommongp_fourier(
                 psrs,
                 globalgp_psd,
                 gwb_components,
                 T=Tspan,
-                common=list(model.parameters) + (list(SMBHB_PARAMS) if smbhb else []),
+                common=common + (list(SMBHB_PARAMS) if smbhb else []),
                 name=model.name,
             )
             return ds.ArrayLikelihood(pslmodels, commongp=[rngp, curngp])

@@ -149,7 +149,8 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
         red_components=inputs['config'].red_components,
         gwb_components=inputs['config'].gwb_components,
         mode=inputs["config"].mode,
-        cosmo_constraints=inputs["config"].cosmo_constraints)
+        cosmo_constraints=inputs["config"].cosmo_constraints,
+        corr=inputs["config"].corr)
 
 
     if inputs["config"].mode == "enterprise":
