@@ -781,7 +781,6 @@ def discovery_numpyro_model_builder(
     psrs: list[ds.Pulsar],
     inputs: dict[str, ModuleType],
     likelihood_obj: ds.ArrayLikelihood,
-    noisedict: dict | None = None,
     pta_dataset: str | None = None,
     bhb_th_prior: bool = False,
     gamma_bhb: float | None = None,

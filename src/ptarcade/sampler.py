@@ -47,7 +47,6 @@ from rich.panel import Panel
 from ptarcade import console, input_handler, pta_importer, signal_builder
 from ptarcade.models_utils import ParamDict, cosmo_lnlikelihood, to_prior_range
 from ptarcade.input_handler import bcolors
-from ptarcade.models_utils import ParamDict
 
 log = logging.getLogger("rich")
 numpyro.enable_x64(use_x64=True)

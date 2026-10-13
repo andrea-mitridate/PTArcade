@@ -231,7 +231,7 @@ def plot_chains(
     else:
         for idx, par in enumerate(params):
             if "+" not in par and "-" not in par and "n_parall" not in par:
-                key = par.replace("_", "\_")
+                key = par.replace("_", r"\_")
                 key = rf"$\mathrm{{{key}}}$"
                 params_dic[key] = idx
 
@@ -252,7 +252,7 @@ def plot_chains(
         ax.set_ylabel(f"{key}", fontsize=label_size)
 
     for ax in axs[-1]:
-        ax.set_xlabel("$\mathrm{MCMC\;sample}$", fontsize=label_size)
+        ax.set_xlabel(r"$\mathrm{MCMC\;sample}$", fontsize=label_size)
 
     plt.tight_layout()
 
