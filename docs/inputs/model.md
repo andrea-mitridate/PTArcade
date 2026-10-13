@@ -198,7 +198,7 @@ The model file can also contain additional (optional) variables that can be used
 :   :octicons-milestone-24: Default: _`1.0`_ – 
     Some models are better supported by the data than others, and a better-supported model is 
     more likely to be sampled by MCMC. In some cases, this will result in poor sampling of the 
-    less-supported model. To sample both models well, one model may need to be up-weighted or down-weighted. The user can specify a weight on their chosen model to help with sampling. 
+    less-supported model. To sample both models well, one model may need to be up-weighted or down-weighted. The user can specify a weight on their provided model to help with sampling. 
     Selecting a value such that `mod_sel_wgt` $< 1$ down-weights the specified model, while 
     `mod_sel_wgt` $> 1$ up-weights the specified model. This parameter is only relevant if `mod_sel = True` in the [config file][config].
 
