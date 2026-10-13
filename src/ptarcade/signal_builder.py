@@ -611,13 +611,22 @@ def ceffyl_builder(inputs):
 
     ceffyl_pta = Ceffyl.ceffyl(datadir)
 
-    params = list(inputs["model"].parameters.values())
+    # Ceffyl.signal can't take a parameter.Constant (it has no `size`), so constants go
+    # through const_params, which ceffyl passes to the psd as kwargs
+    params = []
+    const_params = {}
+    for name, par in inputs["model"].parameters.items():
+        if isinstance(par, parameter.ConstantParameter):
+            const_params[name] = par.value
+        else:
+            params.append(par)
 
     model = []
 
     model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
                           psd=aux.omega2cross(inputs["model"].spectrum, likelihood="ceffyl"),
                           params=params,
+                          const_params=const_params,
                           name=''))
 
 
