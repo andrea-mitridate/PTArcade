@@ -4,10 +4,15 @@ from __future__ import annotations
 import os
 import warnings
 
+import numpyro
+
 from astropy.utils.exceptions import AstropyDeprecationWarning
+
+from ptarcade import pta_importer
 
 warnings.filterwarnings('ignore', category=AstropyDeprecationWarning)
 
+import json
 import logging
 import platform
 import shutil
@@ -21,7 +26,13 @@ import erfa
 
 sys.modules["astropy.erfa"] = erfa
 
+import types
+
+from pathlib import Path
+
+import jax
 import numpy as np
+import pandas as pd
 import rich
 from ceffyl import Sampler
 from enterprise.pulsar import Pulsar
@@ -30,16 +41,15 @@ from enterprise_extensions import hypermodel
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
 from PTMCMCSampler.PTMCMCSampler import PTSampler
-from rich import print
-from rich.console import Console
 from rich.panel import Panel
 
-from ptarcade import input_handler, pta_importer, signal_builder
+from ptarcade import console, input_handler, pta_importer, signal_builder
+from ptarcade.models_utils import ParamDict, cosmo_lnlikelihood
 from ptarcade.input_handler import bcolors
 from ptarcade.models_utils import ParamDict
-from ptarcade import console
 
 log = logging.getLogger("rich")
+numpyro.enable_x64(use_x64=True)
 
 def cpu_model() -> str:
     """Get CPU info."""
@@ -71,7 +81,7 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
 
     if not cmd_input_okay:
 
-        error = (f"Model file must be present\n"
+        error = ("Model file must be present\n"
         "\t- This is added with the -[blue bold]m[/] input flags. Add -[blue bold]h[/] (--[blue bold]help[/]) flags for more help.\n")
 
         log.error(error, extra={"markup":True})
@@ -82,9 +92,9 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
 
     if not hasattr(inputs["model"], "group"):
         pars_dic = inputs["model"].parameters
-        group = [par for par in pars_dic.keys() if pars_dic[par].common]
+        group = [par for par in pars_dic if getattr(pars_dic[par], "common", True)]
 
-        setattr(inputs["model"], "group", group)
+        inputs["model"].group = group
 
     inputs["model"].parameters = ParamDict(inputs["model"].parameters)
 
@@ -116,7 +126,7 @@ def get_user_pta_data(inputs: dict[str, Any]) -> tuple[list[Pulsar], dict | None
 
 
 def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_params : dict | None ) -> dict[int, PTA]:
-    """Initialize the PTA with the user input
+    """Initialize the PTA with the user input.
 
     Parameters
     ----------
@@ -133,13 +143,13 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
         Dictionary of [enterprise.signals.signal_base.PTA][] objects configured with user inputs
 
     """
-
     input_handler.check_model(
         model=inputs['model'],
         psrs=psrs,
         red_components=inputs['config'].red_components,
         gwb_components=inputs['config'].gwb_components,
-        mode=inputs["config"].mode)
+        mode=inputs["config"].mode,
+        cosmo_constraints=inputs["config"].cosmo_constraints)
 
 
     if inputs["config"].mode == "enterprise":
@@ -173,11 +183,24 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
                 corr=inputs['config'].corr,
                 red_components=inputs["config"].red_components,
                 gwb_components=inputs["config"].gwb_components)
-            
+
     elif inputs["config"].mode == "ceffyl":
 
         pta = signal_builder.ceffyl_builder(inputs)
-        
+
+    elif inputs["config"].mode == "discovery":
+        discovery_psrs = pta_importer.convert_enterprise_pulsars_to_discovery(
+            psrs, inputs["config"].pta_data, noisedict=noise_params
+        )
+        pta = signal_builder.discovery_builder(
+            psrs=discovery_psrs,
+            model=inputs["model"],
+            corr=inputs["config"].corr,
+            red_components=inputs["config"].red_components,
+            gwb_components=inputs["config"].gwb_components,
+        )
+        pta.psrs = discovery_psrs
+
     return pta
 
 
@@ -187,7 +210,7 @@ def setup_sampler(
         pta: dict[int, PTA] | None,
         emp_dist: array_like | None,
 ) -> tuple[PTSampler, NDArray]:
-    """Setup the PTMCMC sampler
+    """Set up the PTMCMC sampler.
 
     Parameters
     ----------
@@ -210,7 +233,7 @@ def setup_sampler(
     """
     out_dir = os.path.join(
         inputs["config"].out_dir, inputs["model"].name, f'chain_{input_options["n"]}')
-    
+
     if not inputs["config"].resume and os.path.exists(out_dir):
         shutil.rmtree(out_dir)
 
@@ -220,11 +243,36 @@ def setup_sampler(
         groups = signal_builder.unique_sampling_groups(super_model)
 
         if inputs["model"].group:
-            idx_params = [super_model.param_names.index(pp) for pp in inputs["model"].group]
+            # Build the list of parameter indices corresponding to the user-specified group.
+            # Each entry in inputs["model"].group is a parameter name (or base name for
+            # multidimensional parameters that are indexed as "{name}_0", "{name}_1", ...).
+            idx_params = []
+            for pp in inputs["model"].group:
+                if pp in super_model.param_names:
+                    # Shared parameter: appears exactly once in param_names
+                    idx_params.append(super_model.param_names.index(pp))
+                else:
+                    # Multidimensional parameter: collect all indexed variants "{pp}_0", "{pp}_1", ...
+                    i = 0
+                    while f"{pp}_{i}" in super_model.param_names:
+                        idx_params.append(super_model.param_names.index(f"{pp}_{i}"))
+                        i += 1
+            # Add this parameter group to the sampler's group list multiple times so
+            # that it is proposed more frequently during sampling.
             [groups.append(idx_params) for _ in range(5)] # type: ignore
 
         # add nmodel index to group structure
         groups.extend([[len(super_model.param_names)-1]])
+
+        if inputs["config"].cosmo_constraints:
+            spectrum = inputs["model"].spectrum
+            cosmo_params_names = list(inputs["model"].parameters)
+            constraints = inputs["config"].cosmo_constraints
+
+            def _cosmo_lnlikelihood(self, x):
+                return cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names, constraints)
+
+            super_model.get_lnlikelihood = types.MethodType(_cosmo_lnlikelihood, super_model)
 
         sampler = super_model.setup_sampler(
             resume=inputs["config"].resume,
@@ -233,18 +281,52 @@ def setup_sampler(
             groups=groups,
             empirical_distr=emp_dist)
 
+        # Remove prior-draw proposals for UserParameter parameters. Their sampler
+        # is a fixed point (x0), which breaks detailed balance for that jump type.
+        _user_param_names = set()
+        for _p in super_model.params:
+            if "UserParameter" in str(_p):
+                _base = str(_p).split(":")[0]
+                _user_param_names.update(
+                    [f"{_base}_{i}" for i in range(_p.size)] if _p.size else [_base]
+                )
+        if _user_param_names:
+            sampler.propCycle = [
+                prop for prop in sampler.propCycle
+                if not (hasattr(prop, "name_list") and
+                        all(n in _user_param_names for n in prop.name_list))
+            ]
+
         x0 = super_model.initial_sample()
 
         super_model.get_lnlikelihood(x0) # Cache now to make timing more accurate
 
     elif inputs["config"].mode == "ceffyl":
 
+        if inputs["config"].cosmo_constraints:
+            spectrum = inputs["model"].spectrum
+            constraints = inputs["config"].cosmo_constraints
+            cosmo_params_names = list(inputs["model"].parameters)
+
+            def _cosmo_lnlikelihood(x):
+                return cosmo_lnlikelihood(pta, x, spectrum, cosmo_params_names, constraints)
+
+            ln_likelihood = _cosmo_lnlikelihood
+
+        else:
+            ln_likelihood = pta.ln_likelihood
+
         sampler = Sampler.setup_sampler(pta,
             outdir=out_dir,
-            logL=pta.ln_likelihood,
-            logp=pta.ln_prior)
+            logL=ln_likelihood,
+            logp=pta.ln_prior,
+            jump=False)
 
         x0 = pta.initial_samples()
+    elif inputs["config"].mode == "discovery":
+        numpyro_model = signal_builder.discovery_numpyro_model_builder(pta.psrs, inputs, pta)
+        sampler = numpyro.infer.NUTS(numpyro_model)
+        x0 = None
 
     return sampler, x0
 
@@ -291,21 +373,35 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
             module="enterprise.signals.parameter",
             lineno=62,
         )
-        try:
-            sampler.sample(
-                x0,
-                N_samples,
-                SCAMweight=inputs["config"].scam_weight,
-                AMweight=inputs["config"].am_weight,
-                DEweight=inputs["config"].de_weight,
+        if inputs["config"].mode in ["enteprise", "ceffyl"]:
+            try:
+                sampler.sample(
+                    x0,
+                    N_samples,
+                    SCAMweight=inputs["config"].scam_weight,
+                    AMweight=inputs["config"].am_weight,
+                    DEweight=inputs["config"].de_weight,
+                )
+            except RuntimeError as e:
+                err = ("There was an error while sampling. If this error involves autocorrelation time,\n"
+                      "a temporary fix is to increase the number of samples in the configuration file.\n"
+                      "We are actively working to upgrade the autocorrelation routines in our sampler.\n\n")
+                console.print("\n\n")
+                log.exception(err)
+                raise SystemExit from None
+        elif inputs["config"].mode == "discovery":
+            mcmc = numpyro.infer.MCMC(
+                sampler, num_chains=1, progress_bar=True, num_warmup=N_samples // 4, num_samples=N_samples
             )
-        except RuntimeError as e:
-            err = ("There was an error while sampling. If this error involves autocorrelation time,\n"
-                  "a temporary fix is to increase the number of samples in the configuration file.\n"
-                  "We are actively working to upgrade the autocorrelation routines in our sampler.\n\n")
-            console.print("\n\n")
-            log.exception(err)
-            raise SystemExit from None
+            mcmc.run(jax.random.key(42))
+            samples_df = pd.DataFrame(mcmc.get_samples())
+            parameter_dict = inputs["model"].parameters
+            prior_dict = {key: np.array(val["args"]).tolist() for key,val in parameter_dict.items()}
+            out_dir = Path(inputs["config"].out_dir)
+            out_dir.mkdir(exist_ok=True, parents=True)
+            samples_df.to_feather(out_dir / "chain_1.feather")
+            with (out_dir / "priors.json").open("w") as f:
+                json.dump(prior_dict, f)
 
     console.print()
     console.print(Panel.fit("[bold green]Done sampling[/]", border_style="green"))
@@ -335,7 +431,7 @@ def main():
     noise_params = None
     emp_dist = None
 
-    if inputs["config"].mode == "enterprise":
+    if inputs["config"].mode in ["enterprise", "discovery"]:
         with console.status("Loading Pulsars and noise data...", spinner="bouncingBall"):
 
             # import pta data
@@ -344,17 +440,16 @@ def main():
             console.print(f"[bold green]Done loading [blue]{len(psrs)}[/] Pulsars and noise data :heavy_check_mark:\n")
 
 
-    with console.status("Initializing PTA...", spinner="bouncingBall"):
-        pta = initialize_pta(inputs, psrs, noise_params)
-        console.print("[bold green]Done initializing PTA :heavy_check_mark:\n")
+    #with console.status("Initializing PTA...", spinner="bouncingBall"):
+    pta = initialize_pta(inputs, psrs, noise_params)
+    console.print("[bold green]Done initializing PTA :heavy_check_mark:\n")
 
 
-    with console.status("Initializing Sampler...", spinner="bouncingBall"):
-        sampler, x0 = setup_sampler(inputs, input_options, pta, emp_dist)
-        console.print("[bold green]Done initializing Sampler :heavy_check_mark:\n")
+    #with console.status("Initializing Sampler...", spinner="bouncingBall"):
+    sampler, x0 = setup_sampler(inputs, input_options, pta, emp_dist)
+    console.print("[bold green]Done initializing Sampler :heavy_check_mark:\n")
 
-    console.print("Done with all initializtions.\nSetup times (including first sample) {:.2f} seconds real, {:.2f} seconds CPU\n".format(
-        time.perf_counter()-start_real, time.process_time()-start_cpu));
+    console.print(f"Done with all initializtions.\nSetup times (including first sample) {time.perf_counter()-start_real:.2f} seconds real, {time.process_time()-start_cpu:.2f} seconds CPU\n")
 
     start_cpu = time.process_time()
     start_real = time.perf_counter()

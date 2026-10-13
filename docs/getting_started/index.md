@@ -127,6 +127,43 @@ using a [configuration file][config]
         year = "2023"}   
     ```
 
+??? note "Additional Citations"
+    PTArcade can be run in two modes: Ceffyl and ENTERPRISE (for more details on how to choose differnt run modes see [here][run_mode]). 
+    
+    If you use PTArcade in Ceffyl mode (which is the default one), please also cite
+
+    ```
+    @misc{lamb2023need,
+        title={The Need For Speed: Rapid Refitting Techniques for Bayesian Spectral Characterization of the Gravitational Wave Background Using PTAs}, 
+        author={William G. Lamb and Stephen R. Taylor and Rutger van Haasteren},
+        year={2023},
+        eprint={2303.15442},
+        archivePrefix={arXiv},
+        primaryClass={astro-ph.HE}
+        }
+    ```
+
+    If you use PTArcade in ENTERPRISE mode, please also cite
+    ```
+    @misc{enterprise,
+        author       = {Justin A. Ellis and Michele Vallisneri and Stephen R. Taylor and Paul T. Baker},
+        title        = {ENTERPRISE: Enhanced Numerical Toolbox Enabling a Robust PulsaR Inference SuitE},
+        month        = sep,
+        year         = 2020,
+        howpublished = {Zenodo},
+        doi          = {10.5281/zenodo.4059815},
+        url          = {https://doi.org/10.5281/zenodo.4059815}
+        }
+
+    @misc{enterprise-ext,
+        author       = {Stephen R. Taylor and Paul T. Baker and Jeffrey S. Hazboun and Joseph Simon and Sarah J. Vigeland},
+        title        = {enterprise_extensions},
+        year         = {2021},
+        url          = {https://github.com/nanograv/enterprise_extensions},
+        note         = {v2.3.3}
+        }
+    ```
+
   [ENTERPRISE]: https://github.com/nanograv/enterprise
   [Ceffyl]: https://github.com/astrolamb/ceffyl
   [local_install]: local_install.md
@@ -142,3 +179,4 @@ using a [configuration file][config]
   [posterior]: https://en.wikipedia.org/wiki/Posterior_probability#:~:text=In%20the%20context%20of%20Bayesian,a%20collection%20of%20observed%20data.
   [K_bound]: ../utils/plot_utils.md
   [mod_sel]: ../utils/chain_utils.md#+compute_bf
+  [run_mode]: ../inputs/config.md#+config.mode

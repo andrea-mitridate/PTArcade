@@ -660,10 +660,10 @@ def plot_hpi(
                     ax = plot.get_axes_for_params(par)
 
                 if x1:
-                    p1 = density(x1)[0]
+                    p1 = density(x1)
                     ax.plot([x1, x1], [0, p1], ls = 'dashed', color = colors[idx+c_adjust], lw=lw)
                 if x2:
-                    p2 = density(x2)[0]
+                    p2 = density(x2)
                     ax.plot([x2, x2], [0, p2], ls = 'dashed', color = colors[idx+c_adjust], lw=lw)
 
     return
@@ -723,11 +723,11 @@ def print_stats(
                 x2 = level[1]
 
                 if x1:
-                    print(f'Lower {100*levels[idy]}%-HPDI limit is reached for {par} = {10**x1}')
+                    print(f'Lower {100*levels[idy]}%-HPDI limit is reached for {par} = {x1}')
                 else:
                     print(f'Lower {100*levels[idy]}%-HPDI limit is reached for {par} does not exist')
                 if x2:
-                    print(f'Upper {100*levels[idy]}%-HPDI limit is reached for {par} = {10**x2}')
+                    print(f'Upper {100*levels[idy]}%-HPDI limit is reached for {par} = {x2}')
                 else:
                     print(f'Upper {100*levels[idy]}%-HPDI limit is reached for {par} does not exist')
 

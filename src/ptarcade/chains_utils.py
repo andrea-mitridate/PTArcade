@@ -1,6 +1,7 @@
 """Utilities to be used with output MCMC chains of PTArcade."""
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
@@ -53,12 +54,22 @@ def params_loader(file: str | Path) -> dict[str, tuple[float, float] | None]:
                 params[key] = (minimum, maximum)
 
             elif "Normal" in line:
-                dim = len(re.search('\\[(.*?)\\]', line).group(1).split()) # type: ignore
+                if '[' in line:
+                    dim = len(re.search('\\[(.*?)\\]', line).group(1).split()) # type: ignore
+                else:
+                    dim = 1
                 for i in range(dim):
-                    params[f"{key}_{i}"] = None # type: ignore
+                    params[f"{key}_{i}"] = (None, None) # type: ignore
 
+            elif 'UserParameter' in line:
+                if '[' in line:
+                    dim = int(re.search('\\[(\\d+)\\]', line).group(1)) # type: ignore
+                    for i in range(dim):
+                        params[f"{key}_{i}"] = (None, None) # type: ignore
+                else:
+                    params[key] = (None, None) # type: ignore
             else:
-                params[key] = None # type: ignore
+                params[key] = (None, None) # type: ignore
 
     return params # type: ignore
 
@@ -204,18 +215,9 @@ def import_to_dataframe(
         # import and merge all the chains removing the burn-in
         name_list = list(params.keys())
 
-        red_noise_filter = re.compile(".*red_noise.*")
-
-        if quick_import and any(filter(red_noise_filter.match, name_list)): # type: ignore
-            # Search reversed list for first occurence of "red_noise"
-            # Return the index (remember, the list is reversed!)
-            # The use of `next` and a generator makes it so that we don't have to
-            # search the whole list, we stop when we get the first match
-            red_noise_ind = next(i for i in enumerate(name_list[::-1]) if "red_noise" in i[1])[0]
-
-            # Slice the list so that we begin directly after the index found above
-            usecols = name_list[-1 * red_noise_ind :]
-
+        # Do not import pulsar red noise parameters
+        if quick_import and any(filter(lambda x: "red_noise" in x, name_list)): # type: ignore
+            usecols = [name for name in name_list if "red_noise" not in name]
             params = {name: params[name] for name in usecols}
         else:
             usecols = name_list
@@ -274,6 +276,22 @@ def import_to_dataframe(
 
             chains = chains.dropna()
 
+    elif chain_ext == ".feather":
+        chains = pd.read_feather(chains_dir / chain_name)
+        with (chains_dir / "priors.json").open("r") as f:
+            params = json.load(f)
+
+        # this isn't "quicker" right now, but it matches the expected behavior
+        if not quick_import:
+            for col in chains.columns:
+                if "red_noise_log10_A" in col:
+                    params[col] = [-20, -11]
+                elif "red_noise_gamma" in col:
+                    params[col] = [0, 7]
+        else:
+            usecols = [col for col in chains.columns if "red_noise" not in col]
+            chains = chains[usecols]
+        params = pd.DataFrame(params)
 
     print(f"Finished importing   {chains_dir} in {time.time() - start_time:.2f}s")
 
@@ -464,7 +482,7 @@ def bf_bootstrap(chain: NDArray, burn: int = 0) -> tuple[float, float]:
     mean = np.mean(df_dist_bs)
     var = np.var(df_dist_bs)
 
-    return mean, var
+    return mean, np.sqrt(var)
 
 
 def compute_bf(chain: NDArray, params: list[str], bootstrap: bool = False, mod_sel_wgt: float = 1.) -> tuple[float, float]:  # noqa: FBT001, FBT002
@@ -490,8 +508,8 @@ def compute_bf(chain: NDArray, params: list[str], bootstrap: bool = False, mod_s
     Returns
     -------
     bf : float
-        The computed Bayes factor. This gives the evidence for model 0 over model 1. A higher value provides
-        stronger evidence for model 0.
+        The computed Bayes factor. This gives the evidence for model 1 over model 0. A higher value provides
+        stronger evidence for model 1.
     unc : float
         The computed uncertainty of the Bayes factor.
 
@@ -837,7 +855,7 @@ def get_max_pos(params: list[str],
 
         density =  MCSamples.get1DDensity(sample, par, normalized=False)
 
-        mind = lambda x: -density(x)[0]
+        mind = lambda x: -density(x)
         if not bounds:
             x = minimize(mind, np.array(bayes_est.get(par)[0]))
             x0 = x.x
