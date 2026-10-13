@@ -256,9 +256,10 @@ with the following parameters in the configuration file:
 
 [`A_bhb_logmax`](#+config.A_bhb_logmax){ #+config.A_bhb_logmax }
 
-:   :octicons-milestone-24: Default: `-14` –
+:   :octicons-milestone-24: Default: `None` –
     Can be assigned to a floating point or integer number to set the upper bound of the log-uniform prior for the
-    SMBHB-signal amplitude. This is only relevant if [`bhb_th_prior = False`](#+config.bhb_th_prior)
+    SMBHB-signal amplitude. If `A_bhb_logmax = None`, $-14$ is used when
+    [`gamma_bhb = 13/3`](#+config.gamma_bhb) and $-11$ otherwise. This is only relevant if [`bhb_th_prior = False`](#+config.bhb_th_prior)
     and you have selected `smbhb = True` in the [model file][model] or [`mod_sel = True`](#+config.mod_sel)
     in the configuration file.
 

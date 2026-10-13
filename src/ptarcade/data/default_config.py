@@ -16,7 +16,7 @@ corr = False # set to True if you want to include HD spatial correlations in the
 gwb_components = 14 # number of frequency components for common process
 bhb_th_prior = True # if set to True the prior for the bhb signal is set to a theory  motivated 2d gaussian
 A_bhb_logmin = None # lower limit for the prior of the bhb signal amplitude. If set to None -18 is used
-A_bhb_logmax = None # upper limit for the prior of the bhb signal amplitude. If set to None -14 is used
+A_bhb_logmax = None # upper limit for the prior of the bhb signal amplitude. If set to None, -14 is used if gamma_bhb = 13/3, -11 otherwise
 gamma_bhb = None # spectral index for the bhb singal. If set to None it's varied between [0, 7].
 
 # additional PTMCMC configuration

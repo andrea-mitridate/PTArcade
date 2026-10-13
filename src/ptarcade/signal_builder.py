@@ -47,6 +47,36 @@ bhb_priors = {"NG15" : [np.array([-15.61492963, 4.70709637]), np.array([[0.27871
 SMBHB_PARAMS = ("gw_bhb_log10_A", "gw_bhb_gamma")
 
 
+def bhb_log10_A_range(
+    gamma_bhb: float | None, A_bhb_logmin: float | None, A_bhb_logmax: float | None
+) -> tuple[float, float]:
+    """Bounds of the log-uniform SMBHB amplitude prior, shared by every backend.
+
+    Parameters
+    ----------
+    gamma_bhb : float, optional
+        Fixed SMBHB spectral index, or None if it is sampled.
+    A_bhb_logmin : float, optional
+        User lower bound. If None, -18 is used.
+    A_bhb_logmax : float, optional
+        User upper bound. If None, -14 is used if `gamma_bhb` = 13/3, -11 otherwise.
+
+    Returns
+    -------
+    tuple[float, float]
+        Lower and upper bounds on log10_A. Each side defaults independently.
+
+    """
+    logmin = -18 if A_bhb_logmin is None else A_bhb_logmin
+    if A_bhb_logmax is not None:
+        logmax = A_bhb_logmax
+    elif gamma_bhb is not None and np.isclose(gamma_bhb, 13 / 3):
+        logmax = -14
+    else:
+        logmax = -11
+    return logmin, logmax
+
+
 def unique_sampling_groups(super_model: hypermodel.Hypermodel) -> list[list[int]]:
     """Fix the hypermodel group structure.
 
@@ -341,19 +371,15 @@ def ent_builder(
                     spectrum=powerlaw_gw, components=gwb_components, Tspan=Tspan, name="gw_bhb"
                 )
 
-        elif bhb_th_prior and pta_dataset != "NG15" and pta_dataset != "IPTA2":
-            print(
-                "WARNING: Theory motivated priors for the SMBHB singal parameters are available only for NG15 and IPTA2. Reverting back to log uniform prior for A and uniform prior for gamma.\n"
-            )
-            s += common_red_noise_block(
-                    psd='powerlaw',
-                    prior='log-uniform',
-                    Tspan=Tspan,
-                    components=gwb_components,
-                    orf=orf,
-                    name = 'gw_bhb')
-
         else:
+            if bhb_th_prior:
+                print(
+                    "WARNING: Theory motivated priors for the SMBHB singal parameters are available only for NG15 and IPTA2. Reverting back to log uniform prior for A and uniform prior for gamma.\n"
+                )
+
+            # common_red_noise_block only uses logmin/logmax when both are given, so
+            # resolve the defaults here
+            A_bhb_logmin, A_bhb_logmax = bhb_log10_A_range(gamma_bhb, A_bhb_logmin, A_bhb_logmax)
             s += common_red_noise_block(
                 psd="powerlaw",
                 prior="log-uniform",
@@ -595,16 +621,9 @@ def ceffyl_builder(inputs):
             bhb_signal = powerlaw2_ceffyl
 
         else:
-            if inputs["config"].A_bhb_logmin:
-                A_bhb_logmin = inputs["config"].A_bhb_logmin
-            else:
-                A_bhb_logmin = -18
-
-            if inputs["config"].A_bhb_logmax:
-                A_bhb_logmax = inputs["config"].A_bhb_logmax
-            else:
-                A_bhb_logmax = -14
-
+            A_bhb_logmin, A_bhb_logmax = bhb_log10_A_range(
+                inputs["config"].gamma_bhb, inputs["config"].A_bhb_logmin, inputs["config"].A_bhb_logmax
+            )
             log10_A_bhb = parameter.Uniform(A_bhb_logmin, A_bhb_logmax)("log10_A")
 
             if inputs["config"].gamma_bhb:
@@ -787,11 +806,7 @@ def discovery_numpyro_model_builder(
             mu, sigma = bhb_th_pars
             bhb_dists["gw_bhb"] = dist.MultivariateNormal(jnp.asarray(mu), covariance_matrix=jnp.asarray(sigma))
         else:
-            # same defaults as the common_red_noise_block used by ent_builder
-            bhb_dists[SMBHB_PARAMS[0]] = dist.Uniform(
-                -18 if A_bhb_logmin is None else A_bhb_logmin,
-                -11 if A_bhb_logmax is None else A_bhb_logmax,
-            )
+            bhb_dists[SMBHB_PARAMS[0]] = dist.Uniform(*bhb_log10_A_range(gamma_bhb, A_bhb_logmin, A_bhb_logmax))
             if gamma_bhb is None:
                 bhb_dists[SMBHB_PARAMS[1]] = dist.Uniform(0, 7)
 
