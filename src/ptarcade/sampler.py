@@ -44,7 +44,7 @@ from PTMCMCSampler.PTMCMCSampler import PTSampler
 from rich.panel import Panel
 
 from ptarcade import console, input_handler, pta_importer, signal_builder
-from ptarcade.models_utils import ParamDict, cosmo_lnlikelihood
+from ptarcade.models_utils import ParamDict, cosmo_lnlikelihood, to_prior_range
 from ptarcade.input_handler import bcolors
 from ptarcade.models_utils import ParamDict
 
@@ -324,8 +324,20 @@ def setup_sampler(
 
         x0 = pta.initial_samples()
     elif inputs["config"].mode == "discovery":
-        numpyro_model = signal_builder.discovery_numpyro_model_builder(pta.psrs, inputs, pta)
-        sampler = numpyro.infer.NUTS(numpyro_model)
+        numpyro_model = signal_builder.discovery_numpyro_model_builder(
+            pta.psrs,
+            inputs,
+            pta,
+            pta_dataset=inputs["config"].pta_data,
+            bhb_th_prior=inputs["config"].bhb_th_prior,
+            gamma_bhb=inputs["config"].gamma_bhb,
+            A_bhb_logmin=inputs["config"].A_bhb_logmin,
+            A_bhb_logmax=inputs["config"].A_bhb_logmax,
+        )
+        # the default init_to_uniform draws an unbounded site (the 2d gaussian SMBHB prior)
+        # from [-2, 2], i.e. log10_A ~ 0, where the likelihood is NaN. Start from a prior
+        # draw instead
+        sampler = numpyro.infer.NUTS(numpyro_model, init_strategy=numpyro.infer.init_to_sample)
         x0 = None
 
     return sampler, x0
@@ -396,9 +408,24 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
                 sampler, num_chains=1, progress_bar=True, num_warmup=N_samples // 4, num_samples=N_samples
             )
             mcmc.run(jax.random.key(42))
-            samples_df = pd.DataFrame(mcmc.get_samples())
+
+            # a vector site (the 2d gaussian SMBHB prior) cannot go into a single
+            # dataframe column, so split it into one column per component. This gives
+            # 'gw_bhb_0'/'gw_bhb_1', the names chains_utils maps enterprise's
+            # 'gw_bhb_np_0'/'gw_bhb_np_1' to
+            samples = {}
+            for site, draws in mcmc.get_samples().items():
+                draws = np.asarray(draws)
+                if draws.ndim == 1:
+                    samples[site] = draws
+                else:
+                    for idx, component in enumerate(draws.reshape(len(draws), -1).T):
+                        samples[f"{site}_{idx}"] = component
+            samples_df = pd.DataFrame(samples)
+
             parameter_dict = inputs["model"].parameters
-            prior_dict = {key: np.array(val["args"]).tolist() for key,val in parameter_dict.items()}
+            prior_dict = {key: to_prior_range(val) for key, val in parameter_dict.items()}
+            prior_dict.update(getattr(sampler.model, "smbhb_priors", {}))
             out_dir = Path(inputs["config"].out_dir)
             out_dir.mkdir(exist_ok=True, parents=True)
             samples_df.to_feather(out_dir / "chain_1.feather")
