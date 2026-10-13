@@ -12,9 +12,17 @@ In the following, we will explain how these two quantities are defined in the mo
   [signal]: #deterministic-signals
 
 ## Priors
-The priors for the signal parameters are defined via the `parameters` dictionary. The keys of this dictionary must be strings, which will be used as names for the model parameters. The values of this dictionary are [ENTERPRISE Parameter][enterprise.signals.parameter.Parameter] objects, the user can create these object via the [`prior`][ptarcade.models_utils.prior] helper function that can be imported from the [ptarcade.models_utils][] module. The first argument that the user needs to pass to the [`prior`][ptarcade.models_utils.prior] function is a string with the name of the prior class they want to use for that parameter, the remaining arguments are used to set the attributes of the prior. By default, parameters are assumed to be common across all pulsars. If the user wants to define a pulsar-dependent parameter, this can be done by passing `common=False` as a keyword argument.
+Signal parameter priors are defined using the `parameters` dictionary. The keys of this dictionary must be strings that will serve as parameter names. The values of this dictiornary are [ENTERPRISE Parameter][enterprise.signals.parameter.Parameter] objects, which the user can create using the [`prior`][ptarcade.models_utils.prior] helper function from the [ptarcade.models_utils][] module.
 
-???+ example "Priors Example"
+The [`prior`][ptarcade.models_utils.prior] helper function supports both pre-defined priors and custom user-defined priors.
+
+### Pre-defined Priors
+
+To use a pre-defined prior, pass the prior name as a string to the first argument of the [`prior`][ptarcade.models_utils.prior] helper function. Additional arguments set the prior's attributes. See below for a complete list of available pre-defined priors.
+
+By default, parameters are assumed to be common across all pulsars. If the user wants to define a pulsar-dependent parameter, this can be done by passing `common=False` as a keyword argument.
+
+???+ example "Pre-defined Prior Examples"
     The `parameters` dictionary of a model described by the parameters $a$ and $b$, which are common among all the pulsars, will look as follows for different choices of the priors:
 
     === "Uniform Priors"
@@ -55,9 +63,55 @@ The priors for the signal parameters are defined via the `parameters` dictionary
 
         1.  In this case, we have assumed 
 
+### Custom priors
+To define a custom prior, pass a Python function as the first argument to [`prior`][ptarcade.models_utils.prior], along with an `x0` parameter specifying the initial sampling point. Additional arguments set the custom prior's attributes. The custom prior needs to be defined as follows:
+
+* The first parameter must be named `value` and accept a [NumPy array][numpy] containing parameter values at which to evaluate the prior
+* The function must return a [NumPy array][numpy] containing the **linear** prior probability density at each value in `value`
+* Additional arguments can be used to parameterize the prior
+
+For multi-dimensional parameters, pass `size=N` to [`prior`][ptarcade.models_utils.prior], where `N` is the number of dimensions, and set `x0` to an array of length `N` containing the initial sampling point.
+
+As for pre-defined priors, by default, parameters are assumed to be common across all pulsars. If the user wants to define a pulsar-dependent parameter, this can be done by passing `common=False` as a keyword argument.
+
+???+ example "Custom Prior Example"
+    The `parameters` dictionary of a model described by a parameter $a$, which is follow an exponential distribution and is common across all the pulsars:
+
+    === "Exponential prior"
+
+        ``` py
+        import ptarcade.models_utils as utils
+        
+        def exponential(value, scale):
+            return np.where(value >= 0, 1 / scale * np.exp(-value / scale), 0.0)
+
+        parameters = {'a' : utils.prior(exponential, x0=1., scale=5.)} # (1)!
+        ```
+
+        1.  In this case, we have choosen `a=1` as the starting sampling point by setting `x0=1.`.
+
+    === "2D custom prior"
+
+        ``` py
+        import ptarcade.models_utils as utils
+
+        def bivariate_exponential(value, scale):
+            return np.where(
+                np.all(value >= 0),
+                np.prod(1 / scale * np.exp(-value / scale)),
+                0.0
+            )
+
+        parameters = {'a' : utils.prior(bivariate_exponential, x0=np.array([1., 1.]), scale=5., size=2)} # (1)!
+        ```
+
+        1.  In this case, `a` is a 2-dimensional parameter. The initial sampling point is set to `[1., 1.]` via `x0`, and `size=2` tells PTArcade that the parameter has 2 components.
+
 ??? info "Constructing Priors"
 
-     Notice, how we used both positional and keyword arguments: Both are allowed. These arguments correspond to the functions defined in either [enterprise.signals.parameter][] or [ptarcade.models_utils][]. Below are links to all supported parameters:
+     Notice how we used both positional and keyword arguments when using the [`prior`][ptarcade.models_utils.prior] helper function. Both are allowed. 
+     
+     The priors pre-defined in either [enterprise.signals.parameter][] or [ptarcade.models_utils][] are:
 
      - [enterprise.signals.parameter.Normal][] 
      - [enterprise.signals.parameter.Uniform][] 
@@ -65,6 +119,8 @@ The priors for the signal parameters are defined via the `parameters` dictionary
      - [enterprise.signals.parameter.LinearExp][] 
      - [enterprise.signals.parameter.Constant][] 
      - [ptarcade.models_utils.Gamma][].
+
+
 
 ??? warning "Common Parameters vs. Pulsar-Dependent"
 
@@ -193,6 +249,20 @@ The model file can also contain additional (optional) variables that can be used
 :   :octicons-milestone-24: Default: _`False`_ – 
     If set to `True`, the expected signal from SMBHBs will be added to the user-specified signal.
 
+[`mod_sel_wgt`](#+model.mod_sel_wgt){ #+model.mod_sel_wgt }
+
+:   :octicons-milestone-24: Default: _`1.0`_ – 
+    Some models are better supported by the data than others, and a better-supported model is 
+    more likely to be sampled by MCMC. In some cases, this will result in poor sampling of the 
+    less-supported model. To sample both models well, one model may need to be up-weighted or down-weighted. The user can specify a weight on their provided model to help with sampling. 
+    Selecting a value such that `mod_sel_wgt` $< 1$ down-weights the specified model, while 
+    `mod_sel_wgt` $> 1$ up-weights the specified model. This parameter is only relevant if `mod_sel = True` in the [config file][config].
+
+    !!! Warning "Sample weighting and computing Bayes factors"
+        While weighting the models will result in improved sampling and thus a more accurate 
+        Bayes factor computation, we must correct for the weighting when computing the Bayes 
+        factor. This can be done by also specifying `mod_sel_wgt` in [`get_bf`][ptarcade.chains_utils.compute_bf] 
+        defined in the PTArcade [`chains_utils`][chains_utils] module.
 [`orf`](#+model.orf){ #+model.smbhb }
 
 :   :octicons-beaker-24: &nbsp; __Experimental__ – 
@@ -204,4 +274,5 @@ The model file can also contain additional (optional) variables that can be used
   [out_name]: ../outputs.md
   [ng15_np]:  link_to_papaer
   [ng15_models]: https://zenodo.org/record/8084351
-
+  [config]: config.md
+  [chains_utils]: ../utils/chain_utils.md

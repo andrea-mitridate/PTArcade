@@ -1,6 +1,7 @@
 """Utilities to be used with output MCMC chains of PTArcade."""
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
@@ -58,10 +59,17 @@ def params_loader(file: str | Path) -> dict[str, tuple[float, float] | None]:
                 else:
                     dim = 1
                 for i in range(dim):
-                    params[f"{key}_{i}"] = None # type: ignore
+                    params[f"{key}_{i}"] = (None, None) # type: ignore
 
+            elif 'UserParameter' in line:
+                if '[' in line:
+                    dim = int(re.search('\\[(\\d+)\\]', line).group(1)) # type: ignore
+                    for i in range(dim):
+                        params[f"{key}_{i}"] = (None, None) # type: ignore
+                else:
+                    params[key] = (None, None) # type: ignore
             else:
-                params[key] = None # type: ignore
+                params[key] = (None, None) # type: ignore
 
     return params # type: ignore
 
@@ -268,6 +276,22 @@ def import_to_dataframe(
 
             chains = chains.dropna()
 
+    elif chain_ext == ".feather":
+        chains = pd.read_feather(chains_dir / chain_name)
+        with (chains_dir / "priors.json").open("r") as f:
+            params = json.load(f)
+
+        # this isn't "quicker" right now, but it matches the expected behavior
+        if not quick_import:
+            for col in chains.columns:
+                if "red_noise_log10_A" in col:
+                    params[col] = [-20, -11]
+                elif "red_noise_gamma" in col:
+                    params[col] = [0, 7]
+        else:
+            usecols = [col for col in chains.columns if "red_noise" not in col]
+            chains = chains[usecols]
+        params = pd.DataFrame(params)
 
     print(f"Finished importing   {chains_dir} in {time.time() - start_time:.2f}s")
 
@@ -461,7 +485,7 @@ def bf_bootstrap(chain: NDArray, burn: int = 0) -> tuple[float, float]:
     return mean, np.sqrt(var)
 
 
-def compute_bf(chain: NDArray, params: list[str], bootstrap: bool = False) -> tuple[float, float]:  # noqa: FBT001, FBT002
+def compute_bf(chain: NDArray, params: list[str], bootstrap: bool = False, mod_sel_wgt: float = 1.) -> tuple[float, float]:  # noqa: FBT001, FBT002
     """Compute the Bayes factor and estimate its uncertainty.
 
     Parameters
@@ -477,6 +501,9 @@ def compute_bf(chain: NDArray, params: list[str], bootstrap: bool = False) -> tu
     bootstrap : bool, optional
         A flag indicating whether to compute the Bayes factor using a bootstrap method. If True, the Bayes factor will
         be computed using the 'get_bf' function. The bootsrap calculation is significantly slower. Defaults to False.
+    mod_sel_wgt: float, optional
+        If the new physics model was weighted to improve sampling, this will bias the Bayes Factor calculation.
+        If `mod_sel_wgt` was an input in the model file, the value should be supplied here too. Defaults to 1.
 
     Returns
     -------
@@ -514,6 +541,10 @@ def compute_bf(chain: NDArray, params: list[str], bootstrap: bool = False) -> tu
 
     else:
         bf, unc = model_utils.odds_ratio(chain[:, nmodel_idx], models=[0,1])
+
+    # correct for model selection weight
+    bf /= mod_sel_wgt
+    unc /= mod_sel_wgt
 
     return bf, unc
 

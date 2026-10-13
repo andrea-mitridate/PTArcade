@@ -39,23 +39,28 @@ g_s_0 : np.float64
     Entropic relativistic degrees of freedom today
 priors_type : typing.Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "Constant", "Gamma"]
     Type for parameter priors.
+
 """
 from __future__ import annotations
 
 import logging
-from collections import UserDict
-from collections.abc import Callable
+from collections import UserDict, namedtuple
+from collections.abc import Callable, Mapping
 from functools import cache
 from importlib.resources import files
 from typing import Any, Literal
 
+import jax
+import jax.numpy as jnp
 import natpy as nat
 import numpy as np
+import numpyro.distributions as dist
 import scipy.stats as ss
 from enterprise.signals import parameter
 from enterprise.signals.parameter import function
 from numpy._typing import _ArrayLikeFloat_co as array_like
 from numpy.typing import NDArray
+from scipy.integrate import trapezoid
 
 from ptarcade import fast_interpolate
 
@@ -84,6 +89,15 @@ gev_to_hz : np.float64 = nat.convert(nat.GeV, nat.Hz) # conversion from gev to H
 # tabulated values for the number of relativistic degrees of
 # freedom from reference 2005.03544
 gs = np.loadtxt(files('ptarcade.data').joinpath('g_star.dat')) # type: ignore
+lvk_omega = np.loadtxt(files('ptarcade.data').joinpath('lvk.dat')) # type: ignore
+_lvkv_freq = lvk_omega[:, 0].astype(float)             # frequencies
+_lvkv_data = h**2 * lvk_omega[:, 1].astype(float)             # measured omega
+_lvkv_invvar = (1.0 / h**2 / lvk_omega[:, 2]**2).astype(float)
+lvk_norm = - 0.5 * np.dot(_lvkv_data, _lvkv_data * _lvkv_invvar)
+
+# Fixed log-spaced quadrature grid for BBN delta_Neff integration
+_bbn_u = np.linspace(np.log(1e-12), np.log(1e3), 1000)
+_bbn_f = np.exp(_bbn_u)
 
 # type to use for priors-building functions
 priors_type = Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "Constant", "Gamma"]
@@ -114,6 +128,32 @@ def g_rho(x: array_like, is_freq: bool = False) -> array_like:  # noqa: FBT001, 
 
     return dof
 
+def g_rho_jax(x: jax.Array, is_freq: bool = False) -> jax.Array:  # noqa: FBT001, FBT002
+    """Return the number of relativistic degrees of freedom as a function of T/GeV or f/Hz.
+
+    Parameters
+    ----------
+    x : array_like
+        The temperature(s) [GeV] or frequency/frequencies [Hz].
+    is_freq : bool, optional
+        True if `x` is a frequency/frequencies, False if temperature(s).
+        Defaults to False.
+
+    Returns
+    -------
+    dof : array_like
+        The relativistic degrees of freedom at `x`.
+
+    """
+    if is_freq:
+        dof = jnp.interp(x, gs[:, 1], gs[:, 3])
+
+    else:
+        dof = jnp.interp(x, gs[:, 0], gs[:, 3])
+
+    return dof
+
+
 
 def g_s(x: array_like, is_freq: bool = False) -> array_like:  # noqa: FBT001, FBT002
     """Return the number of entropic relativistic degrees of freedom as a function of T/GeV or f/Hz.
@@ -137,6 +177,31 @@ def g_s(x: array_like, is_freq: bool = False) -> array_like:  # noqa: FBT001, FB
 
     else:
         dof = np.interp(x, gs[:, 0], gs[:, 2])
+
+    return dof
+
+def g_s_jax(x: jax.Array, is_freq: bool = False) -> jax.Array:  # noqa: FBT001, FBT002
+    """Return the number of entropic relativistic degrees of freedom as a function of T/GeV or f/Hz.
+
+    Parameters
+    ----------
+    x : array_like
+        The temperature(s) [GeV] or frequency/frequencies [Hz].
+    is_freq : bool, optional
+        True if `x` is a frequency/frequencies, False if temperature(s).
+        Defaults to False.
+
+    Returns
+    -------
+    dof : array_like
+        The entropic relativistic degrees of freedom at `x`.
+
+    """
+    if is_freq:
+        dof = jnp.interp(x, gs[:, 1], gs[:, 2])
+
+    else:
+        dof = jnp.interp(x, gs[:, 0], gs[:, 2])
 
     return dof
 
@@ -192,7 +257,7 @@ g_s_0: np.float64 = __g_s_0(T_0)  # entropic relativistic degrees of freedom tod
 # -----------------------------------------------------------
 
 
-def GammaPrior(value: float, a: float, loc: float, scale: float) -> float:
+def GammaPrior(value: float, a: float, beta: float) -> float:
     """Prior function for Gamma parameters.
 
     Parameters
@@ -212,9 +277,9 @@ def GammaPrior(value: float, a: float, loc: float, scale: float) -> float:
         The probability density of the Gamma distribution at `value`.
 
     """
-    return ss.gamma.pdf(value, a, loc, scale)
+    return ss.gamma.pdf(value, a, scale=1/beta)
 
-def GammaSampler(a: float, loc: float, scale: float, size: int | None  = None) -> NDArray:
+def GammaSampler(a: float, beta: float, size: int | None  = None) -> NDArray:
     """Sampling function for Gamma parameters.
 
     Parameters
@@ -234,10 +299,10 @@ def GammaSampler(a: float, loc: float, scale: float, size: int | None  = None) -
         A NumPy array of size `size` containing samples from the Gamma distribution.
 
     """
-    return ss.gamma.rvs(a, loc, scale, size=size)
+    return ss.gamma.rvs(a, scale=1/beta, size=size)
 
 
-def Gamma(a: float, loc: float, scale: float, size: int | None = None):
+def Gamma(a: float,  beta: float, size: int | None = None):
     """Class factory for Gamma parameters.
 
     Parameters
@@ -261,9 +326,9 @@ def Gamma(a: float, loc: float, scale: float, size: int | None = None):
         """Child class of enterprise.signals.parameter.Parameter."""
 
         _size = size
-        _prior = parameter.Function(GammaPrior, a=a, loc=loc, scale=scale)
+        _prior = parameter.Function(GammaPrior, a=a,  beta=beta)
         _sampler = staticmethod(GammaSampler)
-        _typename = parameter._argrepr("Gamma", a=a, loc=loc, scale=scale)
+        _typename = parameter._argrepr("Gamma", a=a, beta=beta)
 
     return Gamma
 
@@ -272,7 +337,11 @@ def Gamma(a: float, loc: float, scale: float, size: int | None = None):
 # Helper functions.
 # -----------------------------------------------------------
 
-def omega2cross(omega_hh: Callable[..., NDArray], ceffyl : bool = False) -> Callable[..., NDArray]:
+def omega2cross(
+    omega_hh: Callable[..., NDArray | jax.Array],
+    likelihood: Literal["enterprise", "ceffyl", "discovery"] = "enterprise",
+    model_name: str | None  = None,
+) -> Callable[..., NDArray]:
     """Convert GW energy density.
 
     Converts the GW energy density as a fraction of the closure density into the cross-power spectral density
@@ -281,50 +350,72 @@ def omega2cross(omega_hh: Callable[..., NDArray], ceffyl : bool = False) -> Call
 
     Parameters
     ----------
-    omega_hh : Callable[..., NDArray]
+    omega_hh : Callable[..., NDArray | jax.Array]
         The function that returns the GW energy density as a fraction of the closure density.
 
-    ceffyl: bool
-        If set to tru use a version compatible with ceffyl, if set to false a version compatible with 
-        ENTERPRISE
+    likelihood: str
+        Can be "enterprise", "ceffyl", or "discovery"
+
+    model_name : str, optional
+        The model name. Used by the "discovery" backend to strip the model-name
+        prefix that is prepended to parameter names for correlated signals. Defaults
+        to None (no prefix stripping).
 
     Returns
     -------
-    Callable[..., NDArray]
+    Callable[..., NDArray | jax.Array]
         A function that returns the cross-power spectral density as a function of the frequency in Hz.
 
     """
-    if ceffyl:
-        @function
-        def cross(f: NDArray, Tspan: float, **kwargs):
+    match likelihood:
+        case "ceffyl":
 
-            # fraction of the critical density in GWs
-            h2_omega = omega_hh(f, **kwargs)
+            @function
+            def cross(f: NDArray, Tspan: float, **kwargs):
+                # fraction of the critical density in GWs
+                h2_omega = omega_hh(f, **kwargs)
 
-            # characteristic strain spectrum h_c(f)
-            hcf = H_0_Hz / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f)
+                # characteristic strain spectrum h_c(f)
+                hcf = H_0_Hz / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f)
 
-            # cross-power spectral density S(f) (s^3)
-            sf = (hcf**2 / (12 * np.pi**2 * f**3)) / Tspan
+                # cross-power spectral density S(f) (s^3)
+                sf = (hcf**2 / (12 * np.pi**2 * f**3)) / Tspan
 
-            return sf
+                return sf
 
-    else:
-        @function
-        def cross(f: NDArray, components: int = 2, **kwargs):
+        case "enterprise":
 
-            df = np.diff(np.concatenate((np.array([0]), f[::components])))
+            @function
+            def cross(f: NDArray, components: int = 2, **kwargs):
+                df = np.diff(np.concatenate((np.array([0]), f[::components])))
 
-            # fraction of the critical density in GWs
-            h2_omega = omega_hh(f, **kwargs)
+                # fraction of the critical density in GWs
+                h2_omega = omega_hh(f, **kwargs)
 
-            # characteristic strain spectrum h_c(f)
-            hcf = H_0_Hz / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f)
+                # characteristic strain spectrum h_c(f)
+                hcf = H_0_Hz / h * np.sqrt(3 * h2_omega / 2) / (np.pi * f)
 
-            # cross-power spectral density S(f) (s^3)
-            sf = (hcf**2 / (12 * np.pi**2 * f**3)) * np.repeat(df, components)
+                # cross-power spectral density S(f) (s^3)
+                sf = (hcf**2 / (12 * np.pi**2 * f**3)) * np.repeat(df, components)
 
-            return sf
+                return sf
+
+        case "discovery":
+
+            def cross(f: jax.Array, df: jax.Array, *args, **kwargs):
+                # discovery prefixes parameter names with the model name when correlated
+                if model_name and kwargs:
+                    kwargs = {key.removeprefix(f"{model_name}_"): val for key, val in kwargs.items()}
+                # fraction of the critical density in GWs
+                h2_omega = omega_hh(f, *args, **kwargs)
+
+                # characteristic strain spectrum h_c(f)
+                hcf = H_0_Hz / h * jnp.sqrt(3 * h2_omega / 2) / (jnp.pi * f)
+
+                # cross-power spectral density S(f) (s^3)
+                sf = (hcf**2 / (12 * np.pi**2 * f**3)) * df
+
+                return sf
 
     return cross
 
@@ -345,6 +436,7 @@ def prep_data(path: str) -> tuple[list[NDArray], NDArray, NDArray]:
         The omega grid of the tabulated data.
     par_names : NDArray
         The names of the parameters in the tabulated data.
+
     """
     par_names = np.loadtxt(path, max_rows=1, dtype='str')
     data = np.loadtxt(path, skiprows=1)
@@ -367,7 +459,7 @@ def prep_data(path: str) -> tuple[list[NDArray], NDArray, NDArray]:
     return grids, omega_grid, par_names
 
 
-def spec_importer(path: str) -> Callable[[NDArray, Any],  NDArray]:
+def spec_importer(path: str, kind:Literal["numpy", "jax"]="numpy") -> Callable[[NDArray, Any],  NDArray]:
     """Import data and create a fast interpolation function.
 
     Interpolate the GWB power spectrum from tabulated data. Return a function that interpolates
@@ -383,16 +475,29 @@ def spec_importer(path: str) -> Callable[[NDArray, Any],  NDArray]:
     Callable[[NDArray, P], NDArray]
         A callable object that interpolates the GWB power spectrum at a given frequency `f` and with given
         parameters `kwargs`.
+
     """
     info, data = fast_interpolate.load_data(path)
     # info is a list of (name, start, step)
 
-    def spectrum(f: NDArray, **kwargs: Any) -> NDArray:
+    if kind.lower() == "numpy":
+        def spectrum(f: NDArray, **kwargs: Any) -> NDArray:
 
-        # Construct right information format for interpolation
-        return fast_interpolate.interp([(start, step, f if name == 'f' else kwargs[name])
-                                         for (name, start, step) in info],
-                                        data)
+            # Construct right information format for interpolation
+            return fast_interpolate.interp([(start, step, f if name == 'f' else kwargs[name])
+                                            for (name, start, step) in info],
+                                           data)
+    elif kind.lower() == "jax":
+        def spectrum(f: NDArray, **kwargs: Any) -> NDArray:
+
+            # Construct right information format for interpolation
+            return fast_interpolate.jax_interp([(start, step, f if name == 'f' else kwargs[name])
+                                            for (name, start, step) in info],
+                                           data)
+    else:
+        msg = f"Unknown spec_importer kind {kind!r}; expected 'numpy' or 'jax'."
+        raise ValueError(msg)
+
     return spectrum # type: ignore
 
 
@@ -411,6 +516,7 @@ def freq_at_temp(T: array_like) -> array_like:
     -------
     NDArray
         The GW frequency [Hz] today that was of horizon size when the universe was at temperature `T` [GeV].
+
     """
     f_0 = H_0_Hz / (2 * np.pi)
 
@@ -420,6 +526,37 @@ def freq_at_temp(T: array_like) -> array_like:
 
     prefactor = f_0 * (gs_ratio) ** (1 / 3) * T_ratio
     sqr_term = np.sqrt(
+        omega_v
+        + (gs_ratio**-1 * T_ratio**-3 * omega_m)
+        + (g_ratio**-1 * T_ratio**-4 * omega_r),
+    )
+
+    return prefactor * sqr_term
+
+def freq_at_temp_jax(T: jax.Array) -> jax.Array:
+    """Find frequency today as function of temperature when GW was horizon size.
+
+    Calculates the GW frequency [Hz] today as a function of the universe temperature [GeV]
+    when the GW was of horizon size.
+
+    Parameters
+    ----------
+    T : array_like
+        The universe temperature [GeV] at the time when the GW was of horizon size.
+
+    Returns
+    -------
+    NDArray
+        The GW frequency [Hz] today that was of horizon size when the universe was at temperature `T` [GeV].
+    """
+    f_0 = H_0_Hz / (2 * np.pi)
+
+    T_ratio = T_0 / T # type: ignore
+    g_ratio = g_rho_0 / g_rho_jax(T) # type: ignore
+    gs_ratio = g_s_0 / g_s_jax(T) # type: ignore
+
+    prefactor = f_0 * (gs_ratio) ** (1 / 3) * T_ratio
+    sqr_term = jnp.sqrt(
         omega_v
         + (gs_ratio**-1 * T_ratio**-3 * omega_m)
         + (g_ratio**-1 * T_ratio**-4 * omega_r)
@@ -444,6 +581,24 @@ def temp_at_freq(f: array_like) -> NDArray:
 
     """
     return np.interp(f, gs[:, 1], gs[:, 0], left=np.nan, right=np.nan)
+
+
+def temp_at_freq_jax(f: jax.Array) -> jax.Array:
+    """Get the temperature [GeV] of the universe when a gravitational wave of a
+    certain frequency [Hz] today was of horizon size.
+
+    Parameters
+    ----------
+    f : array_like
+        The frequency in Hz today.
+
+    Returns
+    -------
+    NDArray
+        The temperature [GeV] when the GW at frequency `f` [Hz] was of horizon size.
+
+    """
+    return jnp.interp(f, gs[:, 1], gs[:, 0], left=jnp.nan, right=jnp.nan)
 
 
 class ParamDict(UserDict):
@@ -473,15 +628,18 @@ class ParamDict(UserDict):
     """
 
     def __setitem__(self, key: str, prior: parameter.Parameter):
+        # numpyro distributions are not class factories, so don't call them
+        if isinstance(prior, dist.Distribution):
+            super().__setitem__(key, prior)
         # The "or" here makes it backwards compatible with our old syntax
         # for the parameter dictionaries
-        if isinstance(prior, parameter.Parameter ) or getattr(prior, "common", False):
+        elif isinstance(prior, parameter.Parameter) or getattr(prior, "common", False):
             super().__setitem__(key, prior(key))
         else:
             super().__setitem__(key, prior)
 
 
-def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
+def prior(name: priors_type | Callable, *args: Any, **kwargs: Any) -> parameter.Parameter:
     """Wrap enterprise prior creation.
 
     This function wraps the class factories in [enterprise.signals.parameter][].
@@ -493,14 +651,21 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
     then `common` defaults to `True`. This attribute will be used by
     [ptarcade.models_utils.ParamDict][] objects in the model files.
 
+    When `name` is a callable, the function uses
+    [enterprise.signals.parameter.UserParameter][] to create a parameter with an
+    arbitrary prior. In this case, an initial sample point `x0` must be provided
+    as a keyword argument.
+
     Parameters
     ----------
-    name : priors_type
-        The prior to use.
+    name : priors_type | Callable
+        The prior to use. Either a string naming a built-in prior or a callable
+        defining a custom prior pdf.
     *args
         Positional arguments passed to the prior factory.
     **kwargs
-        kwargs passed to the prior factory.
+        kwargs passed to the prior factory. When `name` is callable, `x0` (float)
+        must be provided as the initial sample point.
 
     Returns
     -------
@@ -517,24 +682,269 @@ def prior(name: priors_type, *args: Any, **kwargs: Any) -> parameter.Parameter:
     # If it wasn't passed, set it to True
     common = kwargs.pop("common", True)
 
-    # Check if the user passed a correct prior name.
-    # If they didn't, print an informative message
-    try:
-        prior_factory = getattr(parameter, name)
-    except AttributeError:
+    if isinstance(name, dist.Distribution):
+        # numpyro distribution, only meaningful for discovery mode
+        name.common = common
+        return name
+
+    if callable(name):
+        # Checks if the user passed a function as prior.
+        # If they did, it creates a custom prior using enterprise's UserParameter class factory.
+        x0 = kwargs.pop("x0")
+        size = kwargs.pop("size", len(x0) if hasattr(x0, '__len__') else None)
+        size = None if size == 1 else size
+        prior_obj = parameter.UserParameter(prior=function(name)(**kwargs), sampler=lambda **kw: x0, size=size)
+
+
+    else:
+        # Checks if the user passed a correct prior name.
+        # If they didn't, print an informative message
         try:
-            prior_factory = globals()[name]
-        except KeyError:
-            err = (f"The 'name' must be a string from the following list {priors_type=}.\n"
-            f"You supplied {name=}.")
+            prior_factory = getattr(parameter, name)
+        except AttributeError:
+            try:
+                prior_factory = globals()[name]
+            except KeyError:
+                err = (f"The 'name' must be a string from the following list {priors_type=}.\n"
+                f"You supplied {name=}.")
 
-            log.error(err)
-            raise SystemExit from None
+                log.error(err)
+                raise SystemExit from None
 
-    # Use enterprise's class factory
-    prior_obj = prior_factory(*args, **kwargs)
+        # Use enterprise's class factory
+        prior_obj = prior_factory(*args, **kwargs)
 
     # Store the `common` arg for later use
     prior_obj.common = common
 
     return prior_obj
+
+
+# LinearExp has no single-distribution numpyro equivalent: sample Uniform(10**pmin, 10**pmax) and register log10 of it
+# as a deterministic instead.
+LinearExpSpec = namedtuple("LinearExpSpec", ["pmin", "pmax"])
+
+ConstantSpec = namedtuple("ConstantSpec", ["value"])
+
+
+def to_numpyro_prior(param: parameter.Parameter | dist.Distribution) -> dist.Distribution | LinearExpSpec:
+    """Translate a PTArcade prior into a numpyro distribution.
+
+    Used by the discovery backend to build sampling sites from the priors declared in a
+    model file.
+
+    Parameters
+    ----------
+    param : parameter.Parameter | numpyro.distributions.Distribution
+        The prior to translate. A numpyro distribution is returned unchanged. A bound
+        enterprise parameter is mapped via its ``.type`` and ``.prior.func_kwargs``.
+
+    Returns
+    -------
+    numpyro.distributions.Distribution | LinearExpSpec
+        The numpyro distribution to sample from, or a `LinearExpSpec`/`ConstantSpec`
+        for the priors that need special handling by the caller.
+
+    Raises
+    ------
+    NotImplementedError
+        If the parameter type has no numpyro translation (e.g. a callable custom prior).
+        Pass a numpyro distribution directly instead for discovery mode.
+
+    """
+    if isinstance(param, dist.Distribution):
+        return param
+
+    if isinstance(param, parameter.ConstantParameter):
+        return ConstantSpec(param.value)
+
+    kind = getattr(param, "type", None)
+    kw = getattr(getattr(param, "prior", None), "func_kwargs", {})
+
+    if kind == "uniform":
+        return dist.Uniform(kw["pmin"], kw["pmax"])
+    if kind == "normal":
+        return dist.Normal(kw["mu"], kw["sigma"])
+    if kind == "truncnormal":
+        return dist.TruncatedNormal(kw["mu"], kw["sigma"], low=kw["pmin"], high=kw["pmax"])
+    if kind == "gamma":
+        # PTArcade-custom Gamma: pdf is ss.gamma(a, scale=1/beta), i.e. shape a, rate beta.
+        return dist.Gamma(kw["a"], rate=kw["beta"])
+    if kind == "linearexp":
+        return LinearExpSpec(kw["pmin"], kw["pmax"])
+
+    msg = (
+        f"Cannot translate prior of type '{kind}' to a numpyro distribution for discovery mode. "
+        "Pass a numpyro distribution directly, e.g. prior(numpyro.distributions.Uniform(-9, -4))."
+    )
+    raise NotImplementedError(
+        msg,
+    )
+
+
+def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...]) -> float:
+    """Calculate the effective number of relativistic species from a GW spectrum.
+
+    Parameters
+    ----------
+    spectrum : Callable[..., NDArray]
+        The function that returns the GW energy density as a fraction of the closure density.
+    params : tuple[Any, ...]
+        The parameters to pass to `spectrum`.
+
+    Returns
+    -------
+    float
+        The effective number of relativistic species contributed by the GW spectrum.
+
+    """
+    return 1.78e5 * trapezoid(spectrum(_bbn_f, *params), _bbn_u)
+
+
+def bbn_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray], sm_neff: float = 3.044, mu_neff: float = 2.941, sigma_neff: float = 0.143) -> float:
+    """Calculate the cosmological log-likelihood based on N_eff measurements.
+
+    Parameters
+    ----------
+    x : NDArray
+        The array of parameter values.
+    param_names : NDArray
+        The names of the parameters in `x`.
+    cosmo_params : list[str]
+        The names of the cosmological parameters to use in the likelihood.
+    spectrum : Callable[..., NDArray]
+        The function that returns the GW energy density as a fraction of the closure density.
+    sm_neff : float, optional
+        The Standard Model value of N_eff. Defaults to 3.044.
+    mu_neff : float, optional
+        The mean value of N_eff from observations. Defaults to 2.941.
+    sigma_neff : float, optional
+        The standard deviation of N_eff from observations. Defaults to 0.143.
+
+    Returns
+    -------
+    float
+        The cosmological likelihood based on N_eff measurements.
+
+    """
+    d_neff = delta_neff(spectrum, x)
+
+    # Written as the difference of the two exponents rather than log(exp(...)/norm),
+    # the latter underflows to -inf
+    z = (d_neff + sm_neff - mu_neff) / sigma_neff
+    z_norm = (sm_neff - mu_neff) / sigma_neff
+
+    return -0.5 * z**2 + 0.5 * z_norm**2
+
+
+def lvk_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray]) -> float:
+    """LVK log-likelihood: -½ Σ [(data - model)^2 / σ^2]."""
+    model = spectrum(_lvkv_freq, *x)            # h^2 Ω_GW(f; x)
+
+    resid = _lvkv_data - model                 # data - model
+    # χ² = Σ resid² / σ² = resid · (resid * invvar)
+    chi2 = np.dot(resid, resid * _lvkv_invvar)
+
+    return -0.5 * chi2 - lvk_norm
+
+
+
+def cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names, constraints):
+    param_names = list(self.param_names)
+
+    if hasattr(self, 'ln_likelihood'):
+        # ceffyl: self is a ceffyl pta object
+        base_lnlike = self.ln_likelihood(x)
+    else:
+        # enterprise: self is a HyperModel — replicate get_lnlikelihood logic
+        idx = param_names.index('nmodel')
+        nmodel = int(np.rint(x[idx]))
+
+        q = [x[param_names.index(par)] for par in self.models[nmodel].param_names]
+        base_lnlike = self.models[nmodel].get_lnlikelihood(q)
+
+        if self.log_weights is not None:
+            base_lnlike += self.log_weights[nmodel]
+
+        if nmodel == 0 and self.num_models > 1:
+            return base_lnlike
+
+    mask = np.isin(param_names, cosmo_params_names)
+    cosmo_params = x[mask]
+
+    extra = 0.0
+    if "bbn" in constraints:
+        extra += bbn_lnlikelihood(cosmo_params, spectrum)
+    if "lvk" in constraints:
+        extra += lvk_lnlikelihood(cosmo_params, spectrum)
+
+    return base_lnlike + extra
+
+
+SpectrumParams = Mapping[str, Any] | tuple[Any, ...]
+"""Model parameters for a spectrum call: by name (preferred) or positional."""
+
+
+def _eval_spectrum(spectrum: Callable[..., jax.Array], f: jax.Array, params: SpectrumParams) -> jax.Array:
+    """Evaluate `spectrum` at `f`, binding parameters by name when they are given by name.
+
+    Positional binding is only correct when the model's `parameters` dict happens to be
+    ordered like the spectrum signature, so callers should pass a mapping.
+    """
+    if isinstance(params, Mapping):
+        return spectrum(f, **params)
+    return spectrum(f, *params)
+
+
+def delta_neff_jax(spectrum: Callable[..., jax.Array], params: SpectrumParams) -> jax.Array:
+    """JAX version of [ptarcade.models_utils.delta_neff][]."""
+    return 1.78e5 * jnp.trapezoid(_eval_spectrum(spectrum, jnp.asarray(_bbn_f), params), jnp.asarray(_bbn_u))
+
+
+def bbn_lnlikelihood_jax(x: SpectrumParams, spectrum: Callable[..., jax.Array], sm_neff: float = 3.044, mu_neff: float = 2.941, sigma_neff: float = 0.143) -> jax.Array:
+    """JAX version of [ptarcade.models_utils.bbn_lnlikelihood][].
+
+    Kept in the exponent-difference form so the value and its gradient stay finite for
+    arbitrarily large `d_neff` — NUTS needs a usable gradient there, not a NaN.
+    """
+    d_neff = delta_neff_jax(spectrum, x)
+    z = (d_neff + sm_neff - mu_neff) / sigma_neff
+    z_norm = (sm_neff - mu_neff) / sigma_neff
+    return -0.5 * z**2 + 0.5 * z_norm**2
+
+
+def lvk_lnlikelihood_jax(x: SpectrumParams, spectrum: Callable[..., jax.Array]) -> jax.Array:
+    """JAX version of [ptarcade.models_utils.lvk_lnlikelihood][]."""
+    model = _eval_spectrum(spectrum, jnp.asarray(_lvkv_freq), x)
+    resid = jnp.asarray(_lvkv_data) - model
+    chi2 = jnp.dot(resid, resid * jnp.asarray(_lvkv_invvar))
+    return -0.5 * chi2 - lvk_norm
+
+
+def cosmo_lnlikelihood_discovery(cosmo_params: SpectrumParams, spectrum: Callable[..., jax.Array], constraints: list[str]) -> jax.Array:
+    """Sum the requested BBN/LVK cosmo constraints for the discovery backend.
+
+    Parameters
+    ----------
+    cosmo_params : Mapping[str, Any] | tuple[Any, ...]
+        The new-physics parameter values. Prefer a ``{name: value}`` mapping keyed by the
+        model's (unprefixed) parameter names, which is bound to the spectrum signature by
+        name. A tuple is splatted positionally and is only correct if the model's
+        ``parameters`` order matches the ``spectrum(freqs, ...)`` signature order.
+    spectrum : Callable[..., jax.Array]
+        The (JAX) model spectrum returning the GW energy density.
+    constraints : list[str]
+        Any of ``"bbn"``, ``"lvk"``.
+
+    Returns
+    -------
+    jax.Array
+        The summed cosmo log-likelihood contribution, to be added as a `numpyro.factor`.
+
+    """
+    extra = 0.0
+    if "bbn" in constraints:
+        extra += bbn_lnlikelihood_jax(cosmo_params, spectrum)
+    if "lvk" in constraints:
+        extra += lvk_lnlikelihood_jax(cosmo_params, spectrum)
+    return extra

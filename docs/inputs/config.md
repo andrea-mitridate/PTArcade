@@ -10,6 +10,31 @@ file are:
     in PTArcade are NANOGrav 15-year (`pta_data = "NG15"`), NANOGrav 12.5-year
     (`pta_data = "NG12"`), and IPTA DR2 (`pta_data = "IPTA2"`).
 
+    ??? info "Custom data"
+        It is also possible to provide custom data by setting `pta_data` to a dictionary
+        instead of a string. The required keys depend on the run mode:
+
+        **Enterprise mode** — provide timing data, noise parameters, and (optionally)
+        an empirical distribution for jump proposals:
+        ```python
+        pta_data = {
+            "psrs_data": "/path/to/pulsars.pkl",   # pickle file with a list of enterprise Pulsar objects,
+                                                    # or a directory containing .par and .tim files
+            "noise_data": "/path/to/noise.json",   # path to a JSON file containing white noise parameters
+            "emp_dist":   "/path/to/emp_dist.pkl", # path to empirical distribution pickle, or None
+        }
+        ```
+
+        **Ceffyl mode** — provide the path to a directory containing pre-computed
+        Bayesian periodograms in the format expected by [Ceffyl]:
+        ```python
+        pta_data = {
+            "psrs_data": "/path/to/ceffyl_data/", # path to the ceffyl data directory
+            "noise_data": None,
+            "emp_dist":   None,
+        }
+        ```
+
 
 [`N_samples`](#+config.N_samples){ #+config.N_samples }
 
@@ -115,7 +140,7 @@ file are:
         using the function [`get_bf`][ptarcade.chains_utils.compute_bf] defined in the 
         PTArcade [`chains_utils`][chains_utils] module.
 
-    !!! Warning "Mod sel and Ceffyl"
+    !!! Warning "`mod_sel` and Ceffyl"
         At the moment `mod_sel` can only be used with `mode="enterprise"`. We are currently 
         working on adding the `mod_sel` option to the Ceffyl-mode. 
 
@@ -137,7 +162,30 @@ file are:
         derived only without spatial correlations (for these data sets the inclusion
         of pulsar-correlations is not expected to impact the spectral reconstruction significantly). 
         Therefore, for these datasets, ceffyl mode can run only with `corr=False`.
-    
+
+[`cosmo_constraints`](#+config.cosmo_constraints){ #+config.cosmo_constraints }
+
+:   :octicons-milestone-24: Default: `[]` –
+    This parameter controls whether additional cosmological constraints are applied
+    to the GW spectrum on top of the PTA likelihood. It must be a list, and can
+    contain any combination of the following entries:
+
+    * `"bbn"`: applies a Big Bang Nucleosynthesis (BBN) constraint by requiring
+    that the total GW energy density integrated over all frequencies does not
+    exceed the bound on extra relativistic degrees of freedom $\Delta N_{\rm eff}$
+    inferred from measurements of light-element abundances. The constraint uses
+    $N_{\rm eff} = 2.941 \pm 0.143$ (at 68% confidence).
+
+    * `"lvk"`: applies a constraint from the LIGO–Virgo–KAGRA (LVK) upper limits on
+    the stochastic GW background in the 20–1726 Hz frequency band [(LVK 2025)][lvk2025].
+
+    Setting `cosmo_constraints = []` (the default) disables all cosmological constraints.
+
+    !!! warning "Stochastic signals only"
+        Cosmological constraints can only be applied to stochastic signals defined
+        via a `spectrum` function in the model file. They cannot be used with
+        deterministic signals.
+
 [`red_components`](#+config.red_components){ #+config.red_components }
 
 :   :octicons-milestone-24: Default: `30` –
@@ -272,6 +320,7 @@ with the following parameters in the configuration file:
 [chains_utils]: ../utils/chain_utils.md
 [NG15newphys]: https://arxiv.org/abs/2306.16219
 [NG15astro]: https://arxiv.org/abs/2306.16220
+[lvk2025]: https://arxiv.org/abs/2508.20721
 [ENTERPRISE]: https://github.com/nanograv/enterprise
 [GFL]: https://arxiv.org/pdf/2303.15442.pdf
 [Ceffyl]: https://github.com/astrolamb/ceffyl

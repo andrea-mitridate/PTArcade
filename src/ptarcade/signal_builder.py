@@ -1,14 +1,18 @@
 """Module for building PTA signals."""
 from __future__ import annotations
 
+import inspect
 import logging
 import sys
-from importlib.resources import files
 from pathlib import Path
 from types import ModuleType
 from zipfile import ZipFile
 
+import discovery as ds
+import jax
+import jax.numpy as jnp
 import numpy as np
+import numpyro
 from astropy.utils.data import download_file
 from ceffyl import Ceffyl
 from enterprise import constants as const
@@ -23,13 +27,15 @@ from enterprise_extensions.blocks import (common_red_noise_block,
                                           white_noise_block)
 from enterprise_extensions.sampler import get_parameter_groups
 from numpy.typing import NDArray
+from numpyro import distributions as dist
 
-import ptarcade.models_utils as aux
 import ptarcade.ent_mod as mods
+import ptarcade.models_utils as aux
 
 log = logging.getLogger("rich")
 
-# gaussian parameters for the SMBHB signal. 
+
+# gaussian parameters for the SMBHB signal.
 # NG15 parameters are extracted from the holodeck library astro-02-gw
 # IPTA2 parameters are taken from Middleton et al. 2021
 bhb_priors = {"NG15" : [np.array([-15.61492963, 4.70709637]), np.array([[0.27871359, -0.00263617], [-0.00263617, 0.12415383]])],
@@ -86,7 +92,6 @@ def powerlaw2(f: NDArray, log10_Agamma: NDArray, components: int = 2) -> NDArray
         The modified powerlaw.
 
     """
-
     df = np.diff(np.concatenate((np.array([0]), f[::components])))
     return (
         (10 ** log10_Agamma[0]) ** 2
@@ -100,7 +105,6 @@ def powerlaw2(f: NDArray, log10_Agamma: NDArray, components: int = 2) -> NDArray
 
 @parameter.function
 def powerlaw(f, Tspan, log10_A, gamma):
-    
     """Modified powerlaw function.
 
     Powerlaw function modified to work with ceffyl.
@@ -122,7 +126,6 @@ def powerlaw(f, Tspan, log10_A, gamma):
         The modified powerlaw.
 
     """
-    
     return (
         (10**log10_A) ** 2 / 12.0 / np.pi**2 * const.fyr ** (gamma - 3) * f ** (-gamma) / Tspan  # divide by Tspan here
     )
@@ -213,7 +216,6 @@ def ent_builder(
     red_components: int = 30,
     gwb_components: int = 14,
 ) -> signal_base.PTA:
-
     """
     Reads in list of enterprise Pulsar instances and returns a PTA
     object instantiated with user-supplied options.
@@ -276,7 +278,7 @@ def ent_builder(
 
         if bhb_th_prior and (pta_dataset == "NG15" or pta_dataset == "IPTA2"):
 
-            mu, sigma = bhb_priors[pta_dataset]            
+            mu, sigma = bhb_priors[pta_dataset]
 
             if model is None:
                 log10_Agamma_gw = parameter.Normal(mu=mu, sigma=sigma, size=2)("gw_bhb")
@@ -339,7 +341,7 @@ def ent_builder(
             s += np_signal
 
         elif hasattr(model, "spectrum"):
-            spectrum = aux.omega2cross(model.spectrum)
+            spectrum = aux.omega2cross(model.spectrum, likelihood="enterprise")
             cpl_np = spectrum(**model.parameters)
 
             if corr and hasattr(model, "orf"):
@@ -390,7 +392,7 @@ def ent_builder(
             s2 += chrom.dm_exponential_dip(tmin=54500, tmax=55000, idx=2, sign=False, name="dmexp_1")
             if p.toas.max() / const.day > 57850:
                 s2 += chrom.dm_exponential_dip(tmin=57300, tmax=57850, idx=2, sign=False, name="dmexp_2")
-        
+
         models.append(s2(p))
 
     # set up PTA
@@ -521,6 +523,10 @@ def ceffyl_builder(inputs):
         # find ipta data inside dir
         datadir = (ceffyldl / "ng12p5_30f_fs{cp}_ceffyl")
 
+    else:
+        datadir = Path(inputs["config"].pta_data["psrs_data"])
+
+
     ceffyl_pta = Ceffyl.ceffyl(datadir)
 
     params = list(inputs["model"].parameters.values())
@@ -528,11 +534,11 @@ def ceffyl_builder(inputs):
     model = []
 
     model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
-                          psd=aux.omega2cross(inputs["model"].spectrum, ceffyl=True),  
+                          psd=aux.omega2cross(inputs["model"].spectrum, likelihood="ceffyl"),
                           params=params,
                           name=''))
-    
-    
+
+
     if inputs["model"].smbhb:
         mu, sigma = bhb_priors.get(inputs["config"].pta_data, np.array([False, False]))
 
@@ -561,11 +567,169 @@ def ceffyl_builder(inputs):
             bhb_params = [log10_A_bhb, gamma_bhb]
             bhb_signal = powerlaw
 
-            
+
         model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
-                          psd=bhb_signal,  
+                          psd=bhb_signal,
                           params=bhb_params,
                           name=''))
 
     ceffyl_pta.add_signals(model)
     return ceffyl_pta
+
+def discovery_builder(
+    psrs: list[ds.Pulsar],
+    model: ModuleType,
+    corr: bool = False,
+    red_components: int = 30,
+    gwb_components: int = 14,
+) -> ds.ArrayLikelihood:
+
+    with jax.default_device("cpu"):
+        Tspan = ds.getspan(psrs)
+
+        # stochastic process
+        if hasattr(model, "spectrum"):
+            globalgp_psd = aux.omega2cross(model.spectrum, likelihood="discovery", model_name=model.name)
+            globalgp_psd.__signature__ = inspect.signature(model.spectrum)
+            pslmodels = (
+                ds.PulsarLikelihood(
+                    [
+                        psr.residuals,
+                        ds.makenoise_measurement(psr, psr.noisedict),
+                        ds.makegp_ecorr(psr, psr.noisedict),
+                        ds.makegp_timing(psr, svd=True),
+                    ],
+                )
+                for psr in psrs
+            )
+
+            rngp = ds.makecommongp_fourier(psrs, ds.powerlaw, red_components, T=Tspan, name="red_noise")
+            if corr:
+                hdgp = ds.makeglobalgp_fourier(psrs, globalgp_psd, ds.hd_orf, gwb_components, T=Tspan, name=model.name)
+                return ds.ArrayLikelihood(pslmodels, commongp=rngp, globalgp=hdgp)
+
+            curngp = ds.makecommongp_fourier(
+                psrs,
+                globalgp_psd,
+                gwb_components,
+                T=Tspan,
+                common=list(model.parameters),
+                name=model.name,
+            )
+            return ds.ArrayLikelihood(pslmodels, commongp=[rngp, curngp])
+
+        # deterministic delays
+        delay_func = model.signal
+        delay_func.__signature__ = inspect.signature(model.signal)
+
+        pslmodels = (
+            ds.PulsarLikelihood(
+                [
+                    psr.residuals,
+                    ds.makenoise_measurement(psr, psr.noisedict),
+                    ds.makegp_ecorr(psr, psr.noisedict),
+                    ds.makegp_timing(psr, svd=True),
+                    ds.makedelay(
+                        psr,
+                        delay_func,
+                        common=[
+                            par
+                            for par, val in model.parameters.items()
+                            if getattr(val, "common", True) # return false if no "common" attribute
+                        ],
+                        name=model.name,
+                    ),
+                ]
+            )
+            for psr in psrs
+        )
+
+        rngp = ds.makecommongp_fourier(psrs, ds.powerlaw, red_components, T=Tspan, name="red_noise")
+        return ds.ArrayLikelihood(pslmodels, commongp=rngp)
+
+def _sample_numpyro_site(site_name: str, prior_spec):
+    """Register a single numpyro sample site from a translated prior."""
+    if isinstance(prior_spec, aux.LinearExpSpec):
+        lin = numpyro.sample(
+            f"{site_name}__lin", dist.Uniform(10.0**prior_spec.pmin, 10.0**prior_spec.pmax),
+        )
+        return numpyro.deterministic(site_name, jnp.log10(lin))
+    if isinstance(prior_spec, aux.ConstantSpec):
+        return numpyro.deterministic(site_name, jnp.asarray(prior_spec.value))
+    return numpyro.sample(site_name, prior_spec)
+
+
+def discovery_numpyro_model_builder(
+    psrs: list[ds.Pulsar],
+    inputs: dict[str, ModuleType],
+    likelihood_obj: ds.ArrayLikelihood,
+    noisedict: dict | None = None,
+    pta_dataset: str | None = None,
+    bhb_th_prior: bool = False,
+    gamma_bhb: float | None = None,
+    A_bhb_logmin: float | None = None,
+    A_bhb_logmax: float | None = None,
+) -> ds.ArrayLikelihood:
+    ln_likelihood = likelihood_obj.logL
+    params = ln_likelihood.params
+
+    red_noise_gamma_params = []
+    red_noise_amp_params = []
+
+    for p in params:
+        if "red_noise_log10_A" in p:
+            red_noise_amp_params.append(p)
+        elif "red_noise_gamma" in p:
+            red_noise_gamma_params.append(p)
+
+    model_name = inputs["model"].name
+    corr = inputs["config"].corr
+    model_params = inputs["model"].parameters
+    constraints = inputs["config"].cosmo_constraints
+
+    if constraints:
+        # The cosmo constraints evaluate the spectrum once, globally, so a per-pulsar
+        # parameter has no single value to feed it. Fail here, rather than with a
+        # "missing argument" TypeError from inside the traced model.
+        uncommon = [par for par, val in model_params.items() if not getattr(val, "common", True)]
+        if uncommon:
+            msg = (
+                f"cosmo_constraints={constraints} cannot be used with the non-common model "
+                f"parameter(s) {uncommon}: the BBN/LVK likelihoods evaluate the spectrum once "
+                "for the whole array, so every model parameter must be common."
+            )
+            raise ValueError(msg)
+
+    def discovery_model():
+        # new physics priors
+        params = {}
+        for par, val in model_params.items():
+            prior_spec = aux.to_numpyro_prior(val)
+            if getattr(val, "common", True):
+                key = f"{model_name}_{par}" if corr else par
+                params[key] = _sample_numpyro_site(par, prior_spec)
+            else:
+                for psr in psrs:
+                    name = f"{psr.name}_{model_name}_{par}"
+                    params[name] = _sample_numpyro_site(name, prior_spec)
+
+        # Pulsar red noise priors
+        for amp, gam in zip(red_noise_amp_params, red_noise_gamma_params, strict=True):
+            params[amp] = numpyro.sample(amp, dist.Uniform(-20, -11))
+            params[gam] = numpyro.sample(gam, dist.Uniform(0, 7))
+
+        numpyro.factor("ll", ln_likelihood(params))
+
+        if constraints:
+            # keyed by the unprefixed model parameter names, as spectrum(freqs, **kwargs)
+            # expects
+            cosmo_params = {
+                par: params[f"{model_name}_{par}" if corr else par]
+                for par in model_params
+            }
+            numpyro.factor(
+                "cosmo",
+                aux.cosmo_lnlikelihood_discovery(cosmo_params, inputs["model"].spectrum, constraints),
+            )
+
+    return discovery_model
