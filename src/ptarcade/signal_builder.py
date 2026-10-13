@@ -42,8 +42,9 @@ log = logging.getLogger("rich")
 bhb_priors = {"NG15" : [np.array([-15.61492963, 4.70709637]), np.array([[0.27871359, -0.00263617], [-0.00263617, 0.12415383]])],
               "IPTA2" : [np.array([-15.02928454, 4.14290127]), np.array([[0.06869369, 0.00017051], [0.00017051, 0.04681747]])]}
 
-# names carried by the SMBHB parameters in discovery mode. They are prefixed by the
-# model name when the signal is correlated, so match them with str.endswith.
+# names carried by the SMBHB parameters in discovery and ceffyl modes. In discovery they
+# are prefixed by the model name when the signal is correlated, so match them with
+# str.endswith.
 SMBHB_PARAMS = ("gw_bhb_log10_A", "gw_bhb_gamma")
 
 
@@ -139,10 +140,12 @@ def powerlaw2(f: NDArray, log10_Agamma: NDArray, components: int = 2) -> NDArray
 
 
 @parameter.function
-def powerlaw(f, Tspan, log10_A, gamma):
+def powerlaw(f, Tspan, gw_bhb_log10_A, gw_bhb_gamma):
     """Modified powerlaw function.
 
-    Powerlaw function modified to work with ceffyl.
+    Powerlaw function modified to work with ceffyl, for the SMBHB signal. ceffyl passes
+    each parameter to the psd as a kwarg named after it, so the arguments carry the
+    `gw_bhb_` names, which keep them distinct from model parameters such as `log10_A`.
 
     Parameters
     ----------
@@ -150,9 +153,9 @@ def powerlaw(f, Tspan, log10_A, gamma):
         Frequency array.
     Tspan: fload
         Observation time.
-    log10_A : float
+    gw_bhb_log10_A : float
         Log10(amplitude)
-    gamma : float
+    gw_bhb_gamma : float
         Spectral index
 
     Returns
@@ -162,7 +165,12 @@ def powerlaw(f, Tspan, log10_A, gamma):
 
     """
     return (
-        (10**log10_A) ** 2 / 12.0 / np.pi**2 * const.fyr ** (gamma - 3) * f ** (-gamma) / Tspan  # divide by Tspan here
+        (10**gw_bhb_log10_A) ** 2
+        / 12.0
+        / np.pi**2
+        * const.fyr ** (gw_bhb_gamma - 3)
+        * f ** (-gw_bhb_gamma)
+        / Tspan  # divide by Tspan here
     )
 
 
@@ -625,15 +633,15 @@ def ceffyl_builder(inputs):
             A_bhb_logmin, A_bhb_logmax = bhb_log10_A_range(
                 inputs["config"].gamma_bhb, inputs["config"].A_bhb_logmin, inputs["config"].A_bhb_logmax
             )
-            log10_A_bhb = parameter.Uniform(A_bhb_logmin, A_bhb_logmax)("log10_A")
+            log10_A_bhb = parameter.Uniform(A_bhb_logmin, A_bhb_logmax)(SMBHB_PARAMS[0])
 
             # Ceffyl.signal can't take a parameter.Constant (it has no `size`), so a fixed
             # gamma goes through const_params, which ceffyl passes to the psd as a kwarg
             if inputs["config"].gamma_bhb is not None:
                 bhb_params = [log10_A_bhb]
-                bhb_const_params = {"gamma": inputs["config"].gamma_bhb}
+                bhb_const_params = {SMBHB_PARAMS[1]: inputs["config"].gamma_bhb}
             else:
-                bhb_params = [log10_A_bhb, parameter.Uniform(0, 7)("gamma")]
+                bhb_params = [log10_A_bhb, parameter.Uniform(0, 7)(SMBHB_PARAMS[1])]
             bhb_signal = powerlaw
 
 
