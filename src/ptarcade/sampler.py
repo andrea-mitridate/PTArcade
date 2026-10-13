@@ -318,11 +318,11 @@ def setup_sampler(
 
         if inputs["config"].cosmo_constraints:
             spectrum = inputs["model"].spectrum
-            cosmo_params_names = list(inputs["model"].parameters)
+            model_params = inputs["model"].parameters
             constraints = inputs["config"].cosmo_constraints
 
             def _cosmo_lnlikelihood(self, x):
-                return cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names, constraints)
+                return cosmo_lnlikelihood(self, x, spectrum, model_params, constraints)
 
             super_model.get_lnlikelihood = types.MethodType(_cosmo_lnlikelihood, super_model)
 
@@ -358,10 +358,10 @@ def setup_sampler(
         if inputs["config"].cosmo_constraints:
             spectrum = inputs["model"].spectrum
             constraints = inputs["config"].cosmo_constraints
-            cosmo_params_names = list(inputs["model"].parameters)
+            model_params = inputs["model"].parameters
 
             def _cosmo_lnlikelihood(x):
-                return cosmo_lnlikelihood(pta, x, spectrum, cosmo_params_names, constraints)
+                return cosmo_lnlikelihood(pta, x, spectrum, model_params, constraints)
 
             ln_likelihood = _cosmo_lnlikelihood
 

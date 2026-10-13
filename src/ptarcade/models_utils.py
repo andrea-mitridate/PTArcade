@@ -44,6 +44,7 @@ priors_type : typing.Literal["Uniform", "Normal", "TruncNormal", "LinearExp", "C
 from __future__ import annotations
 
 import logging
+import re
 from collections import UserDict, namedtuple
 from collections.abc import Callable, Mapping
 from functools import cache
@@ -830,15 +831,15 @@ def to_prior_range(param: parameter.Parameter | dist.Distribution) -> list[float
     return unbounded
 
 
-def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...]) -> float:
+def delta_neff(spectrum: Callable[..., NDArray], params: SpectrumParams) -> float:
     """Calculate the effective number of relativistic species from a GW spectrum.
 
     Parameters
     ----------
     spectrum : Callable[..., NDArray]
         The function that returns the GW energy density as a fraction of the closure density.
-    params : tuple[Any, ...]
-        The parameters to pass to `spectrum`.
+    params : Mapping[str, Any] | tuple[Any, ...]
+        The parameters to pass to `spectrum`, preferably by name.
 
     Returns
     -------
@@ -846,20 +847,16 @@ def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...]) -> flo
         The effective number of relativistic species contributed by the GW spectrum.
 
     """
-    return 1.78e5 * trapezoid(spectrum(_bbn_f, *params), _bbn_u)
+    return 1.78e5 * trapezoid(_eval_spectrum(spectrum, _bbn_f, params), _bbn_u)
 
 
-def bbn_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray], sm_neff: float = 3.044, mu_neff: float = 2.941, sigma_neff: float = 0.143) -> float:
+def bbn_lnlikelihood(x: SpectrumParams, spectrum: Callable[..., NDArray], sm_neff: float = 3.044, mu_neff: float = 2.941, sigma_neff: float = 0.143) -> float:
     """Calculate the cosmological log-likelihood based on N_eff measurements.
 
     Parameters
     ----------
-    x : NDArray
-        The array of parameter values.
-    param_names : NDArray
-        The names of the parameters in `x`.
-    cosmo_params : list[str]
-        The names of the cosmological parameters to use in the likelihood.
+    x : Mapping[str, Any] | tuple[Any, ...]
+        The model parameter values, preferably by name.
     spectrum : Callable[..., NDArray]
         The function that returns the GW energy density as a fraction of the closure density.
     sm_neff : float, optional
@@ -885,9 +882,9 @@ def bbn_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray], sm_neff: floa
     return -0.5 * z**2 + 0.5 * z_norm**2
 
 
-def lvk_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray]) -> float:
+def lvk_lnlikelihood(x: SpectrumParams, spectrum: Callable[..., NDArray]) -> float:
     """LVK log-likelihood: -½ Σ [(data - model)^2 / σ^2]."""
-    model = spectrum(_lvkv_freq, *x)            # h^2 Ω_GW(f; x)
+    model = _eval_spectrum(spectrum, _lvkv_freq, x)            # h^2 Ω_GW(f; x)
 
     resid = _lvkv_data - model                 # data - model
     # χ² = Σ resid² / σ² = resid · (resid * invvar)
@@ -897,7 +894,39 @@ def lvk_lnlikelihood(x: NDArray, spectrum: Callable[..., NDArray]) -> float:
 
 
 
-def cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names, constraints):
+def cosmo_params_from_sample(x: NDArray, param_names: list[str], model_params: Mapping[str, Any]) -> dict[str, Any]:
+    """Collect the model parameter values for a spectrum call, keyed by name.
+
+    Constants are not sampled, so they are not in `x` and their value is taken from the
+    prior. A vector parameter is sampled as `{name}_0`, `{name}_1`, ...
+
+    Parameters
+    ----------
+    x : NDArray
+        The sample.
+    param_names : list[str]
+        The names of the entries of `x`.
+    model_params : Mapping[str, Any]
+        The model file's `parameters`.
+
+    Returns
+    -------
+    dict[str, Any]
+        `{name: value}` for every model parameter.
+
+    """
+    values = {}
+    for name, par in model_params.items():
+        if isinstance(par, parameter.ConstantParameter):
+            values[name] = par.value
+        elif name in param_names:
+            values[name] = x[param_names.index(name)]
+        else:
+            values[name] = x[[i for i, pn in enumerate(param_names) if re.fullmatch(rf"{re.escape(name)}_\d+", pn)]]
+    return values
+
+
+def cosmo_lnlikelihood(self, x, spectrum, model_params, constraints):
     param_names = list(self.param_names)
 
     if hasattr(self, 'ln_likelihood'):
@@ -917,8 +946,9 @@ def cosmo_lnlikelihood(self, x, spectrum, cosmo_params_names, constraints):
         if nmodel == 0 and self.num_models > 1:
             return base_lnlike
 
-    mask = np.isin(param_names, cosmo_params_names)
-    cosmo_params = x[mask]
+    # bound to the spectrum by name: the order of param_names need not match the
+    # spectrum signature, and constants are not in x at all
+    cosmo_params = cosmo_params_from_sample(x, param_names, model_params)
 
     extra = 0.0
     if "bbn" in constraints:
