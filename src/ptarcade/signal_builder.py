@@ -615,6 +615,7 @@ def ceffyl_builder(inputs):
 
     if inputs["model"].smbhb:
         mu, sigma = bhb_priors.get(inputs["config"].pta_data, np.array([False, False]))
+        bhb_const_params = {}
 
         if mu.all() and inputs["config"].bhb_th_prior:
             bhb_params = [parameter.Normal(mu=mu, sigma=sigma, size=2)("gw_bhb")]
@@ -626,18 +627,20 @@ def ceffyl_builder(inputs):
             )
             log10_A_bhb = parameter.Uniform(A_bhb_logmin, A_bhb_logmax)("log10_A")
 
-            if inputs["config"].gamma_bhb:
-                gamma_bhb = parameter.Constant(inputs["config"].gamma_bhb)('gamma')
+            # Ceffyl.signal can't take a parameter.Constant (it has no `size`), so a fixed
+            # gamma goes through const_params, which ceffyl passes to the psd as a kwarg
+            if inputs["config"].gamma_bhb is not None:
+                bhb_params = [log10_A_bhb]
+                bhb_const_params = {"gamma": inputs["config"].gamma_bhb}
             else:
-                gamma_bhb = parameter.Uniform(0, 7)("gamma")
-
-            bhb_params = [log10_A_bhb, gamma_bhb]
+                bhb_params = [log10_A_bhb, parameter.Uniform(0, 7)("gamma")]
             bhb_signal = powerlaw
 
 
         model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
                           psd=bhb_signal,
                           params=bhb_params,
+                          const_params=bhb_const_params,
                           name=''))
 
     ceffyl_pta.add_signals(model)
