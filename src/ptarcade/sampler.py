@@ -425,7 +425,18 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
             samples_df = pd.DataFrame(samples)
 
             parameter_dict = inputs["model"].parameters
-            prior_dict = {key: to_prior_range(val) for key, val in parameter_dict.items()}
+            prior_dict = {}
+            for key, val in parameter_dict.items():
+                if getattr(val, "common", True):
+                    prior_dict[key] = to_prior_range(val)
+                else:
+                    # a non-common parameter is sampled once per pulsar, under
+                    # '{psr}_{model}_{par}', so give each of those columns the range
+                    suffix = f"_{inputs['model'].name}_{key}"
+                    prior_range = to_prior_range(val)
+                    for col in samples_df.columns:
+                        if col.endswith(suffix):
+                            prior_dict[col] = prior_range
             prior_dict.update(getattr(sampler.model, "smbhb_priors", {}))
             out_dir = Path(inputs["config"].out_dir)
             out_dir.mkdir(exist_ok=True, parents=True)
