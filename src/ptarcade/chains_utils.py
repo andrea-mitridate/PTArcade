@@ -485,7 +485,7 @@ def bf_bootstrap(chain: NDArray, burn: int = 0) -> tuple[float, float]:
     return mean, np.sqrt(var)
 
 
-def compute_bf(chain: NDArray, params: list[str], bootstrap: bool = False) -> tuple[float, float]:  # noqa: FBT001, FBT002
+def compute_bf(chain: NDArray, params: list[str], bootstrap: bool = False, mod_sel_wgt: float = 1.) -> tuple[float, float]:  # noqa: FBT001, FBT002
     """Compute the Bayes factor and estimate its uncertainty.
 
     Parameters
@@ -501,6 +501,9 @@ def compute_bf(chain: NDArray, params: list[str], bootstrap: bool = False) -> tu
     bootstrap : bool, optional
         A flag indicating whether to compute the Bayes factor using a bootstrap method. If True, the Bayes factor will
         be computed using the 'get_bf' function. The bootsrap calculation is significantly slower. Defaults to False.
+    mod_sel_wgt: float, optional
+        If the new physics model was weighted to improve sampling, this will bias the Bayes Factor calculation.
+        If `mod_sel_wgt` was an input in the model file, the value should be supplied here too. Defaults to 1.
 
     Returns
     -------
@@ -538,6 +541,10 @@ def compute_bf(chain: NDArray, params: list[str], bootstrap: bool = False) -> tu
 
     else:
         bf, unc = model_utils.odds_ratio(chain[:, nmodel_idx], models=[0,1])
+
+    # correct for model selection weight
+    bf /= mod_sel_wgt
+    unc /= mod_sel_wgt
 
     return bf, unc
 

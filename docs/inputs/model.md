@@ -249,6 +249,20 @@ The model file can also contain additional (optional) variables that can be used
 :   :octicons-milestone-24: Default: _`False`_ – 
     If set to `True`, the expected signal from SMBHBs will be added to the user-specified signal.
 
+[`mod_sel_wgt`](#+model.mod_sel_wgt){ #+model.mod_sel_wgt }
+
+:   :octicons-milestone-24: Default: _`1.0`_ – 
+    Some models are better supported by the data than others, and a better-supported model is 
+    more likely to be sampled by MCMC. In some cases, this will result in poor sampling of the 
+    less-supported model. To sample both models well, one model may need to be up-weighted or down-weighted. The user can specify a weight on their provided model to help with sampling. 
+    Selecting a value such that `mod_sel_wgt` $< 1$ down-weights the specified model, while 
+    `mod_sel_wgt` $> 1$ up-weights the specified model. This parameter is only relevant if `mod_sel = True` in the [config file][config].
+
+    !!! Warning "Sample weighting and computing Bayes factors"
+        While weighting the models will result in improved sampling and thus a more accurate 
+        Bayes factor computation, we must correct for the weighting when computing the Bayes 
+        factor. This can be done by also specifying `mod_sel_wgt` in [`get_bf`][ptarcade.chains_utils.compute_bf] 
+        defined in the PTArcade [`chains_utils`][chains_utils] module.
 [`orf`](#+model.orf){ #+model.smbhb }
 
 :   :octicons-beaker-24: &nbsp; __Experimental__ – 
@@ -260,4 +274,5 @@ The model file can also contain additional (optional) variables that can be used
   [out_name]: ../outputs.md
   [ng15_np]:  link_to_papaer
   [ng15_models]: https://zenodo.org/record/8084351
-
+  [config]: config.md
+  [chains_utils]: ../utils/chain_utils.md
