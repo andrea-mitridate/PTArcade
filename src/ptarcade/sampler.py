@@ -386,7 +386,7 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
             lineno=62,
         )
 
-        if inputs["config"].mode in ["enteprise", "ceffyl"]:
+        if inputs["config"].mode in ["enterprise", "ceffyl"]:
             try:
                 sampler.sample(
                     x0,
