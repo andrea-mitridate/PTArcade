@@ -782,6 +782,44 @@ def to_numpyro_prior(param: parameter.Parameter | dist.Distribution) -> dist.Dis
     )
 
 
+def to_prior_range(param: parameter.Parameter | dist.Distribution) -> list[float]:
+    """Get the hard bounds of a prior.
+
+    Used by the discovery backend to record parameter ranges in `priors.json`, which
+    [ptarcade.chains_utils.import_to_dataframe][] reads back and
+    [ptarcade.plot_utils.plot_posteriors][] passes to GetDist.
+
+    Parameters
+    ----------
+    param : parameter.Parameter | numpyro.distributions.Distribution
+        The prior to bound.
+
+    Returns
+    -------
+    list[float]
+        `[lower, upper]`, or `[nan, nan]` for a prior with no hard bounds. Entries
+        containing NaN are dropped by [ptarcade.plot_utils.plot_posteriors][].
+
+    """
+    unbounded = [np.nan, np.nan]
+
+    if isinstance(param, dist.Distribution):
+        support = getattr(param, "support", None)
+        lower, upper = getattr(support, "lower_bound", None), getattr(support, "upper_bound", None)
+        if lower is None or upper is None:
+            return unbounded
+        return [float(lower), float(upper)]
+
+    kind = getattr(param, "type", None)
+    kw = getattr(getattr(param, "prior", None), "func_kwargs", {})
+
+    if kind in ("uniform", "linearexp", "truncnormal"):
+        return [float(kw["pmin"]), float(kw["pmax"])]
+
+    # normal, gamma, constant, and user-defined priors have no two-sided hard bounds
+    return unbounded
+
+
 def delta_neff(spectrum: Callable[..., NDArray], params: tuple[Any, ...]) -> float:
     """Calculate the effective number of relativistic species from a GW spectrum.
 
