@@ -47,14 +47,23 @@ file are:
         thinned by a factor of 10. Therefore, the number of MC samples that will be 
         saved is given by `N_samples`/10.
 
+    !!! note "Discovery mode"
+        NUTS chains are not thinned: all `N_samples` samples are saved. They follow
+        `max(N_samples/4, 1000)` warmup steps, which are discarded.
+
 [`mode`](#+config.mode){ #+config.mode }
 
 :   :octicons-milestone-24: Default: `ceffyl` – 
-    PTArcade can be run in two modes: 
+    PTArcade can be run in three modes: 
     
     * `mode = "enterprise"`: In this configuration, the code will analyze the full PTA
     dataset in the time domain by using the numerical techniques implemented in 
     [ENTERPRISE].
+
+    * `mode = "discovery"`: Like `"enterprise"`, the full PTA dataset in the time domain, 
+    but with the JAX likelihoods of [discovery], sampled with NUTS. Model files for this
+    mode write `spectrum` and `signal` with `jax.numpy`. It runs on a GPU if JAX finds
+    one (`pip install ptarcade[cuda]` installs JAX's CUDA build).
 
     * `mode = "ceffyl"`: In this configuration, the code will analyze PTA data at the level
     of the *Bayesian peridograms* (1), and fit the user-specified signal to these
@@ -67,7 +76,7 @@ file are:
 
     !!! warning "Ceffyl and Deterministic Signals"
         The Ceffyl mode can only be used to analyze stochastic signals. If your 
-        signal is deterministic, you have to run the code in ENTERPRISE-mode. 
+        signal is deterministic, you have to run the code in ENTERPRISE- or discovery-mode. 
 
     ??? note "Additional Citations"
         If you use PTArcade in ENTERPRISE-mode, please add the following 
@@ -143,6 +152,21 @@ file are:
     !!! Warning "`mod_sel` and Ceffyl"
         At the moment `mod_sel` can only be used with `mode="enterprise"`. We are currently 
         working on adding the `mod_sel` option to the Ceffyl-mode. 
+
+[`seed`](#+config.seed){ #+config.seed }
+
+:   :octicons-milestone-24: Default: `None` –
+    Discovery mode only: the random seed of the sampler. With `None` every run draws a fresh
+    seed; it is printed and saved as `seed.txt` next to the chain, so setting `seed` to that
+    value repeats the run exactly.
+
+[`target_accept`](#+config.target_accept){ #+config.target_accept }
+
+:   :octicons-milestone-24: Default: `0.8` –
+    Discovery mode only: the acceptance probability that NUTS adapts its step size to during
+    warmup. A higher value gives smaller steps, which avoids divergent transitions in sharply
+    curved posteriors but takes more steps per sample. If a run reports divergent
+    transitions, try `0.9` or `0.95`.
 
 [`corr`](#+config.corr){ #+config.corr }
 
@@ -325,3 +349,4 @@ with the following parameters in the configuration file:
 [ENTERPRISE]: https://github.com/nanograv/enterprise
 [GFL]: https://arxiv.org/pdf/2303.15442.pdf
 [Ceffyl]: https://github.com/astrolamb/ceffyl
+[discovery]: https://github.com/nanograv/discovery

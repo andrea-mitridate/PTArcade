@@ -173,6 +173,8 @@ def check_config(config: ModuleType) -> None:
            "A_bhb_logmin": None,
            "A_bhb_logmax" : None,
            "gamma_bhb" : None,
+           "seed" : None,
+           "target_accept" : 0.8,
        }
 
     for par in default:
@@ -288,6 +290,22 @@ def check_config(config: ModuleType) -> None:
             )
             log.error(error)
             raise SystemExit
+
+    if config.seed is not None and not isinstance(config.seed, int):
+        error = (
+            "The variable 'seed' in the configuration file must be an integer, or None for a "
+            f"fresh random seed each run.\nYou supplied seed={config.seed}, type is {type(config.seed)}."
+        )
+        log.error(error)
+        raise SystemExit
+
+    if not isinstance(config.target_accept, (int, float)) or not 0 < config.target_accept < 1:
+        error = (
+            "The variable 'target_accept' in the configuration file must be a number between 0 and 1.\n"
+            f"You supplied target_accept={config.target_accept}."
+        )
+        log.error(error)
+        raise SystemExit
 
     # checks bhb params
     bhb_pars = {"A_bhb_logmin": config.A_bhb_logmin, "A_bhb_logmax": config.A_bhb_logmax, "gamma_bhb": config.gamma_bhb}

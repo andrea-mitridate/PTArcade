@@ -209,46 +209,6 @@ def powerlaw2_ceffyl(f: NDArray, Tspan: float, gw_bhb: NDArray, components: int 
     )
 
 
-def combine_with_smbhb(psd: Callable[..., jax.Array], np_params: list[str]) -> Callable[..., jax.Array]:
-    """Add the SMBHB powerlaw to a new-physics spectrum.
-
-    [discovery][] reads the parameter names of a spectrum off its signature and then
-    calls it positionally, so the returned function carries an explicit signature
-    `(f, df, *np_params, *SMBHB_PARAMS)`. The SMBHB names have to live in that signature,
-    since the shared GP gives no prefix that would keep them apart from the
-    new-physics parameters. Summing the two spectra into a single
-    prior — rather than handing `discovery` a list of priors — keeps the analytic
-    inverse of the correlated GP prior matrix, which is worth roughly a factor of
-    three per likelihood gradient.
-
-    Parameters
-    ----------
-    psd : Callable[..., jax.Array]
-        The new-physics cross-power spectral density, taking `(f, df, *np_params)`.
-    np_params : list[str]
-        Names of the new-physics parameters, in the order `psd` takes them.
-
-    Returns
-    -------
-    Callable[..., jax.Array]
-        The summed spectrum, with an inspectable signature.
-
-    """
-    n_np = len(np_params)
-
-    def combined(f, df, *args):
-        return psd(f, df, *args[:n_np]) + ds.powerlaw(f, df, *args[n_np:])
-
-    combined.__signature__ = inspect.Signature(
-        [
-            inspect.Parameter(par, inspect.Parameter.POSITIONAL_OR_KEYWORD)
-            for par in ("f", "df", *np_params, *SMBHB_PARAMS)
-        ]
-    )
-
-    return combined
-
-
 def tnequad_conv(noisedict: dict) -> bool:
     """Check equad defintion.
 
@@ -663,6 +623,17 @@ def ceffyl_builder(inputs):
     ceffyl_pta.add_signals(model)
     return ceffyl_pta
 
+def with_signature(fn: Callable[..., jax.Array], names: list[str]) -> Callable[..., jax.Array]:
+    """`fn(f, df, *args)` with the argument names discovery reads off a prior's signature."""
+    def named(f, df, *args):
+        return fn(f, df, *args)
+
+    named.__signature__ = inspect.Signature(
+        [inspect.Parameter(par, inspect.Parameter.POSITIONAL_OR_KEYWORD) for par in ("f", "df", *names)]
+    )
+    return named
+
+
 def discovery_builder(
     psrs: list[ds.Pulsar],
     model: ModuleType,
@@ -670,100 +641,115 @@ def discovery_builder(
     red_components: int = 30,
     gwb_components: int = 14,
 ) -> ds.ArrayLikelihood:
+    """Build the discovery likelihood of `model`.
 
+    The array-wide spectrum (the new-physics spectrum, the SMBHB, or both) shares one GP
+    with the pulsars' red noise when it is uncorrelated, as discovery's
+    `makepowerlaw_crn` does: the two use the same Fourier basis, so a single GP halves the
+    basis and roughly doubles the speed of the likelihood. A correlated spectrum gets its
+    own global GP.
+    """
     with jax.default_device("cpu"):
         Tspan = ds.getspan(psrs)
         smbhb = getattr(model, "smbhb", False)
-
-        # stochastic process
-        if hasattr(model, "spectrum"):
-            globalgp_psd = aux.omega2cross(model.spectrum, likelihood="discovery", model_name=model.name)
-            globalgp_psd.__signature__ = inspect.signature(model.spectrum)
-
-            # add the SMBHB signal to the new-physics spectrum, so that the two share a
-            # single GP and the correlated prior keeps its analytic inverse
-            if smbhb:
-                np_params = [par for par in inspect.signature(model.spectrum).parameters if par != "f"]
-                globalgp_psd = combine_with_smbhb(globalgp_psd, np_params)
-
-            pslmodels = (
-                ds.PulsarLikelihood(
-                    [
-                        psr.residuals,
-                        ds.makenoise_measurement(psr, psr.noisedict),
-                        ds.makegp_ecorr(psr, psr.noisedict),
-                        ds.makegp_timing(psr, svd=True),
-                    ],
-                )
-                for psr in psrs
-            )
-
-            uncommon = [par for par, val in model.parameters.items() if not getattr(val, "common", True)]
-
-            rngp = ds.makecommongp_fourier(psrs, ds.powerlaw, red_components, T=Tspan, name="red_noise")
-            if corr:
-                # a common=False parameter is rejected by input_handler.check_model here
-                hdgp = ds.makeglobalgp_fourier(psrs, globalgp_psd, ds.hd_orf, gwb_components, T=Tspan, name=model.name)
-                return ds.ArrayLikelihood(pslmodels, commongp=rngp, globalgp=hdgp)
-
-            # only the common parameters are shared across pulsars. The rest keep the
-            # per-pulsar names that discovery_numpyro_model_builder samples them under
-            common = [par for par in model.parameters if par not in uncommon]
-
-            curngp = ds.makecommongp_fourier(
-                psrs,
-                globalgp_psd,
-                gwb_components,
-                T=Tspan,
-                common=common + (list(SMBHB_PARAMS) if smbhb else []),
-                name=model.name,
-            )
-            return ds.ArrayLikelihood(pslmodels, commongp=[rngp, curngp])
+        bhb = "gw_bhb"
+        bhb_params = list(SMBHB_PARAMS)
+        spectrum = hasattr(model, "spectrum")
 
         # deterministic delays
-        delay_func = model.signal
-        delay_func.__signature__ = inspect.signature(model.signal)
+        delay = None
+        if hasattr(model, "signal"):
+            delay_func = model.signal
+            delay_func.__signature__ = inspect.signature(model.signal)
 
-        pslmodels = (
+            def delay(psr):
+                return ds.makedelay(
+                    psr,
+                    delay_func,
+                    common=[
+                        par
+                        for par, val in model.parameters.items()
+                        if getattr(val, "common", True) # return false if no "common" attribute
+                    ],
+                    name=model.name,
+                )
+
+        pslmodels = [
             ds.PulsarLikelihood(
                 [
                     psr.residuals,
                     ds.makenoise_measurement(psr, psr.noisedict),
                     ds.makegp_ecorr(psr, psr.noisedict),
                     ds.makegp_timing(psr, svd=True),
-                    ds.makedelay(
-                        psr,
-                        delay_func,
-                        common=[
-                            par
-                            for par, val in model.parameters.items()
-                            if getattr(val, "common", True) # return false if no "common" attribute
-                        ],
-                        name=model.name,
-                    ),
+                    *([delay(psr)] if delay else []),
                 ]
             )
             for psr in psrs
-        )
+        ]
 
-        rngp = ds.makecommongp_fourier(psrs, ds.powerlaw, red_components, T=Tspan, name="red_noise")
+        # the array-wide spectrum: the new-physics spectrum, the SMBHB powerlaw, or their sum.
+        # discovery reads its parameter names off the signature. The global GP of a
+        # correlated spectrum prefixes them with its name; in the uncorrelated case they
+        # share a GP with the red noise, so the new-physics names carry the model name to
+        # keep them apart from the red noise's log10_A and gamma. One summed spectrum, rather
+        # than a list of priors, keeps the analytic inverse of the correlated GP prior
+        np_params = [par for par in inspect.signature(model.spectrum).parameters if par != "f"] if spectrum else []
+        np_names = np_params if corr else [f"{model.name}_{par}" for par in np_params]
+        names = [*np_names, *(bhb_params if smbhb else [])]
+        if spectrum:
+            np_psd = aux.omega2cross(model.spectrum, likelihood="discovery", model_name=model.name)
 
-        if not smbhb:
-            return ds.ArrayLikelihood(pslmodels, commongp=rngp)
+            def gw_psd(f, df, *args):
+                phi = np_psd(f, df, *args[:len(np_names)])
+                return phi + ds.powerlaw(f, df, *args[len(np_names):]) if smbhb else phi
 
-        # a deterministic model has no spectrum to fold the SMBHB signal into, so it gets
-        # its own GP. ds.powerlaw is used directly here: the "gw_bhb" GP name supplies the
-        # prefix that `combine_with_smbhb` has to carry in the parameter names instead.
+            psd = with_signature(gw_psd, names)
+        else:
+            psd = with_signature(ds.powerlaw, bhb_params) if smbhb else None
+
         if corr:
-            bhbgp = ds.makeglobalgp_fourier(
-                psrs, ds.powerlaw, ds.hd_orf, gwb_components, T=Tspan, name="gw_bhb",
-            )
-            return ds.ArrayLikelihood(pslmodels, commongp=rngp, globalgp=bhbgp)
+            # a common=False parameter is rejected by input_handler.check_model here
+            rngp = ds.makecommongp_fourier(psrs, ds.powerlaw, red_components, T=Tspan, name="red_noise")
+            if psd is None:
+                likelihood = ds.ArrayLikelihood(pslmodels, commongp=rngp)
+            else:
+                # without a new-physics spectrum, the GP name supplies the SMBHB prefix
+                psd, name = (psd, model.name) if spectrum else (ds.powerlaw, bhb)
+                hdgp = ds.makeglobalgp_fourier(psrs, psd, ds.hd_orf, gwb_components, T=Tspan, name=name)
+                likelihood = ds.ArrayLikelihood(pslmodels, commongp=rngp, globalgp=hdgp)
+        else:
+            # a per-pulsar new-physics parameter becomes `{psr}_red_noise_{model}_{par}`
+            uncommon = [
+                f"{model.name}_{par}" for par, val in model.parameters.items() if not getattr(val, "common", True)
+            ] if spectrum else []
+            n_components = max(red_components, gwb_components) if psd is not None else red_components
 
-        bhbgp = ds.makecommongp_fourier(
-            psrs, ds.powerlaw, gwb_components, T=Tspan, common=list(SMBHB_PARAMS), name="gw_bhb",
-        )
-        return ds.ArrayLikelihood(pslmodels, commongp=[rngp, bhbgp])
+            def red_noise_psd(f, df, log10_A, gamma, *args):
+                phi = ds.powerlaw(f, df, log10_A, gamma)
+                if red_components < n_components:
+                    phi = jnp.where(jnp.arange(len(f)) < 2 * red_components, phi, 0.0)
+                if psd is None:
+                    return phi
+                n_gw = 2 * gwb_components
+                return phi.at[:n_gw].add(psd(f[:n_gw], df[:n_gw], *args))
+
+            gp = ds.makecommongp_fourier(
+                psrs,
+                with_signature(red_noise_psd, ["log10_A", "gamma", *names]),
+                n_components,
+                T=Tspan,
+                common=[par for par in names if par not in uncommon],
+                name="red_noise",
+            )
+            likelihood = ds.ArrayLikelihood(pslmodels, commongp=gp)
+
+        # build logL now and drop the pulsars' noise kernels (about 7 GB for NG15): without
+        # a delay, logL keeps only small reduced arrays, but ArrayLikelihood would hold the
+        # kernels through psls and vsm for the whole run
+        likelihood.logL
+        del pslmodels, likelihood.psls, likelihood.vsm
+        return likelihood
+
 
 def _sample_numpyro_site(site_name: str, prior_spec):
     """Register a single numpyro sample site from a translated prior."""
@@ -777,6 +763,31 @@ def _sample_numpyro_site(site_name: str, prior_spec):
     return numpyro.sample(site_name, prior_spec)
 
 
+def smbhb_numpyro_priors(
+    prefix: str,
+    pta_dataset: str | dict | None,
+    bhb_th_prior: bool,
+    gamma_bhb: float | None,
+    A_bhb_logmin: float | None,
+    A_bhb_logmax: float | None,
+) -> dict[str, dist.Distribution]:
+    """numpyro sites and priors of the SMBHB parameters named `prefix`.
+
+    The theory-motivated prior is one 2d site, `prefix`, which do_sample splits into the
+    `{prefix}_0`/`{prefix}_1` columns that enterprise writes; the uniform prior is
+    `{prefix}_log10_A` and, unless `gamma_bhb` fixes it, `{prefix}_gamma`.
+    """
+    # pta_dataset is a dict when the user supplies their own data, hence the isinstance
+    bhb_th_pars = bhb_priors.get(pta_dataset) if isinstance(pta_dataset, str) else None
+    if bhb_th_prior and bhb_th_pars is not None:
+        mu, sigma = bhb_th_pars
+        return {prefix: dist.MultivariateNormal(jnp.asarray(mu), covariance_matrix=jnp.asarray(sigma))}
+    dists = {f"{prefix}_log10_A": dist.Uniform(*bhb_log10_A_range(gamma_bhb, A_bhb_logmin, A_bhb_logmax))}
+    if gamma_bhb is None:
+        dists[f"{prefix}_gamma"] = dist.Uniform(0, 7)
+    return dists
+
+
 def discovery_numpyro_model_builder(
     psrs: list[ds.Pulsar],
     inputs: dict[str, ModuleType],
@@ -786,9 +797,12 @@ def discovery_numpyro_model_builder(
     gamma_bhb: float | None = None,
     A_bhb_logmin: float | None = None,
     A_bhb_logmax: float | None = None,
-) -> ds.ArrayLikelihood:
+) -> Callable[[], None]:
+    """Build the numpyro model of a discovery run, with the likelihood `likelihood_obj`."""
+    model = inputs["model"]
     ln_likelihood = likelihood_obj.logL
     params = ln_likelihood.params
+    likelihood_params = set(params)
 
     red_noise_gamma_params = []
     red_noise_amp_params = []
@@ -798,39 +812,33 @@ def discovery_numpyro_model_builder(
             red_noise_amp_params.append(p)
         elif "red_noise_gamma" in p:
             red_noise_gamma_params.append(p)
+    # the pulsars in the order of the red noise sites' entries
+    red_noise_psrs = [p.removesuffix("_red_noise_log10_A") for p in red_noise_amp_params]
+    if [p.removesuffix("_red_noise_gamma") for p in red_noise_gamma_params] != red_noise_psrs:
+        msg = (
+            "red noise amplitudes and spectral indices do not match pulsar by pulsar: "
+            f"{red_noise_amp_params}, {red_noise_gamma_params}"
+        )
+        raise ValueError(msg)
 
-    smbhb = getattr(inputs["model"], "smbhb", False)
+    # theory motivated priors are only available for the datasets in `bhb_priors`
+    if bhb_th_prior and not (isinstance(pta_dataset, str) and pta_dataset in bhb_priors):
+        log.warning(
+            "Theory motivated priors for the SMBHB signal parameters are available only "
+            f"for {' and '.join(bhb_priors)}. Reverting back to log uniform prior for A "
+            "and uniform prior for gamma.\n",
+        )
+    bhb_options = (pta_dataset, bhb_th_prior, gamma_bhb, A_bhb_logmin, A_bhb_logmax)
 
-    # SMBHB priors, keyed by numpyro site name. The site names match the ones ent_builder
-    # uses, so that the chains can be post-processed the same way
-    bhb_dists = {}
-    if smbhb:
-        # the SMBHB parameters are named by `discovery_builder`, which prefixes them with
-        # the model name for a correlated spectrum. Read them back off the likelihood
-        # rather than rebuilding that naming rule here.
-        bhb_amp_param = next(p for p in params if p.endswith(SMBHB_PARAMS[0]))
-        bhb_gamma_param = next(p for p in params if p.endswith(SMBHB_PARAMS[1]))
+    # the SMBHB sites' priors, and the likelihood's names of (log10_A, gamma). discovery
+    # prefixes those with the model name for a correlated spectrum, so they are looked up,
+    # as in common_key
+    smbhb = getattr(model, "smbhb", False)
+    bhb_dists = smbhb_numpyro_priors("gw_bhb", *bhb_options) if smbhb else {}
+    bhb_keys = [next(p for p in params if p.endswith(par)) for par in SMBHB_PARAMS] if smbhb else []
 
-        # theory motivated priors are only available for the datasets in `bhb_priors`.
-        # pta_dataset is a dict when the user supplies their own data, hence the isinstance
-        bhb_th_pars = bhb_priors.get(pta_dataset) if isinstance(pta_dataset, str) else None
-        if bhb_th_prior and bhb_th_pars is None:
-            log.warning(
-                "Theory motivated priors for the SMBHB signal parameters are available only "
-                f"for {' and '.join(bhb_priors)}. Reverting back to log uniform prior for A "
-                "and uniform prior for gamma.\n",
-            )
-
-        if bhb_th_prior and bhb_th_pars is not None:
-            mu, sigma = bhb_th_pars
-            bhb_dists["gw_bhb"] = dist.MultivariateNormal(jnp.asarray(mu), covariance_matrix=jnp.asarray(sigma))
-        else:
-            bhb_dists[SMBHB_PARAMS[0]] = dist.Uniform(*bhb_log10_A_range(gamma_bhb, A_bhb_logmin, A_bhb_logmax))
-            if gamma_bhb is None:
-                bhb_dists[SMBHB_PARAMS[1]] = dist.Uniform(0, 7)
-
-    model_name = inputs["model"].name
-    model_params = inputs["model"].parameters
+    model_name = model.name
+    model_params = model.parameters
     constraints = inputs["config"].cosmo_constraints
 
     def common_key(par: str) -> str:
@@ -865,25 +873,29 @@ def discovery_numpyro_model_builder(
                 params[common_key(par)] = _sample_numpyro_site(par, prior_spec)
             else:
                 for psr in psrs:
+                    # the site keeps one name; in the likelihood, a per-pulsar spectrum
+                    # parameter sits in the red-noise GP (discovery_builder)
                     name = f"{psr.name}_{model_name}_{par}"
-                    params[name] = _sample_numpyro_site(name, prior_spec)
+                    key = f"{psr.name}_red_noise_{model_name}_{par}"
+                    params[key if key in likelihood_params else name] = _sample_numpyro_site(name, prior_spec)
 
-        # SMBHB priors
-        if "gw_bhb" in bhb_dists:
-            gw_bhb = numpyro.sample("gw_bhb", bhb_dists["gw_bhb"])
-            params[bhb_amp_param], params[bhb_gamma_param] = gw_bhb[0], gw_bhb[1]
-        elif smbhb:
-            params[bhb_amp_param] = numpyro.sample(SMBHB_PARAMS[0], bhb_dists[SMBHB_PARAMS[0]])
-            params[bhb_gamma_param] = (
-                numpyro.sample(SMBHB_PARAMS[1], bhb_dists[SMBHB_PARAMS[1]])
-                if SMBHB_PARAMS[1] in bhb_dists
-                else gamma_bhb
+        # SMBHB priors. The 2d gaussian is one site; a fixed gamma has none
+        if smbhb:
+            values = {site: numpyro.sample(site, prior) for site, prior in bhb_dists.items()}
+            log10_A, gamma = values["gw_bhb"] if "gw_bhb" in values else (
+                values["gw_bhb_log10_A"], values.get("gw_bhb_gamma", gamma_bhb)
             )
+            params |= dict(zip(bhb_keys, (log10_A, gamma), strict=True))
 
-        # Pulsar red noise priors
-        for amp, gam in zip(red_noise_amp_params, red_noise_gamma_params, strict=True):
-            params[amp] = numpyro.sample(amp, dist.Uniform(-20, -11))
-            params[gam] = numpyro.sample(gam, dist.Uniform(0, 7))
+        # Pulsar red noise priors: one vector site per parameter rather than one scalar site
+        # per pulsar. NUTS updates each site separately, which on GPU is a small kernel per
+        # site and step: on NG15 this makes a leapfrog step ~3x faster
+        with numpyro.plate("psr", len(red_noise_psrs)):
+            log10_A = numpyro.sample("red_noise_log10_A", dist.Uniform(-20, -11))
+            gamma = numpyro.sample("red_noise_gamma", dist.Uniform(0, 7))
+        params |= dict(zip(red_noise_amp_params, log10_A, strict=True)) | dict(
+            zip(red_noise_gamma_params, gamma, strict=True)
+        )
 
         numpyro.factor("ll", ln_likelihood(params))
 
@@ -891,13 +903,10 @@ def discovery_numpyro_model_builder(
             # keyed by the unprefixed model parameter names, as spectrum(freqs, **kwargs)
             # expects
             cosmo_params = {par: params[common_key(par)] for par in model_params}
-            numpyro.factor(
-                "cosmo",
-                aux.cosmo_lnlikelihood_discovery(cosmo_params, inputs["model"].spectrum, constraints),
-            )
+            numpyro.factor("cosmo", aux.cosmo_lnlikelihood_discovery(cosmo_params, model.spectrum, constraints))
 
     # ranges for the SMBHB parameters, written to priors.json by do_sample. The 2d
-    # gaussian is one vector site, which do_sample splits into gw_bhb_0/gw_bhb_1 columns;
+    # gaussian is one vector site, which do_sample splits into {site}_0/{site}_1 columns;
     # it has no hard bounds, and plot_utils drops the NaN ranges
     discovery_model.smbhb_priors = {}
     for site, prior in bhb_dists.items():
@@ -906,5 +915,12 @@ def discovery_numpyro_model_builder(
                 discovery_model.smbhb_priors[f"{site}_{idx}"] = [np.nan, np.nan]
         else:
             discovery_model.smbhb_priors[site] = aux.to_prior_range(prior)
+
+    # chain columns of the vector sites, which do_sample would otherwise number: the red
+    # noise is written per pulsar, under enterprise's names
+    discovery_model.site_columns = {
+        "red_noise_log10_A": red_noise_amp_params,
+        "red_noise_gamma": red_noise_gamma_params,
+    }
 
     return discovery_model

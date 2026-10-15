@@ -15,6 +15,7 @@ warnings.filterwarnings('ignore', category=AstropyDeprecationWarning)
 import json
 import logging
 import platform
+import secrets
 import shutil
 import sys
 import time
@@ -50,6 +51,10 @@ from ptarcade.input_handler import bcolors
 
 log = logging.getLogger("rich")
 numpyro.enable_x64(use_x64=True)
+
+# fewest NUTS warmup steps in discovery mode, see do_sample
+MIN_WARMUP = 1000
+
 
 def cpu_model() -> str:
     """Get CPU info."""
@@ -255,6 +260,11 @@ def ceffyl_prior_draw(pta: Any) -> Callable[[NDArray, int, float], tuple[NDArray
     return draw_from_prior
 
 
+def chain_dir(inputs: dict[str, ModuleType], input_options: dict[str, Any]) -> Path:
+    """Output directory of one chain: `out_dir/<model name>/chain_<n>`, `n` from the `-n` option."""
+    return Path(inputs["config"].out_dir) / inputs["model"].name / f'chain_{input_options["n"]}'
+
+
 def setup_sampler(
         inputs: dict[str, ModuleType],
         input_options: dict[str, Any],
@@ -282,8 +292,7 @@ def setup_sampler(
         Initial sample.
 
     """
-    out_dir = os.path.join(
-        inputs["config"].out_dir, inputs["model"].name, f'chain_{input_options["n"]}')
+    out_dir = str(chain_dir(inputs, input_options))
 
     if not inputs["config"].resume and os.path.exists(out_dir):
         shutil.rmtree(out_dir)
@@ -396,13 +405,19 @@ def setup_sampler(
         # the default init_to_uniform draws an unbounded site (the 2d gaussian SMBHB prior)
         # from [-2, 2], i.e. log10_A ~ 0, where the likelihood is NaN. Start from a prior
         # draw instead
-        sampler = numpyro.infer.NUTS(numpyro_model, init_strategy=numpyro.infer.init_to_sample)
+        # the target acceptance sets the step size that warmup adapts to: numpyro's 0.8 by
+        # default, higher for posteriors with divergent transitions (see do_sample)
+        sampler = numpyro.infer.NUTS(
+            numpyro_model,
+            init_strategy=numpyro.infer.init_to_sample,
+            target_accept_prob=inputs["config"].target_accept,
+        )
         x0 = None
 
     return sampler, x0
 
 
-def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
+def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray, out_dir: Path | None = None) -> None:
     """Run the configured sampler.
 
     Parameters
@@ -414,6 +429,9 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
 
     x0 : NDArray
         The inital sample.
+    out_dir : Path, optional
+        Where discovery mode writes the chain (enterprise and ceffyl modes get it from
+        `setup_sampler`). Defaults to the directory of chain 0, see `chain_dir`.
 
     """
     N_samples = inputs["config"].N_samples
@@ -463,23 +481,40 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
                 log.exception(err)
                 raise SystemExit from None
         elif inputs["config"].mode == "discovery":
-            mcmc = numpyro.infer.MCMC(
-                sampler, num_chains=1, progress_bar=True, num_warmup=N_samples // 4, num_samples=N_samples
-            )
-            mcmc.run(jax.random.key(42))
+            # a fresh seed for every run unless the config fixes one; it is printed and saved
+            # next to the chain, so any run can be repeated
+            seed = inputs["config"].seed if inputs["config"].seed is not None else secrets.randbits(32)
+            console.print(f"Random seed {seed} (set seed = {seed} in the configuration file to repeat this run)\n")
+            key = jax.random.key(seed)
 
-            # a vector site (the 2d gaussian SMBHB prior) cannot go into a single
-            # dataframe column, so split it into one column per component. This gives
-            # 'gw_bhb_0'/'gw_bhb_1', the names chains_utils maps enterprise's
-            # 'gw_bhb_np_0'/'gw_bhb_np_1' to
+            # NUTS adapts its step size and mass matrix in windows during warmup; fewer than
+            # ~1000 warmup steps (Stan's default) leaves them short and the adapted step size
+            # varies a lot from run to run
+            num_warmup = max(N_samples // 4, MIN_WARMUP)
+            mcmc = numpyro.infer.MCMC(
+                sampler, num_chains=1, progress_bar=True, num_warmup=num_warmup, num_samples=N_samples
+            )
+            # -potential energy = the log posterior in the unconstrained space. Its value
+            # differs from enterprise's by the Jacobians, but it is only used for the chain's
+            # autocorrelation (chains_utils.bf_bootstrap)
+            energy, stats = "potential_energy", ("diverging", "num_steps")
+            mcmc.run(key, extra_fields=(energy, *stats))
+
+            # a vector site cannot go into a single dataframe column, so split it into one
+            # column per component: the red noise under the per-pulsar names the model
+            # gives in site_columns, the 2d gaussian SMBHB prior as 'gw_bhb_0'/'gw_bhb_1',
+            # the names chains_utils maps enterprise's 'gw_bhb_np_0'/'gw_bhb_np_1' to
+            site_columns = getattr(sampler.model, "site_columns", {})
             samples = {}
             for site, draws in mcmc.get_samples().items():
                 draws = np.asarray(draws)
                 if draws.ndim == 1:
                     samples[site] = draws
                 else:
-                    for idx, component in enumerate(draws.reshape(len(draws), -1).T):
-                        samples[f"{site}_{idx}"] = component
+                    components = draws.reshape(len(draws), -1).T
+                    columns = site_columns.get(site, [f"{site}_{idx}" for idx in range(len(components))])
+                    samples |= dict(zip(columns, components, strict=True))
+            samples["log_posterior"] = -np.asarray(mcmc.get_extra_fields()[energy])
             samples_df = pd.DataFrame(samples)
 
             parameter_dict = inputs["model"].parameters
@@ -496,11 +531,27 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray) -> None:
                         if col.endswith(suffix):
                             prior_dict[col] = prior_range
             prior_dict.update(getattr(sampler.model, "smbhb_priors", {}))
-            out_dir = Path(inputs["config"].out_dir)
+            out_dir = Path(out_dir or chain_dir(inputs, {"n": 0}))
             out_dir.mkdir(exist_ok=True, parents=True)
             samples_df.to_feather(out_dir / "chain_1.feather")
             with (out_dir / "priors.json").open("w") as f:
                 json.dump(prior_dict, f)
+            (out_dir / "seed.txt").write_text(f"{seed}\n")
+
+            # NUTS diagnostics per sample, kept out of the chain's parameter columns
+            extra = mcmc.get_extra_fields()
+            sampler_stats = pd.DataFrame({name: np.asarray(extra[name]) for name in stats})
+            sampler_stats.to_feather(out_dir / "sampler_stats.feather")
+            n_div = int(sampler_stats["diverging"].sum())
+            console.print(f"{n_div} divergent transitions in {len(sampler_stats)} samples, "
+                          f"{sampler_stats['num_steps'].mean():.0f} leapfrog steps per sample on average")
+            if n_div:
+                log.warning(
+                    f"{n_div} divergent transitions: the chain may be biased; see "
+                    f"{out_dir / 'sampler_stats.feather'}. A higher target_accept in the configuration "
+                    f"file (it is {inputs['config'].target_accept}; try 0.9 or 0.95) gives smaller steps, "
+                    "which usually removes them at the cost of more steps per sample"
+                )
 
     console.print()
     console.print(Panel.fit("[bold green]Done sampling[/]", border_style="green"))
@@ -553,7 +604,7 @@ def main():
     start_cpu = time.process_time()
     start_real = time.perf_counter()
 
-    do_sample(inputs, sampler, x0)
+    do_sample(inputs, sampler, x0, chain_dir(inputs, input_options))
 
     real_time = time.perf_counter()-start_real
     cpu_time = time.process_time()-start_cpu
