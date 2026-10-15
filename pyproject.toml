@@ -7,7 +7,7 @@ authors = [
     {name = "Andrea Mitridate", email = "andrea.mitridate@nanograv.org"},
     {name = "David Wright", email = "david.wright@nanograv.org"},
 ]
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.11,<3.15"
 dependencies = [
     "ptmcmcsampler>=2.1.4,<3.0.0",
     "mpi4py>=3.1.4,<5.0.0",
@@ -29,6 +29,7 @@ dependencies = [
     "discovery",
     "numpyro>=0.19.0",
     "jax>=0.4.30",
+    "flowjax>=19.1",
 ]
 name = "PTArcade"
 version = "1.1.5"
@@ -46,6 +47,13 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Astronomy",
     "Topic :: Scientific/Engineering :: Physics",
+]
+
+[project.optional-dependencies]
+# GPU build of jax for discovery mode: pip install ptarcade[cuda]. jax has CUDA 13 builds
+# from 0.7.0
+cuda = [
+    "jax[cuda13]>=0.7.0",
 ]
 
 [project.urls]
@@ -75,7 +83,7 @@ docs = [
 [tool.ruff]
 ignore = ["Q000", "ANN", "E402"]
 line-length = 120
-target-version = "py310"
+target-version = "py311"
 fix = true
 unfixable = []
 select = [
@@ -170,8 +178,20 @@ exclude = [
 
 [tool.black]
 line-length = 120
-target-version = ['py310']
+target-version = ['py311']
 include = '\.pyi?$'
+
+[tool.uv]
+# the lock resolves once for every Python version and by default shares a numpy across them,
+# building it from source where it has no wheel (numpy 2.2 on Python 3.14). Requiring a
+# wheel for every version makes it pick, per version, a numpy that has one
+no-build-package = ["numpy"]
+required-environments = [
+    "python_version == '3.11'",
+    "python_version == '3.12'",
+    "python_version == '3.13'",
+    "python_version == '3.14'",
+]
 
 [tool.uv.sources]
 discovery = { git = "https://github.com/nanograv/discovery.git" }
