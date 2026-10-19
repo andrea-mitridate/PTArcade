@@ -108,9 +108,9 @@ def unique_sampling_groups(super_model: hypermodel.Hypermodel) -> list[list[int]
 
 @parameter.function
 def powerlaw2(f: NDArray, log10_Agamma: NDArray, components: int = 2) -> NDArray:
-    """Modified powerlaw function.
+    """Compute a powerlaw PSD from one array of amplitude and spectral index.
 
-    Defines a modified  powerlaw function that takes as input an
+    Defines a modified powerlaw function that takes as input an
     array containing the values of the amplitude and spectral index.
 
     Parameters
@@ -119,8 +119,8 @@ def powerlaw2(f: NDArray, log10_Agamma: NDArray, components: int = 2) -> NDArray
         Frequency array.
     log10_Agamma : NDArray
         Two component NDArray of [Log10(amplitude), spectral index].
-    components : int
-        Number of components for each frequency.
+    components : int, optional
+        Number of components for each frequency (default is 2).
 
     Returns
     -------
@@ -141,7 +141,7 @@ def powerlaw2(f: NDArray, log10_Agamma: NDArray, components: int = 2) -> NDArray
 
 @parameter.function
 def powerlaw(f, Tspan, gw_bhb_log10_A, gw_bhb_gamma):
-    """Modified powerlaw function.
+    """Compute the SMBHB powerlaw PSD for ceffyl.
 
     Powerlaw function modified to work with ceffyl, for the SMBHB signal. ceffyl passes
     each parameter to the psd as a kwarg named after it, so the arguments carry the
@@ -151,12 +151,12 @@ def powerlaw(f, Tspan, gw_bhb_log10_A, gw_bhb_gamma):
     ----------
     f : NDArray
         Frequency array.
-    Tspan: fload
+    Tspan : float
         Observation time.
     gw_bhb_log10_A : float
-        Log10(amplitude)
+        Log10(amplitude).
     gw_bhb_gamma : float
-        Spectral index
+        Spectral index.
 
     Returns
     -------
@@ -176,7 +176,7 @@ def powerlaw(f, Tspan, gw_bhb_log10_A, gw_bhb_gamma):
 
 @parameter.function
 def powerlaw2_ceffyl(f: NDArray, Tspan: float, gw_bhb: NDArray, components: int = 2) -> NDArray:
-    """Modified powerlaw function.
+    """Compute a powerlaw PSD from one array of amplitude and spectral index, for ceffyl.
 
     Defines a modified powerlaw function that takes as input an
     array containing the values of the amplitude and spectral index.
@@ -186,12 +186,12 @@ def powerlaw2_ceffyl(f: NDArray, Tspan: float, gw_bhb: NDArray, components: int 
     ----------
     f : NDArray
         Frequency array.
-    Tspan: fload
+    Tspan : float
         Observation time.
     gw_bhb : NDArray
         Two component NDArray of [Log10(amplitude), spectral index].
-    components : int
-        Count by this number in `f`.
+    components : int, optional
+        Count by this number in `f` (default is 2).
 
     Returns
     -------
@@ -259,47 +259,49 @@ def ent_builder(
     red_components: int = 30,
     gwb_components: int = 14,
 ) -> signal_base.PTA:
-    """
-    Reads in list of enterprise Pulsar instances and returns a PTA
-    object instantiated with user-supplied options.
+    """Build the enterprise PTA of a model from a list of pulsars.
 
     Parameters
     ----------
     psrs : list[Pulsar]
         List of enterprise Pulsar instances.
-    model : ModuleType
-        Object containing the parameters of the exotic
-        signal. Defaults to None.
-    noisedict : dict, optional
-        Dictionary of pulsar noise properties. Defaults to None]
-    pta_dataset : str, optional
-        PTADataset object containing the data for the PTA. Defaults to None.
-    bhb_th_prior : bool
-        If set to True the prior for the bhb signal will be
-        derived by fitting a 2D Gaussian to the distribution of A and gamma
-        in the holodeck library astro-02-gw. Defaults to False.
-    gamma_bhb : float, optional
-        Fixed common bhb process spectral index value. If set to
-        None we vary the spectral index over the range [0, 7]. Defaults to None.
-    A_bhb_logmin : float, optional
-        specifies lower prior on the log amplitude of the bhb
-        common process. If set to None, -18 is used. Defaults to Non
-    A_bhb_logmax : float, optional
-        specifies upper prior on the log amplitude of the bhb
-        common process. If set to None, -14 is used if gamma_bhb = 13/3, -11 is
-        used otherwise. Defaults to None.
-    corr : bool
-        if set to True HD correlations are assumed for GWBs. Defaults to False.
-    red_components : int
-        number of frequency components for the intrinsic
-        red noise. Defaults to 30.
-    gwb_components : int
-        number of frequency components for the common processes. Defaults to 14
+    model : ModuleType | None, optional
+        The user's model file, with the parameters of the new-physics signal (default is
+        None, the SMBHB-only model).
+    noisedict : dict | None, optional
+        Dictionary of pulsar noise properties. If None, the white noise is varied
+        (default is None).
+    pta_dataset : str | None, optional
+        Name of the PTA data set, used to look up the theory-motivated SMBHB prior
+        (default is None).
+    bhb_th_prior : bool, optional
+        If True, the prior for the SMBHB signal is a 2D Gaussian fit to the distribution
+        of A and gamma in the holodeck library astro-02-gw. Only available for NG15 and
+        IPTA2 (default is False).
+    gamma_bhb : float | None, optional
+        Fixed SMBHB spectral index. If None, it is varied over [0, 7] (default is None).
+    A_bhb_logmin : float | None, optional
+        Lower bound of the SMBHB log amplitude prior. If None, -18 is used (default is
+        None).
+    A_bhb_logmax : float | None, optional
+        Upper bound of the SMBHB log amplitude prior. If None, -14 is used if
+        `gamma_bhb` = 13/3, -11 otherwise (default is None).
+    corr : bool, optional
+        If True, HD correlations are assumed for the GWBs (default is False).
+    red_components : int, optional
+        Number of frequency components of the intrinsic red noise (default is 30).
+    gwb_components : int, optional
+        Number of frequency components of the common processes (default is 14).
 
     Returns
     -------
     signal_base.PTA
         PTA object instantiated with user-supplied options.
+
+    Raises
+    ------
+    SystemExit
+        If the DM variation or equad conventions are not consistent across the pulsars.
 
     """
     # timing model
@@ -444,8 +446,24 @@ def ent_builder(
     return pta
 
 
-def ceffyl_builder(inputs):
+def ceffyl_builder(inputs: dict[str, ModuleType]) -> Ceffyl.ceffyl:
+    """Build the ceffyl PTA of a model.
 
+    The free spectrum of the PTA data set in the config is downloaded from zenodo and
+    cached, unless the user supplies their own.
+
+    Parameters
+    ----------
+    inputs : dict[str, ModuleType]
+        The user's inputs, with the model file under "model" and the config file under
+        "config".
+
+    Returns
+    -------
+    Ceffyl.ceffyl
+        The ceffyl PTA, with the model's signals added.
+
+    """
     if inputs["config"].pta_data == "IPTA2":
 
         if inputs["config"].corr:
@@ -624,7 +642,21 @@ def ceffyl_builder(inputs):
     return ceffyl_pta
 
 def with_signature(fn: Callable[..., jax.Array], names: list[str]) -> Callable[..., jax.Array]:
-    """`fn(f, df, *args)` with the argument names discovery reads off a prior's signature."""
+    """Give a positional PSD named arguments, which discovery reads off its signature.
+
+    Parameters
+    ----------
+    fn : Callable[..., jax.Array]
+        A PSD, called as `fn(f, df, *args)`.
+    names : list[str]
+        The names of `args`, in order.
+
+    Returns
+    -------
+    Callable[..., jax.Array]
+        `fn`, with the signature `(f, df, *names)`.
+
+    """
     def named(f, df, *args):
         return fn(f, df, *args)
 

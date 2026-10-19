@@ -278,11 +278,11 @@ def convert_enterprise_pulsars_to_discovery(
         psrs_path = Path(pta_data["psrs_data"]).resolve()
         dataset_name = f"{psrs_path.stem}_{hashlib.sha1(str(psrs_path).encode()).hexdigest()[:8]}"
 
-    out_dir = Path(get_cache_dir("ptarcade")) / "feather_pulsars" / dataset_name
-    out_dir.mkdir(exist_ok = True, parents=True)
+    feather_dir = Path(get_cache_dir("ptarcade")) / "feather_pulsars" / dataset_name
+    feather_dir.mkdir(exist_ok = True, parents=True)
 
     for ep in enterprise_psrs:
-        output_file = out_dir / f"{ep.name}.feather"
+        output_file = feather_dir / f"{ep.name}.feather"
         if output_file.exists():
             # You can also pre-load these manually at this location
             # Not going to load them now. Some pulsars take a large amount of memory to convert.
@@ -293,7 +293,7 @@ def convert_enterprise_pulsars_to_discovery(
         ds.Pulsar.save_feather(ep, str(output_file), noisedict)
 
     for ep in enterprise_psrs:
-        output_file = out_dir / f"{ep.name}.feather"
+        output_file = feather_dir / f"{ep.name}.feather"
         msg = f"Loading {ep.name}"
         log.info(msg)
         # You can also pre-load these manually at this location

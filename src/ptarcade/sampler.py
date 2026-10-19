@@ -292,10 +292,10 @@ def setup_sampler(
         Initial sample.
 
     """
-    out_dir = str(chain_dir(inputs, input_options))
+    chain_path = str(chain_dir(inputs, input_options))
 
-    if not inputs["config"].resume and os.path.exists(out_dir):
-        shutil.rmtree(out_dir)
+    if not inputs["config"].resume and os.path.exists(chain_path):
+        shutil.rmtree(chain_path)
 
     if inputs['config'].mode == "enterprise":
         super_model = hypermodel.HyperModel(pta, log_weights=np.log([1., inputs["model"].mod_sel_wgt]))
@@ -336,7 +336,7 @@ def setup_sampler(
 
         sampler = super_model.setup_sampler(
             resume=inputs["config"].resume,
-            outdir=out_dir,
+            outdir=chain_path,
             sample_nmodel=inputs["config"].mod_sel,
             groups=groups,
             empirical_distr=emp_dist)
@@ -377,7 +377,7 @@ def setup_sampler(
             ln_likelihood = pta.ln_likelihood
 
         sampler = Sampler.setup_sampler(pta,
-            outdir=out_dir,
+            outdir=chain_path,
             logL=ln_likelihood,
             logp=pta.ln_prior,
             jump=False)
@@ -417,7 +417,7 @@ def setup_sampler(
     return sampler, x0
 
 
-def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray, out_dir: Path | None = None) -> None:
+def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray, chain_path: Path | None = None) -> None:
     """Run the configured sampler.
 
     Parameters
@@ -429,7 +429,7 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray, out_dir: 
 
     x0 : NDArray
         The inital sample.
-    out_dir : Path, optional
+    chain_path : Path, optional
         Where discovery mode writes the chain (enterprise and ceffyl modes get it from
         `setup_sampler`). Defaults to the directory of chain 0, see `chain_dir`.
 
@@ -531,24 +531,24 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray, out_dir: 
                         if col.endswith(suffix):
                             prior_dict[col] = prior_range
             prior_dict.update(getattr(sampler.model, "smbhb_priors", {}))
-            out_dir = Path(out_dir or chain_dir(inputs, {"n": 0}))
-            out_dir.mkdir(exist_ok=True, parents=True)
-            samples_df.to_feather(out_dir / "chain_1.feather")
-            with (out_dir / "priors.json").open("w") as f:
+            chain_path = Path(chain_path or chain_dir(inputs, {"n": 0}))
+            chain_path.mkdir(exist_ok=True, parents=True)
+            samples_df.to_feather(chain_path / "chain_1.feather")
+            with (chain_path / "priors.json").open("w") as f:
                 json.dump(prior_dict, f)
-            (out_dir / "seed.txt").write_text(f"{seed}\n")
+            (chain_path / "seed.txt").write_text(f"{seed}\n")
 
             # NUTS diagnostics per sample, kept out of the chain's parameter columns
             extra = mcmc.get_extra_fields()
             sampler_stats = pd.DataFrame({name: np.asarray(extra[name]) for name in stats})
-            sampler_stats.to_feather(out_dir / "sampler_stats.feather")
+            sampler_stats.to_feather(chain_path / "sampler_stats.feather")
             n_div = int(sampler_stats["diverging"].sum())
             console.print(f"{n_div} divergent transitions in {len(sampler_stats)} samples, "
                           f"{sampler_stats['num_steps'].mean():.0f} leapfrog steps per sample on average")
             if n_div:
                 log.warning(
                     f"{n_div} divergent transitions: the chain may be biased; see "
-                    f"{out_dir / 'sampler_stats.feather'}. A higher target_accept in the configuration "
+                    f"{chain_path / 'sampler_stats.feather'}. A higher target_accept in the configuration "
                     f"file (it is {inputs['config'].target_accept}; try 0.9 or 0.95) gives smaller steps, "
                     "which usually removes them at the cost of more steps per sample"
                 )
