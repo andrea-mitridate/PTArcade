@@ -93,7 +93,7 @@ def get_user_args() -> tuple[dict[str, ModuleType], dict[str, Any]] :
         raise SystemExit
 
     inputs = input_handler.load_inputs(input_options)
-    input_handler.check_config(inputs['config'])
+    input_handler.check_config(inputs['config'], inputs['model'])
 
     if not hasattr(inputs["model"], "group"):
         pars_dic = inputs["model"].parameters

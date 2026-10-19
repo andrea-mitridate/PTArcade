@@ -48,6 +48,27 @@ bhb_priors = {"NG15" : [np.array([-15.61492963, 4.70709637]), np.array([[0.27871
 SMBHB_PARAMS = ("gw_bhb_log10_A", "gw_bhb_gamma")
 
 
+def smbhb_only(model: ModuleType | None) -> bool:
+    """Check whether a model is the SMBHB-only model.
+
+    A model file with `parameters = {}` and `smbhb = True` is the SMBHB-only model, the null
+    of model selection. The builders give it the SMBHB signal alone, with no new-physics
+    part.
+
+    Parameters
+    ----------
+    model : ModuleType | None
+        The user's model file, or None if there is none.
+
+    Returns
+    -------
+    bool
+        True if there is no model, or the model file has no parameters.
+
+    """
+    return model is None or not model.parameters
+
+
 def bhb_log10_A_range(
     gamma_bhb: float | None, A_bhb_logmin: float | None, A_bhb_logmax: float | None
 ) -> tuple[float, float]:
@@ -261,6 +282,8 @@ def ent_builder(
 ) -> signal_base.PTA:
     """Build the enterprise PTA of a model from a list of pulsars.
 
+    A model file without parameters gives the SMBHB-only model, as `model=None` does.
+
     Parameters
     ----------
     psrs : list[Pulsar]
@@ -304,6 +327,10 @@ def ent_builder(
         If the DM variation or equad conventions are not consistent across the pulsars.
 
     """
+    # the SMBHB-only model is the null of model selection: build it without a new-physics part
+    if smbhb_only(model):
+        model = None
+
     # timing model
     tm = gp_signals.MarginalizingTimingModel(use_svd=True)
     s = tm
@@ -451,7 +478,8 @@ def ceffyl_builder(inputs: dict[str, ModuleType]) -> Ceffyl.ceffyl:
     """Build the ceffyl PTA of a model.
 
     The free spectrum of the PTA data set in the config is downloaded from zenodo and
-    cached, unless the user supplies their own.
+    cached, unless the user supplies their own. A model file without parameters gives the
+    SMBHB-only model.
 
     Parameters
     ----------
@@ -602,11 +630,14 @@ def ceffyl_builder(inputs: dict[str, ModuleType]) -> Ceffyl.ceffyl:
 
     model = []
 
-    model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
-                          psd=aux.omega2cross(inputs["model"].spectrum, likelihood="ceffyl"),
-                          params=params,
-                          const_params=const_params,
-                          name=''))
+    # the SMBHB-only model has no new-physics signal (ceffyl cannot sample a signal
+    # without parameters)
+    if not smbhb_only(inputs["model"]):
+        model.append(Ceffyl.signal(N_freqs=inputs["config"].gwb_components,
+                              psd=aux.omega2cross(inputs["model"].spectrum, likelihood="ceffyl"),
+                              params=params,
+                              const_params=const_params,
+                              name=''))
 
 
     if inputs["model"].smbhb:
@@ -669,29 +700,53 @@ def with_signature(fn: Callable[..., jax.Array], names: list[str]) -> Callable[.
 
 def discovery_builder(
     psrs: list[ds.Pulsar],
-    model: ModuleType,
+    model: ModuleType | None,
     corr: bool = False,
     red_components: int = 30,
     gwb_components: int = 14,
 ) -> ds.ArrayLikelihood:
-    """Build the discovery likelihood of `model`.
+    """Build the discovery likelihood of a model.
+
+    `model=None`, or a model file without parameters, gives the SMBHB-only model: the null
+    of model selection, as `ent_builder(model=None)` in enterprise mode.
 
     The array-wide spectrum (the new-physics spectrum, the SMBHB, or both) shares one GP
     with the pulsars' red noise when it is uncorrelated, as discovery's
     `makepowerlaw_crn` does: the two use the same Fourier basis, so a single GP halves the
     basis and roughly doubles the speed of the likelihood. A correlated spectrum gets its
     own global GP.
+
+    Parameters
+    ----------
+    psrs : list[ds.Pulsar]
+        The discovery pulsars, each with its `noisedict`.
+    model : ModuleType | None
+        The user's model file, or None for the SMBHB-only model.
+    corr : bool, optional
+        If True, the array-wide spectrum is HD correlated (default is False).
+    red_components : int, optional
+        Number of frequency components of the intrinsic red noise (default is 30).
+    gwb_components : int, optional
+        Number of frequency components of the array-wide spectrum (default is 14).
+
+    Returns
+    -------
+    ds.ArrayLikelihood
+        The likelihood, with `logL` already built and the pulsars' noise kernels dropped.
+
     """
+    if smbhb_only(model):
+        model = None
     with jax.default_device("cpu"):
         Tspan = ds.getspan(psrs)
-        smbhb = getattr(model, "smbhb", False)
+        smbhb = model is None or model.smbhb
         bhb = "gw_bhb"
         bhb_params = list(SMBHB_PARAMS)
-        spectrum = hasattr(model, "spectrum")
+        spectrum = model is not None and hasattr(model, "spectrum")
 
         # deterministic delays
         delay = None
-        if hasattr(model, "signal"):
+        if model is not None and hasattr(model, "signal"):
             delay_func = model.signal
             delay_func.__signature__ = inspect.signature(model.signal)
 

@@ -134,13 +134,15 @@ def load_inputs(input_options: dict[str, Any]) -> dict[str, ModuleType]:
             }
 
 
-def check_config(config: ModuleType) -> None:
+def check_config(config: ModuleType, model: ModuleType) -> None:
     """Validate the config file.
 
     Parameters
     ----------
     config : ModuleType
         The configuration file loaded as a Python module
+    model : ModuleType
+        The model file loaded as a Python module, for the checks of model selection
 
     Raises
     ------
@@ -327,6 +329,17 @@ def check_config(config: ModuleType) -> None:
         )
         log.warning(warning)
 
+    # model selection compares the model against the SMBHB-only model, which a model file
+    # without parameters already is (as signal_builder.smbhb_only)
+    if config.mod_sel and not model.parameters:
+        error = (
+            "mod_sel = True compares the model against the SMBHB-only model, but this model "
+            "file has no parameters, so it is the SMBHB-only model itself. Run model selection "
+            "with a new-physics model file, or set mod_sel = False.\n"
+        )
+        log.error(error)
+        raise SystemExit
+
 
 def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_components: int, mode: str, cosmo_constraints: list, corr: bool = False) -> None:
     """Validate model file.
@@ -368,6 +381,29 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
         log.error(error)
         raise SystemExit
 
+    for par in optional:
+        if not hasattr(model, par):
+            setattr(model, par, optional_default[par])
+            message = f"[bold]{par}[/] not found in the model file, it will be set to [bold]{optional_default[par]}[/].\n"
+            log.info(message, extra={"markup": True})
+
+    # a model without parameters is the SMBHB-only model (signal_builder.smbhb_only); it
+    # needs no spectrum or signal
+    if not model.parameters:
+        if not model.smbhb:
+            error = (
+                "The model file has no parameters, so it has no signal. "
+                "Set smbhb = True to run the SMBHB-only model."
+            )
+            log.error(error)
+            raise SystemExit
+        if cosmo_constraints:
+            error = ("The SMBHB-only model has no new-physics spectrum to apply cosmo_constraints to."
+                     " Please, set cosmo_constraints to [] in the config file.")
+            log.error(error)
+            raise SystemExit
+        return
+
     ## custom_prior_fix
 
     if not (hasattr(model, "signal") or hasattr(model, "spectrum")):
@@ -377,12 +413,6 @@ def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_
         )
         log.error(error)
         raise SystemExit
-
-    for par in optional:
-        if not hasattr(model, par):
-            setattr(model, par, optional_default[par])
-            message = f"[bold]{par}[/] not found in the model file, it will be set to [bold]{optional_default[par]}[/].\n"
-            log.info(message, extra={"markup": True})
 
     # check priors
 

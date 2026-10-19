@@ -248,6 +248,8 @@ The model file can also contain additional (optional) variables that can be used
 
 :   :octicons-milestone-24: Default: _`False`_ – 
     If set to `True`, the expected signal from SMBHBs will be added to the user-specified signal.
+    A model file with `smbhb = True` and `parameters = {}` (no `spectrum` or `signal`) is the
+    SMBHB-only model.
 
 [`mod_sel_wgt`](#+model.mod_sel_wgt){ #+model.mod_sel_wgt }
 
