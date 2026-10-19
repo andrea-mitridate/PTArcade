@@ -260,9 +260,19 @@ def ceffyl_prior_draw(pta: Any) -> Callable[[NDArray, int, float], tuple[NDArray
     return draw_from_prior
 
 
+def run_dir(inputs: dict[str, ModuleType]) -> Path:
+    """Output directory of a model: `out_dir/<model name>`, or `out_dir/<model name>_mod_sel` with `mod_sel`.
+
+    Model selection runs get their own directory, so that they never overwrite the plain run
+    of the same model file.
+    """
+    suffix = "_mod_sel" if inputs["config"].mod_sel else ""
+    return Path(inputs["config"].out_dir) / f'{inputs["model"].name}{suffix}'
+
+
 def chain_dir(inputs: dict[str, ModuleType], input_options: dict[str, Any]) -> Path:
-    """Output directory of one chain: `out_dir/<model name>/chain_<n>`, `n` from the `-n` option."""
-    return Path(inputs["config"].out_dir) / inputs["model"].name / f'chain_{input_options["n"]}'
+    """Output directory of one chain: `run_dir/chain_<n>`, `n` from the `-n` option."""
+    return run_dir(inputs) / f'chain_{input_options["n"]}'
 
 
 def setup_sampler(

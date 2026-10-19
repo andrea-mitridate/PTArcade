@@ -15,6 +15,9 @@ output directory via the [configuration file][out].
 2.  By default, `name=np_model`. The user can specify a different 
 name in the [model file][name].
 
+With [`mod_sel = True`][mod_sel], the directory is `name_mod_sel/` instead, so that a
+model selection run never overwrites a run of the same model without it.
+
 The SMBHB parameters are `gw_bhb_log10_A` and `gw_bhb_gamma`, or `gw_bhb_0` and
 `gw_bhb_1` (the log amplitude and the spectral index) with the theory-motivated prior,
 which samples them jointly. A new-physics model with `smbhb = True` names its own
@@ -81,6 +84,7 @@ model, when running in Ceffyl-mode:
     ![Example priors](../assets/images/ex_priors.png)
 
 [out]: ./inputs/config.md#+config.out_dir
+[mod_sel]: ./inputs/config.md#+config.mod_sel
 [name]: ./inputs/model.md#+model.name
 [ENTERPRISE]: https://github.com/nanograv/enterprise
 [introduction]: ./getting_started/index.md

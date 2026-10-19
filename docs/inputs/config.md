@@ -144,6 +144,10 @@ file are:
     to derive the [Bayes factor][bf] between models by simply taking the ratio of
     samples spent in each bin of the model-indexing variable.
 
+    Model selection runs are saved in `out_dir/<model name>_mod_sel/` instead of
+    `out_dir/<model name>/`, so they never overwrite a run of the same model file without
+    `mod_sel`.
+
     !!! tip "Get the Bayes factor"
         After running with `mod_sel = True`, you can easily derive the Bayes factor 
         using the function [`get_bf`][ptarcade.chains_utils.compute_bf] defined in the 
