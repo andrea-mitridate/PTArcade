@@ -789,6 +789,54 @@ def to_numpyro_prior(param: parameter.Parameter | dist.Distribution) -> dist.Dis
     )
 
 
+def numpyro_site(
+    name: str, spec: dist.Distribution | LinearExpSpec | ConstantSpec,
+) -> tuple[str, dist.Distribution] | None:
+    """Get the numpyro sample site of a parameter.
+
+    Parameters
+    ----------
+    name : str
+        The name of the parameter.
+    spec : numpyro.distributions.Distribution | LinearExpSpec | ConstantSpec
+        Its prior, as `to_numpyro_prior` translates it.
+
+    Returns
+    -------
+    tuple[str, numpyro.distributions.Distribution] | None
+        The name and prior of the site, or None for a constant, which is not sampled. A
+        log-linear prior is sampled as a uniform `<name>__lin`.
+
+    """
+    if isinstance(spec, ConstantSpec):
+        return None
+    if isinstance(spec, LinearExpSpec):
+        return f"{name}__lin", dist.Uniform(10.0**spec.pmin, 10.0**spec.pmax)
+    return name, spec
+
+
+def common_numpyro_sites(parameters: Mapping[str, Any]) -> dict[str, dist.Distribution]:
+    """Get the numpyro sample sites of a model's common parameters.
+
+    These are the parameters discovery-mode model selection fits a pseudo-prior to: a
+    per-pulsar parameter keeps its prior as pseudo-prior, and a constant is not sampled.
+
+    Parameters
+    ----------
+    parameters : Mapping[str, Any]
+        The `parameters` of a model file.
+
+    Returns
+    -------
+    dict[str, numpyro.distributions.Distribution]
+        The sites and their priors, in the order of `parameters`.
+
+    """
+    common = {par: val for par, val in parameters.items() if getattr(val, "common", True)}
+    sites = [numpyro_site(par, to_numpyro_prior(val)) for par, val in common.items()]
+    return dict(site for site in sites if site is not None)
+
+
 def to_prior_range(param: parameter.Parameter | dist.Distribution) -> list[float]:
     """Get the hard bounds of a prior.
 
