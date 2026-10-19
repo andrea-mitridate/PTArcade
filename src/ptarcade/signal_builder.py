@@ -357,7 +357,8 @@ def ent_builder(
                 components=gwb_components,
                 gamma_val=gamma_bhb,
                 orf=orf,
-                name="gw_bhb",
+                # the new-physics model's own copy, as with the theory-motivated prior
+                name="gw_bhb" if model is None else "gw_bhb_np",
                 logmin=A_bhb_logmin,
                 logmax=A_bhb_logmax,
             )
