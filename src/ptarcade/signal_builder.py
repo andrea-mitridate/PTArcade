@@ -31,6 +31,7 @@ from numpy.typing import NDArray
 from numpyro import distributions as dist
 
 import ptarcade.ent_mod as mods
+from ptarcade import discovery_pseudo_prior
 import ptarcade.models_utils as aux
 
 log = logging.getLogger("rich")
@@ -41,12 +42,6 @@ log = logging.getLogger("rich")
 # IPTA2 parameters are taken from Middleton et al. 2021
 bhb_priors = {"NG15" : [np.array([-15.61492963, 4.70709637]), np.array([[0.27871359, -0.00263617], [-0.00263617, 0.12415383]])],
               "IPTA2" : [np.array([-15.02928454, 4.14290127]), np.array([[0.06869369, 0.00017051], [0.00017051, 0.04681747]])]}
-
-# names carried by the SMBHB parameters in discovery and ceffyl modes. In discovery they
-# are prefixed by the model name when the signal is correlated, so match them with
-# str.endswith.
-SMBHB_PARAMS = ("gw_bhb_log10_A", "gw_bhb_gamma")
-
 
 def smbhb_only(model: ModuleType | None) -> bool:
     """Check whether a model is the SMBHB-only model.
@@ -69,10 +64,51 @@ def smbhb_only(model: ModuleType | None) -> bool:
     return model is None or not model.parameters
 
 
+def smbhb_name(model: ModuleType | None, *, mod_sel: bool) -> str:
+    """Name the SMBHB parameters of a discovery model.
+
+    Model selection gives the new-physics model its own SMBHB copy, `gw_bhb_np`, next to the
+    null's `gw_bhb`, so that each model keeps its own SMBHB posterior, as in enterprise mode.
+    Without model selection there is one copy, `gw_bhb`.
+
+    Parameters
+    ----------
+    model : ModuleType | None
+        The user's model file, or None for the SMBHB-only model.
+    mod_sel : bool
+        Whether this is a model selection run.
+
+    Returns
+    -------
+    str
+        `gw_bhb_np` or `gw_bhb`.
+
+    """
+    return "gw_bhb_np" if mod_sel and not smbhb_only(model) else "gw_bhb"
+
+
+def smbhb_params(prefix: str) -> list[str]:
+    """Name the SMBHB parameters of the uniform prior, as discovery and ceffyl modes do.
+
+    Parameters
+    ----------
+    prefix : str
+        `gw_bhb`, or `gw_bhb_np` for a new-physics model in model selection (see
+        `smbhb_name`).
+
+    Returns
+    -------
+    list[str]
+        The names of the log amplitude and of the spectral index.
+
+    """
+    return [f"{prefix}_log10_A", f"{prefix}_gamma"]
+
+
 def bhb_log10_A_range(
     gamma_bhb: float | None, A_bhb_logmin: float | None, A_bhb_logmax: float | None
 ) -> tuple[float, float]:
-    """Bounds of the log-uniform SMBHB amplitude prior, shared by every backend.
+    """Get the bounds of the log-uniform SMBHB amplitude prior, shared by every backend.
 
     Parameters
     ----------
@@ -652,15 +688,16 @@ def ceffyl_builder(inputs: dict[str, ModuleType]) -> Ceffyl.ceffyl:
             A_bhb_logmin, A_bhb_logmax = bhb_log10_A_range(
                 inputs["config"].gamma_bhb, inputs["config"].A_bhb_logmin, inputs["config"].A_bhb_logmax
             )
-            log10_A_bhb = parameter.Uniform(A_bhb_logmin, A_bhb_logmax)(SMBHB_PARAMS[0])
+            log10_A_name, gamma_name = smbhb_params("gw_bhb")
+            log10_A_bhb = parameter.Uniform(A_bhb_logmin, A_bhb_logmax)(log10_A_name)
 
             # Ceffyl.signal can't take a parameter.Constant (it has no `size`), so a fixed
             # gamma goes through const_params, which ceffyl passes to the psd as a kwarg
             if inputs["config"].gamma_bhb is not None:
                 bhb_params = [log10_A_bhb]
-                bhb_const_params = {SMBHB_PARAMS[1]: inputs["config"].gamma_bhb}
+                bhb_const_params = {gamma_name: inputs["config"].gamma_bhb}
             else:
-                bhb_params = [log10_A_bhb, parameter.Uniform(0, 7)(SMBHB_PARAMS[1])]
+                bhb_params = [log10_A_bhb, parameter.Uniform(0, 7)(gamma_name)]
             bhb_signal = powerlaw
 
 
@@ -704,6 +741,7 @@ def discovery_builder(
     corr: bool = False,
     red_components: int = 30,
     gwb_components: int = 14,
+    mod_sel: bool = False,
 ) -> ds.ArrayLikelihood:
     """Build the discovery likelihood of a model.
 
@@ -728,6 +766,9 @@ def discovery_builder(
         Number of frequency components of the intrinsic red noise (default is 30).
     gwb_components : int, optional
         Number of frequency components of the array-wide spectrum (default is 14).
+    mod_sel : bool, optional
+        Whether the likelihood is one of a model selection run, which names the SMBHB
+        parameters of a new-physics model `gw_bhb_np` (default is False, see `smbhb_name`).
 
     Returns
     -------
@@ -740,8 +781,8 @@ def discovery_builder(
     with jax.default_device("cpu"):
         Tspan = ds.getspan(psrs)
         smbhb = model is None or model.smbhb
-        bhb = "gw_bhb"
-        bhb_params = list(SMBHB_PARAMS)
+        bhb = smbhb_name(model, mod_sel=mod_sel)
+        bhb_params = smbhb_params(bhb)
         spectrum = model is not None and hasattr(model, "spectrum")
 
         # deterministic delays
@@ -840,15 +881,61 @@ def discovery_builder(
 
 
 def _sample_numpyro_site(site_name: str, prior_spec):
-    """Register a single numpyro sample site from a translated prior."""
-    if isinstance(prior_spec, aux.LinearExpSpec):
-        lin = numpyro.sample(
-            f"{site_name}__lin", dist.Uniform(10.0**prior_spec.pmin, 10.0**prior_spec.pmax),
-        )
-        return numpyro.deterministic(site_name, jnp.log10(lin))
-    if isinstance(prior_spec, aux.ConstantSpec):
+    """Register a single numpyro sample site from a translated prior.
+
+    Parameters
+    ----------
+    site_name : str
+        The name of the site.
+    prior_spec : numpyro.distributions.Distribution | aux.LinearExpSpec | aux.ConstantSpec
+        The prior, as `aux.to_numpyro_prior` translates it. A log-linear prior is sampled
+        as a uniform `<site_name>__lin`, and a constant is recorded without being sampled.
+
+    Returns
+    -------
+    jax.Array
+        The value of the site.
+
+    """
+    site = aux.numpyro_site(site_name, prior_spec)
+    if site is None:
         return numpyro.deterministic(site_name, jnp.asarray(prior_spec.value))
-    return numpyro.sample(site_name, prior_spec)
+    value = numpyro.sample(*site)
+    if isinstance(prior_spec, aux.LinearExpSpec):
+        return numpyro.deterministic(site_name, jnp.log10(value))
+    return value
+
+
+def _sample_smbhb(
+    prefix: str, dists: dict[str, dist.Distribution], gamma_bhb: float | None,
+) -> tuple[dict[str, jax.Array], tuple[jax.Array, jax.Array | float]]:
+    """Sample the SMBHB parameters of one model.
+
+    Parameters
+    ----------
+    prefix : str
+        The name of the SMBHB parameters, `gw_bhb` or `gw_bhb_np`.
+    dists : dict[str, numpyro.distributions.Distribution]
+        Their sites and priors, see `smbhb_numpyro_priors`.
+    gamma_bhb : float | None
+        Fixed SMBHB spectral index, or None if it is sampled.
+
+    Returns
+    -------
+    values : dict[str, jax.Array]
+        The value of each site.
+    log10_A_gamma : tuple[jax.Array, jax.Array | float]
+        The log amplitude and the spectral index.
+
+    """
+    values = {site: numpyro.sample(site, prior) for site, prior in dists.items()}
+    log10_A_name, gamma_name = smbhb_params(prefix)
+    if prefix in values:
+        # the theory-motivated prior is one 2d site
+        log10_A, gamma = values[prefix]
+    else:
+        log10_A, gamma = values[log10_A_name], values.get(gamma_name, gamma_bhb)
+    return values, (log10_A, gamma)
 
 
 def smbhb_numpyro_priors(
@@ -859,37 +946,111 @@ def smbhb_numpyro_priors(
     A_bhb_logmin: float | None,
     A_bhb_logmax: float | None,
 ) -> dict[str, dist.Distribution]:
-    """numpyro sites and priors of the SMBHB parameters named `prefix`.
+    """Get the numpyro sites and priors of the SMBHB parameters.
 
     The theory-motivated prior is one 2d site, `prefix`, which do_sample splits into the
     `{prefix}_0`/`{prefix}_1` columns that enterprise writes; the uniform prior is
     `{prefix}_log10_A` and, unless `gamma_bhb` fixes it, `{prefix}_gamma`.
+
+    Parameters
+    ----------
+    prefix : str
+        The name of the SMBHB parameters, `gw_bhb` or `gw_bhb_np`.
+    pta_dataset : str | dict | None
+        Name of the PTA data set, or the user's own data as a dict.
+    bhb_th_prior : bool
+        If True, use the theory-motivated prior, when `pta_dataset` has one.
+    gamma_bhb : float | None
+        Fixed SMBHB spectral index, or None if it is sampled.
+    A_bhb_logmin : float | None
+        Lower bound of the log amplitude prior. If None, see `bhb_log10_A_range`.
+    A_bhb_logmax : float | None
+        Upper bound of the log amplitude prior. If None, see `bhb_log10_A_range`.
+
+    Returns
+    -------
+    dict[str, numpyro.distributions.Distribution]
+        The SMBHB sites and their priors.
+
     """
     # pta_dataset is a dict when the user supplies their own data, hence the isinstance
     bhb_th_pars = bhb_priors.get(pta_dataset) if isinstance(pta_dataset, str) else None
     if bhb_th_prior and bhb_th_pars is not None:
         mu, sigma = bhb_th_pars
         return {prefix: dist.MultivariateNormal(jnp.asarray(mu), covariance_matrix=jnp.asarray(sigma))}
-    dists = {f"{prefix}_log10_A": dist.Uniform(*bhb_log10_A_range(gamma_bhb, A_bhb_logmin, A_bhb_logmax))}
+    log10_A_name, gamma_name = smbhb_params(prefix)
+    dists = {log10_A_name: dist.Uniform(*bhb_log10_A_range(gamma_bhb, A_bhb_logmin, A_bhb_logmax))}
     if gamma_bhb is None:
-        dists[f"{prefix}_gamma"] = dist.Uniform(0, 7)
+        dists[gamma_name] = dist.Uniform(0, 7)
     return dists
 
 
 def discovery_numpyro_model_builder(
     psrs: list[ds.Pulsar],
     inputs: dict[str, ModuleType],
-    likelihood_obj: ds.ArrayLikelihood,
+    likelihoods: dict[int, ds.ArrayLikelihood],
+    pseudo_prior_dir: Path,
     pta_dataset: str | None = None,
     bhb_th_prior: bool = False,
     gamma_bhb: float | None = None,
     A_bhb_logmin: float | None = None,
     A_bhb_logmax: float | None = None,
 ) -> Callable[[], None]:
-    """Build the numpyro model of a discovery run, with the likelihood `likelihood_obj`."""
+    """Build the numpyro model of a discovery run.
+
+    `likelihoods` is `{0: model}`, or `{0: SMBHB-only null, 1: model}` for model selection,
+    as `initialize_pta` returns them. Model selection samples the model index `nmodel`
+    (prior odds `mod_sel_wgt`) along with both models' parameters: the red noise is shared,
+    and while one model is active the parameters only the other model uses follow a
+    pseudo-prior, fit to the runs named by `pseudo_prior` and `null_pseudo_prior` in the
+    config or loaded from earlier fits (see `discovery_pseudo_prior`). New fits are saved
+    in `pseudo_prior_dir`.
+
+    Parameters
+    ----------
+    psrs : list[ds.Pulsar]
+        The discovery pulsars.
+    inputs : dict[str, ModuleType]
+        The user's inputs, with the model file under "model" and the config file under
+        "config".
+    likelihoods : dict[int, ds.ArrayLikelihood]
+        The likelihood of each model, keyed by model index.
+    pseudo_prior_dir : Path
+        Where new pseudo-prior fits are saved, `out_dir/<model name>_mod_sel/pseudo_priors`:
+        outside the chain's directory, which a new run deletes.
+    pta_dataset : str | None, optional
+        Name of the PTA data set, used to look up the theory-motivated SMBHB prior
+        (default is None).
+    bhb_th_prior : bool, optional
+        If True, use the theory-motivated SMBHB prior, when `pta_dataset` has one
+        (default is False).
+    gamma_bhb : float | None, optional
+        Fixed SMBHB spectral index, or None if it is sampled (default is None).
+    A_bhb_logmin : float | None, optional
+        Lower bound of the SMBHB log amplitude prior (default is None, see
+        `bhb_log10_A_range`).
+    A_bhb_logmax : float | None, optional
+        Upper bound of the SMBHB log amplitude prior (default is None, see
+        `bhb_log10_A_range`).
+
+    Returns
+    -------
+    Callable[[], None]
+        The numpyro model. Its `smbhb_priors` attribute holds the ranges of the SMBHB
+        parameters for priors.json, and its `site_columns` attribute the chain columns of
+        the vector sites.
+
+    Raises
+    ------
+    ValueError
+        If the red noise amplitudes and spectral indices do not match pulsar by pulsar, or
+        `cosmo_constraints` is used with a non-common model parameter.
+
+    """
+    mod_sel = 1 in likelihoods
     model = inputs["model"]
-    ln_likelihood = likelihood_obj.logL
-    params = ln_likelihood.params
+    model_ln_likelihood = likelihoods[1 if mod_sel else 0].logL
+    params = model_ln_likelihood.params
     likelihood_params = set(params)
 
     red_noise_gamma_params = []
@@ -918,12 +1079,15 @@ def discovery_numpyro_model_builder(
         )
     bhb_options = (pta_dataset, bhb_th_prior, gamma_bhb, A_bhb_logmin, A_bhb_logmax)
 
-    # the SMBHB sites' priors, and the likelihood's names of (log10_A, gamma). discovery
-    # prefixes those with the model name for a correlated spectrum, so they are looked up,
-    # as in common_key
-    smbhb = getattr(model, "smbhb", False)
-    bhb_dists = smbhb_numpyro_priors("gw_bhb", *bhb_options) if smbhb else {}
-    bhb_keys = [next(p for p in params if p.endswith(par)) for par in SMBHB_PARAMS] if smbhb else []
+    # the SMBHB of the new-physics model (or of the SMBHB-only model) and, for model
+    # selection, the null's own copy, named as in discovery_builder. discovery prefixes the
+    # new-physics model's likelihood parameters with the model name for a correlated
+    # spectrum, so their names are looked up, as in common_key
+    smbhb = smbhb_only(model) or model.smbhb
+    bhb = smbhb_name(model, mod_sel=mod_sel)
+    bhb_dists = smbhb_numpyro_priors(bhb, *bhb_options) if smbhb else {}
+    bhb_keys = [next(p for p in params if p.endswith(name)) for name in smbhb_params(bhb)] if smbhb else []
+    null_bhb_dists = smbhb_numpyro_priors("gw_bhb", *bhb_options) if mod_sel else {}
 
     model_name = model.name
     model_params = model.parameters
@@ -935,6 +1099,17 @@ def discovery_numpyro_model_builder(
         discovery prefixes it with the model name for a correlated spectrum, but a
         deterministic delay keeps the bare name whatever `corr` is, so the key is looked
         up rather than derived from `corr`.
+
+        Parameters
+        ----------
+        par : str
+            The name of the parameter in the model file.
+
+        Returns
+        -------
+        str
+            The name of the parameter in the likelihood.
+
         """
         prefixed = f"{model_name}_{par}"
         return prefixed if prefixed in params else par
@@ -952,6 +1127,41 @@ def discovery_numpyro_model_builder(
             )
             raise ValueError(msg)
 
+    if mod_sel:
+        null_ln_likelihood = likelihoods[0].logL
+        # the sites only one model uses. Per-pulsar parameters keep their prior as
+        # pseudo-prior (they are left out of model_sites), which is valid and costs little
+        # when they are prior-dominated, as e.g. ULDM phases are
+        model_sites = aux.common_numpyro_sites(model_params)
+        model_log_ratio, null_log_ratio = discovery_pseudo_prior.log_ratios(
+            inputs["config"], model_sites | bhb_dists, null_bhb_dists, pseudo_prior_dir,
+        )
+        # prior probability of the new-physics model; mod_sel_wgt is the prior odds, as in
+        # enterprise's HyperModel and chains_utils.compute_bf
+        model_prior_prob = model.mod_sel_wgt / (1 + model.mod_sel_wgt)
+
+    def model_ll(params: dict[str, jax.Array]) -> jax.Array:
+        """Compute the log likelihood of the new-physics model, cosmo constraints included.
+
+        Parameters
+        ----------
+        params : dict[str, jax.Array]
+            The likelihood's parameters.
+
+        Returns
+        -------
+        jax.Array
+            The log likelihood.
+
+        """
+        ll = model_ln_likelihood(params)
+        if constraints:
+            # keyed by the unprefixed model parameter names, as spectrum(freqs, **kwargs)
+            # expects
+            cosmo_params = {par: params[common_key(par)] for par in model_params}
+            ll = ll + aux.cosmo_lnlikelihood_discovery(cosmo_params, model.spectrum, constraints)
+        return ll
+
     def discovery_model():
         # new physics priors
         params = {}
@@ -967,13 +1177,15 @@ def discovery_numpyro_model_builder(
                     key = f"{psr.name}_red_noise_{model_name}_{par}"
                     params[key if key in likelihood_params else name] = _sample_numpyro_site(name, prior_spec)
 
-        # SMBHB priors. The 2d gaussian is one site; a fixed gamma has none
+        # SMBHB priors, the null's included. The 2d gaussian is one site; a fixed gamma
+        # has none
+        bhb_values = {}
         if smbhb:
-            values = {site: numpyro.sample(site, prior) for site, prior in bhb_dists.items()}
-            log10_A, gamma = values["gw_bhb"] if "gw_bhb" in values else (
-                values["gw_bhb_log10_A"], values.get("gw_bhb_gamma", gamma_bhb)
-            )
-            params |= dict(zip(bhb_keys, (log10_A, gamma), strict=True))
+            bhb_values, log10_A_gamma = _sample_smbhb(bhb, bhb_dists, gamma_bhb)
+            params |= dict(zip(bhb_keys, log10_A_gamma, strict=True))
+        if mod_sel:
+            null_bhb_values, log10_A_gamma = _sample_smbhb("gw_bhb", null_bhb_dists, gamma_bhb)
+            params |= dict(zip(smbhb_params("gw_bhb"), log10_A_gamma, strict=True))
 
         # Pulsar red noise priors: one vector site per parameter rather than one scalar site
         # per pulsar. NUTS updates each site separately, which on GPU is a small kernel per
@@ -985,19 +1197,38 @@ def discovery_numpyro_model_builder(
             zip(red_noise_gamma_params, gamma, strict=True)
         )
 
-        numpyro.factor("ll", ln_likelihood(params))
+        if not mod_sel:
+            numpyro.factor("ll", model_ll(params))
+            return
 
-        if constraints:
-            # keyed by the unprefixed model parameter names, as spectrum(freqs, **kwargs)
-            # expects
-            cosmo_params = {par: params[common_key(par)] for par in model_params}
-            numpyro.factor("cosmo", aux.cosmo_lnlikelihood_discovery(cosmo_params, model.spectrum, constraints))
+        nmodel = numpyro.sample("nmodel", dist.Bernoulli(model_prior_prob))
+        active = nmodel == 1
+
+        # only the active model's likelihood is evaluated
+        numpyro.factor("ll", jax.lax.cond(active, model_ll, null_ln_likelihood, params))
+        # the values of the model's own sites; a log-linear prior is sampled as
+        # `<par>__lin`. 10**log10(lin) only rounds past the prior's bounds within ~1e-15 of
+        # them, i.e. at an unconstrained value |u| > 33, which NUTS does not reach
+        model_values = {
+            site: 10.0 ** params[common_key(site.removesuffix("__lin"))] if site.endswith("__lin")
+            else params[common_key(site)]
+            for site in model_sites
+        } | bhb_values
+        # only the pseudo-prior of the inactive model's parameters is evaluated: with
+        # jnp.where, a NaN gradient of the other one (evaluated far from where it was fit)
+        # would still reach NUTS, as 0 * NaN
+        numpyro.factor(
+            "pseudo",
+            jax.lax.cond(
+                active, lambda: null_log_ratio(null_bhb_values), lambda: model_log_ratio(model_values),
+            ),
+        )
 
     # ranges for the SMBHB parameters, written to priors.json by do_sample. The 2d
     # gaussian is one vector site, which do_sample splits into {site}_0/{site}_1 columns;
     # it has no hard bounds, and plot_utils drops the NaN ranges
     discovery_model.smbhb_priors = {}
-    for site, prior in bhb_dists.items():
+    for site, prior in (bhb_dists | null_bhb_dists).items():
         if prior.event_shape:
             for idx in range(prior.event_shape[0]):
                 discovery_model.smbhb_priors[f"{site}_{idx}"] = [np.nan, np.nan]

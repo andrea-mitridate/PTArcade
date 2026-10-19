@@ -153,9 +153,47 @@ file are:
         using the function [`get_bf`][ptarcade.chains_utils.compute_bf] defined in the 
         PTArcade [`chains_utils`][chains_utils] module.
 
-    !!! Warning "`mod_sel` and Ceffyl"
-        At the moment `mod_sel` can only be used with `mode="enterprise"`. We are currently 
-        working on adding the `mod_sel` option to the Ceffyl-mode. 
+    !!! Warning "`mod_sel` and ceffyl mode"
+        At the moment `mod_sel` can only be used with `mode="enterprise"` and `mode="discovery"`.
+
+    ??? info "`mod_sel` in discovery mode"
+        In discovery mode, while one model is active, the parameters that only the other model
+        uses follow a *pseudo-prior* fitted to earlier runs, which lets the chain switch models
+        often. It needs two runs of the same dataset and SMBHB prior, in any mode
+        (`mode = "ceffyl"` takes a few minutes):
+
+        1. your model, without `mod_sel`;
+        2. the SMBHB-only model, a model file with no parameters:
+        ```python
+        name = "smbhb_only"
+        smbhb = True
+        parameters = {}
+        ```
+
+        Then point [`pseudo_prior`](#+config.pseudo_prior) and
+        [`null_pseudo_prior`](#+config.null_pseudo_prior) at their output directories. The
+        pseudo-priors are fitted at the start of the run (a few minutes) and saved in
+        `out_dir/<model name>_mod_sel/pseudo_priors/` as `pseudo_prior.eqx` and
+        `null_pseudo_prior.eqx`, each with a `.json`. A later run reuses them as long as
+        the runs they were fitted to are unchanged; you can also point the two settings at
+        these files directly. The pseudo-priors never change the Bayes factor, only how
+        quickly it converges.
+
+[`pseudo_prior`](#+config.pseudo_prior){ #+config.pseudo_prior }
+
+:   :octicons-milestone-24: Default: `None` –
+    Discovery mode with `mod_sel = True` only: the output directory of an earlier run of
+    the same model file, `out_dir/<model name>/` (for example `"./chains/my_model/"`), or
+    the `pseudo_prior.eqx` an earlier model selection run of this model saved in
+    `out_dir/<model name>_mod_sel/pseudo_priors/`.
+
+[`null_pseudo_prior`](#+config.null_pseudo_prior){ #+config.null_pseudo_prior }
+
+:   :octicons-milestone-24: Default: `None` –
+    Discovery mode with `mod_sel = True` only: the output directory of an earlier run of
+    the SMBHB-only model (one such run serves every model on the same dataset), or the
+    `null_pseudo_prior.eqx` an earlier model selection run saved in
+    `out_dir/<model name>_mod_sel/pseudo_priors/`.
 
 [`seed`](#+config.seed){ #+config.seed }
 

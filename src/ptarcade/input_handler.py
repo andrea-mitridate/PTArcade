@@ -8,6 +8,7 @@ import os
 from dataclasses import dataclass
 from importlib import util
 from importlib.resources import files
+from pathlib import Path
 from types import ModuleType
 from typing import Any
 
@@ -15,6 +16,8 @@ import jax
 import numpy as np
 from enterprise.pulsar import Pulsar
 from enterprise_extensions import model_utils
+
+import ptarcade.models_utils as aux
 
 log = logging.getLogger("rich")
 
@@ -175,6 +178,8 @@ def check_config(config: ModuleType, model: ModuleType) -> None:
            "A_bhb_logmin": None,
            "A_bhb_logmax" : None,
            "gamma_bhb" : None,
+           "pseudo_prior" : None,
+           "null_pseudo_prior" : None,
            "seed" : None,
            "target_accept" : 0.8,
        }
@@ -339,6 +344,33 @@ def check_config(config: ModuleType, model: ModuleType) -> None:
         )
         log.error(error)
         raise SystemExit
+
+    # model selection in discovery mode fits its pseudo-priors to earlier runs, or loads
+    # earlier fits: the runs each config key names
+    if config.mode == "discovery" and config.mod_sel:
+        runs = {"null_pseudo_prior": "the SMBHB-only model (a model file with parameters = {} and smbhb = True)"}
+        # a model without common sampled parameters or an SMBHB has nothing to fit a
+        # pseudo-prior to. check_model sets the default of smbhb only later, hence getattr
+        if getattr(model, "smbhb", False) or aux.common_numpyro_sites(model.parameters):
+            runs["pseudo_prior"] = "this model"
+        elif config.pseudo_prior:
+            log.warning(
+                "The model has no common sampled parameters and no SMBHB, so its pseudo-prior "
+                f"is its prior and pseudo_prior={config.pseudo_prior} is ignored.\n",
+            )
+        for key, run in runs.items():
+            value = getattr(config, key)
+            path = Path(value or "")
+            saved_fit = path.suffix == ".eqx" and path.is_file() and path.with_suffix(".json").is_file()
+            if not value or not (saved_fit or path.is_dir()):
+                error = (
+                    f"mod_sel = True in discovery mode needs '{key}' in the configuration file: "
+                    f"the output directory of an earlier run of {run}, in any mode, or the "
+                    f"{key}.eqx that an earlier model selection run saved (with its .json).\n"
+                    f"You supplied {key}={value}."
+                )
+                log.error(error)
+                raise SystemExit
 
 
 def check_model(model: ModuleType, psrs: list[Pulsar], red_components: int, gwb_components: int, mode: str, cosmo_constraints: list, corr: bool = False) -> None:

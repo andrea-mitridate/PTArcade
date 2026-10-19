@@ -198,14 +198,21 @@ def initialize_pta(inputs: dict[str, Any], psrs: list[Pulsar] | None, noise_para
         discovery_psrs = pta_importer.convert_enterprise_pulsars_to_discovery(
             psrs, inputs["config"].pta_data, noisedict=noise_params
         )
-        pta = signal_builder.discovery_builder(
-            psrs=discovery_psrs,
-            model=inputs["model"],
-            corr=inputs["config"].corr,
-            red_components=inputs["config"].red_components,
-            gwb_components=inputs["config"].gwb_components,
-        )
-        pta.psrs = discovery_psrs
+        # as in enterprise mode: {0: model}, or {0: SMBHB-only null, 1: model} for model selection
+        models = [None, inputs["model"]] if inputs["config"].mod_sel else [inputs["model"]]
+        pta = {
+            idx: signal_builder.discovery_builder(
+                psrs=discovery_psrs,
+                model=model,
+                corr=inputs["config"].corr,
+                red_components=inputs["config"].red_components,
+                gwb_components=inputs["config"].gwb_components,
+                mod_sel=inputs["config"].mod_sel,
+            )
+            for idx, model in enumerate(models)
+        }
+        for likelihood in pta.values():
+            likelihood.psrs = discovery_psrs
 
     return pta
 
@@ -264,7 +271,7 @@ def run_dir(inputs: dict[str, ModuleType]) -> Path:
     """Output directory of a model: `out_dir/<model name>`, or `out_dir/<model name>_mod_sel` with `mod_sel`.
 
     Model selection runs get their own directory, so that they never overwrite the plain run
-    of the same model file.
+    of the same model file, which discovery mode fits the pseudo-prior to.
     """
     suffix = "_mod_sel" if inputs["config"].mod_sel else ""
     return Path(inputs["config"].out_dir) / f'{inputs["model"].name}{suffix}'
@@ -403,9 +410,10 @@ def setup_sampler(
         x0 = pta.initial_samples()
     elif inputs["config"].mode == "discovery":
         numpyro_model = signal_builder.discovery_numpyro_model_builder(
-            pta.psrs,
+            pta[0].psrs,
             inputs,
             pta,
+            run_dir(inputs) / "pseudo_priors",
             pta_dataset=inputs["config"].pta_data,
             bhb_th_prior=inputs["config"].bhb_th_prior,
             gamma_bhb=inputs["config"].gamma_bhb,
@@ -422,6 +430,9 @@ def setup_sampler(
             init_strategy=numpyro.infer.init_to_sample,
             target_accept_prob=inputs["config"].target_accept,
         )
+        if inputs["config"].mod_sel:
+            # Gibbs updates of the model index between NUTS steps on the rest
+            sampler = numpyro.infer.DiscreteHMCGibbs(sampler, modified=True)
         x0 = None
 
     return sampler, x0
@@ -507,13 +518,15 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray, chain_pat
             # -potential energy = the log posterior in the unconstrained space. Its value
             # differs from enterprise's by the Jacobians, but it is only used for the chain's
             # autocorrelation (chains_utils.bf_bootstrap)
-            energy, stats = "potential_energy", ("diverging", "num_steps")
+            hmc = "hmc_state." if inputs["config"].mod_sel else ""
+            energy, stats = f"{hmc}potential_energy", (f"{hmc}diverging", f"{hmc}num_steps")
             mcmc.run(key, extra_fields=(energy, *stats))
 
             # a vector site cannot go into a single dataframe column, so split it into one
             # column per component: the red noise under the per-pulsar names the model
-            # gives in site_columns, the 2d gaussian SMBHB prior as 'gw_bhb_0'/'gw_bhb_1',
-            # the names chains_utils maps enterprise's 'gw_bhb_np_0'/'gw_bhb_np_1' to
+            # gives in site_columns, the 2d gaussian SMBHB prior as '<site>_0'/'<site>_1',
+            # as enterprise does ('gw_bhb', and 'gw_bhb_np' for the new-physics model's
+            # copy in model selection, see signal_builder.smbhb_name)
             site_columns = getattr(sampler.model, "site_columns", {})
             samples = {}
             for site, draws in mcmc.get_samples().items():
@@ -550,7 +563,7 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray, chain_pat
 
             # NUTS diagnostics per sample, kept out of the chain's parameter columns
             extra = mcmc.get_extra_fields()
-            sampler_stats = pd.DataFrame({name: np.asarray(extra[name]) for name in stats})
+            sampler_stats = pd.DataFrame({name.removeprefix(hmc): np.asarray(extra[name]) for name in stats})
             sampler_stats.to_feather(chain_path / "sampler_stats.feather")
             n_div = int(sampler_stats["diverging"].sum())
             console.print(f"{n_div} divergent transitions in {len(sampler_stats)} samples, "
