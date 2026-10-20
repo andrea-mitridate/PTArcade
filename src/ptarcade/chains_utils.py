@@ -408,7 +408,8 @@ def chain_filter(
     Raises
     ------
     SystemExit
-        If the provided `model_id` is not an integer equal to 0 or 1.
+        If the provided `model_id` is not an integer equal to 0 or 1, or if two of the selected parameters
+        have the same plotted name.
 
     Notes
     -----
@@ -420,6 +421,7 @@ def chain_filter(
 
         if model_id is None:
             print("No model ID specified, posteriors are plotted for model 0")
+            model_id = 0
             filter_model = chain[:, nmodel_idx] < 0.5
         elif model_id == 0:
             filter_model = chain[:, nmodel_idx] < 0.5
@@ -449,8 +451,23 @@ def chain_filter(
                 and '+' not in x
                 and '-' not in x]
 
+    # in model selection both models can have SMBHB parameters, the null model's 'gw_bhb_*' and
+    # the new-physics model's 'gw_bhb_np_*'; both are plotted as 'gw-bhb-*', so keep only the
+    # selected model's copy
+    if 'nmodel' in list(params):
+        names = list(params)
+        twins = {name: name.replace('gw_bhb_np', 'gw_bhb') for name in names if 'gw_bhb_np' in name}
+        twins = {np_name: null_name for np_name, null_name in twins.items() if null_name in names}
+        drop = set(twins.values()) if model_id == 1 else set(twins)
+        filter_par = [idx for idx in filter_par if names[idx] not in drop]
+
     filtered_par = [par.replace('_','-') for par in params[filter_par]] # type: ignore
     filtered_par = [par.replace('np-', '') if 'gw-bhb-np' in par else par for par in filtered_par]
+
+    if len(set(filtered_par)) < len(filtered_par):
+        err = f"Two of the selected parameters have the same plotted name. I got {filtered_par=}."
+        log.error(err)
+        raise SystemExit
 
     return chain[:, filter_par], filtered_par
 
