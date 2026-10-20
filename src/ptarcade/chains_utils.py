@@ -315,6 +315,11 @@ def import_to_dataframe(
         else:
             chains = [chain[[col for col in chain.columns if "red_noise" not in col]] for chain in chains]
 
+        # downstream code finds a parameter's column by its position in params, so list
+        # every column in chain order; those without a prior range (nmodel, log_posterior)
+        # get NaN, as the text branch gives the sampler columns
+        params = {col: params.get(col, [np.nan, np.nan]) for col in chains[0].columns}
+
         if merge_chains:
             chains = pd.concat(chains, ignore_index=True, sort=False)
 
