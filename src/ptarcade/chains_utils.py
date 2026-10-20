@@ -178,6 +178,12 @@ def import_to_dataframe(
     if isinstance(chains_dir, str):
         chains_dir = Path(chains_dir)
 
+    # discovery mode writes chain_1.feather; fall back to it when no text chains exist
+    if chain_name == "chain_1.txt" and not any(chains_dir.glob("*/chain_1.txt")):
+        feathers = any(chains_dir.glob("*/chain_1.feather")) or (chains_dir / "chain_1.feather").exists()
+        if feathers:
+            chain_name = "chain_1.feather"
+
     chain_ext = Path(chain_name).suffix
 
     if chain_ext == ".txt" or chain_ext == ".gz":
@@ -277,20 +283,41 @@ def import_to_dataframe(
             chains = chains.dropna()
 
     elif chain_ext == ".feather":
-        chains = pd.read_feather(chains_dir / chain_name)
-        with (chains_dir / "priors.json").open("r") as f:
+        # a run directory holds chain_<n>/ subdirectories (next to e.g. pseudo_priors/);
+        # a single chain directory holds the feather file itself
+        if (chains_dir / chain_name).exists():
+            directories = [chains_dir]
+        else:
+            directories = sorted(x for x in chains_dir.iterdir() if (x / chain_name).exists())
+
+        with (directories[0] / "priors.json").open("r") as f:
             params = json.load(f)
+
+        for drct in directories[1:]:
+            with (drct / "priors.json").open("r") as f:
+                temp_par = json.load(f)
+            # compare names only: the SMBHB columns' ranges are NaN, and NaN != NaN
+            if temp_par.keys() != params.keys():
+                err = f"Chains have different parameters. {temp_par=} != {params=}"
+                log.error(err)
+                raise SystemExit
+
+        # discovery chains hold no warmup, so burn_frac is not applied
+        chains = [pd.read_feather(drct / chain_name) for drct in directories]
 
         # this isn't "quicker" right now, but it matches the expected behavior
         if not quick_import:
-            for col in chains.columns:
+            for col in chains[0].columns:
                 if "red_noise_log10_A" in col:
                     params[col] = [-20, -11]
                 elif "red_noise_gamma" in col:
                     params[col] = [0, 7]
         else:
-            usecols = [col for col in chains.columns if "red_noise" not in col]
-            chains = chains[usecols]
+            chains = [chain[[col for col in chain.columns if "red_noise" not in col]] for chain in chains]
+
+        if merge_chains:
+            chains = pd.concat(chains, ignore_index=True, sort=False)
+
         params = pd.DataFrame(params)
 
     print(f"Finished importing   {chains_dir} in {time.time() - start_time:.2f}s")
