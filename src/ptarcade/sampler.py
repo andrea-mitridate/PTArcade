@@ -54,6 +54,7 @@ numpyro.enable_x64(use_x64=True)
 
 # fewest NUTS warmup steps in discovery mode, see do_sample
 MIN_WARMUP = 1000
+MAX_WARMUP = 2500
 
 
 def cpu_model() -> str:
@@ -510,8 +511,9 @@ def do_sample(inputs: dict[str, Any], sampler: PTSampler, x0: NDArray, chain_pat
 
             # NUTS adapts its step size and mass matrix in windows during warmup; fewer than
             # ~1000 warmup steps (Stan's default) leaves them short and the adapted step size
-            # varies a lot from run to run
-            num_warmup = max(N_samples // 4, MIN_WARMUP)
+            # varies a lot from run to run. You do not, however, need an extremely large warmup
+            # size for HMC, so we limit it to 2500.
+            num_warmup = min(MAX_WARMUP, max(N_samples // 4, MIN_WARMUP))
             mcmc = numpyro.infer.MCMC(
                 sampler, num_chains=1, progress_bar=True, num_warmup=num_warmup, num_samples=N_samples
             )
