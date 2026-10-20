@@ -880,6 +880,37 @@ def discovery_builder(
         return likelihood
 
 
+def _cond(
+    pred: jax.Array, true_fun: Callable[..., jax.Array], false_fun: Callable[..., jax.Array], *operands,
+) -> jax.Array:
+    """Compute `jax.lax.cond`, but with a concrete predicate only call the selected branch.
+
+    numpyro runs the model and its gradient eagerly at initialization. There `jax.lax.cond`
+    compiles both branches, and their gradients, into new modules: in model selection,
+    both likelihoods, which for a large HD array takes many minutes. Called directly, the
+    selected branch runs op by op, as the likelihood of a run without model selection
+    does. Traced, e.g. in the sampler's jitted step, this is `jax.lax.cond`.
+
+    Parameters
+    ----------
+    pred : jax.Array
+        A scalar boolean: whether to call `true_fun`.
+    true_fun, false_fun : Callable[..., jax.Array]
+        The branches, called with `operands`.
+    *operands
+        The branches' arguments.
+
+    Returns
+    -------
+    jax.Array
+        The selected branch's output.
+
+    """
+    if isinstance(pred, jax.core.Tracer):
+        return jax.lax.cond(pred, true_fun, false_fun, *operands)
+    return true_fun(*operands) if pred else false_fun(*operands)
+
+
 def _sample_numpyro_site(site_name: str, prior_spec):
     """Register a single numpyro sample site from a translated prior.
 
@@ -1205,7 +1236,7 @@ def discovery_numpyro_model_builder(
         active = nmodel == 1
 
         # only the active model's likelihood is evaluated
-        numpyro.factor("ll", jax.lax.cond(active, model_ll, null_ln_likelihood, params))
+        numpyro.factor("ll", _cond(active, model_ll, null_ln_likelihood, params))
         # the values of the model's own sites; a log-linear prior is sampled as
         # `<par>__lin`. 10**log10(lin) only rounds past the prior's bounds within ~1e-15 of
         # them, i.e. at an unconstrained value |u| > 33, which NUTS does not reach
@@ -1219,9 +1250,7 @@ def discovery_numpyro_model_builder(
         # would still reach NUTS, as 0 * NaN
         numpyro.factor(
             "pseudo",
-            jax.lax.cond(
-                active, lambda: null_log_ratio(null_bhb_values), lambda: model_log_ratio(model_values),
-            ),
+            _cond(active, lambda: null_log_ratio(null_bhb_values), lambda: model_log_ratio(model_values)),
         )
 
     # ranges for the SMBHB parameters, written to priors.json by do_sample. The 2d
