@@ -728,6 +728,16 @@ LinearExpSpec = namedtuple("LinearExpSpec", ["pmin", "pmax"])
 ConstantSpec = namedtuple("ConstantSpec", ["value"])
 
 
+def _bound(x: Any) -> Any:
+    """Get a scalar prior bound as a Python float.
+
+    numpyro takes an interval support whose bounds are not Python numbers, such as the
+    0-d jax arrays of ``jnp.log10(...)``, to depend on other sites, and the Gibbs sampler of
+    model selection refuses such supports. Bounds that are arrays are left as they are.
+    """
+    return float(x) if np.ndim(x) == 0 else x
+
+
 def to_numpyro_prior(param: parameter.Parameter | dist.Distribution) -> dist.Distribution | LinearExpSpec:
     """Translate a PTArcade prior into a numpyro distribution.
 
@@ -769,11 +779,11 @@ def to_numpyro_prior(param: parameter.Parameter | dist.Distribution) -> dist.Dis
     kw = getattr(getattr(param, "prior", None), "func_kwargs", {})
 
     if kind == "uniform":
-        return dist.Uniform(kw["pmin"], kw["pmax"])
+        return dist.Uniform(_bound(kw["pmin"]), _bound(kw["pmax"]))
     if kind == "normal":
         return dist.Normal(kw["mu"], kw["sigma"])
     if kind == "truncnormal":
-        return dist.TruncatedNormal(kw["mu"], kw["sigma"], low=kw["pmin"], high=kw["pmax"])
+        return dist.TruncatedNormal(kw["mu"], kw["sigma"], low=_bound(kw["pmin"]), high=_bound(kw["pmax"]))
     if kind == "gamma":
         # PTArcade-custom Gamma: pdf is ss.gamma(a, scale=1/beta), i.e. shape a, rate beta.
         return dist.Gamma(kw["a"], rate=kw["beta"])
@@ -811,7 +821,7 @@ def numpyro_site(
     if isinstance(spec, ConstantSpec):
         return None
     if isinstance(spec, LinearExpSpec):
-        return f"{name}__lin", dist.Uniform(10.0**spec.pmin, 10.0**spec.pmax)
+        return f"{name}__lin", dist.Uniform(_bound(10.0**spec.pmin), _bound(10.0**spec.pmax))
     return name, spec
 
 
