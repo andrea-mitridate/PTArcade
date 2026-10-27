@@ -3,7 +3,7 @@ site_name: PTArcade
 site_author: Andrea Mitridate and David Wright
 site_description: >-
   Searching for new physics signals in Pulsar Timing Array data has
-  never been easier. 
+  never been easier.
 
 repo_url: https://github.com/andrea-mitridate/PTArcade
 repo_name: andrea-mitridate/PTArcade
@@ -82,7 +82,7 @@ plugins:
       handlers:
         python:
           paths: [src]
-          import:
+          inventories:
           - https://enterprise.readthedocs.io/en/latest/objects.inv
           - https://docs.python.org/3/objects.inv
           - https://numpy.org/doc/stable/objects.inv
@@ -92,8 +92,7 @@ plugins:
           - https://enterprise-extensions.readthedocs.io/en/latest/objects.inv
           - https://pandas.pydata.org/docs/objects.inv
           options:
-            selection:
-              members: yes
+            members: true
             docstring_style: numpy
             docstring_section_style: spacy
             show_if_no_docstring: false
