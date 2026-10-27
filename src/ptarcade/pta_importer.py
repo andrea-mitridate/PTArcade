@@ -12,7 +12,7 @@ from pathlib import Path
 import discovery as ds
 from astropy.config import get_cache_dir
 from astropy.utils.data import download_file, get_readable_fileobj
-from enterprise.pulsar import Pulsar
+from enterprise.pulsar import FeatherPulsar, Pulsar
 from numpy._typing import _ArrayLikeFloat_co as array_like
 
 log = logging.getLogger("rich")
@@ -47,20 +47,25 @@ def get_ephem_conv(par_file: str) -> str:
 def get_pulsars(pta_data: str, filters: list[str] | None = None) -> list[Pulsar]:
     """Get Pulsar data.
 
-    If `pta_data` is a file, attempt to load it as a pickle. If it is a
-    directory, read in the par and tim files within.
+    If `pta_data` is a ``.feather`` file, load it as a single pulsar; any other
+    file is loaded as a pickle. If it is a directory containing ``.feather``
+    files, load each of them as a pulsar; otherwise, read in the par and tim
+    files within.
 
     Parameters
     ----------
     pta_data : str
-        Filename for pickle or directory containing par and tim files.
+        Filename for a feather file or pickle, or a directory containing
+        feather files or par and tim files.
     filters : list[str]
-        Selective filter for par and tim files.
+        Selective filter for feather, par, and tim files, matched against the
+        pulsar name at the start of each filename.
 
     Returns
     -------
     psrs : list[Pulsar]
-        List containing pulsar data from `pta_data`.
+        List containing pulsar data from `pta_data`. Feather files are loaded
+        as [enterprise.pulsar.FeatherPulsar][] objects.
 
     Raises
     ------
@@ -69,10 +74,22 @@ def get_pulsars(pta_data: str, filters: list[str] | None = None) -> list[Pulsar]
 
     """
     if os.path.isfile(pta_data):
+        if pta_data.endswith(".feather"):
+            return [FeatherPulsar.read_feather(pta_data)]
+
         with get_readable_fileobj(pta_data, "binary") as handle:
             psrs = pickle.load(handle)
 
         return psrs
+
+    elif os.path.isdir(pta_data) and glob.glob(os.path.join(pta_data, "*.feather")):
+        featherfiles = sorted(glob.glob(os.path.join(pta_data, "*.feather")))
+
+        # filter
+        if filters is not None:
+            featherfiles = [x for x in featherfiles if Path(x).stem.split("_")[0] in filters]
+
+        return [FeatherPulsar.read_feather(f) for f in featherfiles]
 
     elif os.path.isdir(pta_data):
         parfiles = sorted(glob.glob(os.path.join(pta_data, "*.par")))
@@ -136,6 +153,31 @@ def get_wn(wn_data: str | None) -> dict | None :
         err = f"'wn_data' is not correct. Must be path, file, or None.\nCurrent value is {wn_data=}."
         log.error(err)
         raise SystemExit
+
+
+def get_bundled_noise(psrs: list[Pulsar]) -> dict | None:
+    """Collect the noise parameters bundled with the pulsars.
+
+    Pulsars loaded from feather files carry the noise dictionary stored in the
+    file's metadata as a ``noisedict`` attribute.
+
+    Parameters
+    ----------
+    psrs : list[Pulsar]
+        List of Pulsar objects.
+
+    Returns
+    -------
+    dict | None
+        The noise parameters of all pulsars merged into one `dict`, or `None`
+        if no pulsar carries any.
+
+    """
+    params = {}
+    for psr in psrs:
+        params.update(getattr(psr, "noisedict", None) or {})
+
+    return params or None
 
 
 def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, array_like | None]:
@@ -231,8 +273,19 @@ def pta_data_importer(pta_data: str | dict) -> tuple[list[Pulsar], dict | None, 
 
     elif isinstance(pta_data, dict):
         psrs = get_pulsars(pta_data["psrs_data"])
-        params = get_wn(pta_data["noise_data"])
         emp_dist = pta_data["emp_dist"]
+
+        # Noise parameters bundled with the pulsars are overridden by `noise_data`.
+        params = get_bundled_noise(psrs)
+        noise_data = get_wn(pta_data["noise_data"])
+        if params is not None:
+            msg = f"Using the noise parameters bundled with the pulsars in {pta_data['psrs_data']}"
+            if noise_data is not None:
+                msg += f", overridden by {pta_data['noise_data']}"
+            log.info(msg)
+            params.update(noise_data or {})
+        else:
+            params = noise_data
 
     else:
         err = f"'pta_data' is not correct\n.Current value is {pta_data=}."

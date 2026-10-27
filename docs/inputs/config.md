@@ -19,11 +19,17 @@ file are:
         ```python
         pta_data = {
             "psrs_data": "/path/to/pulsars.pkl",   # pickle file with a list of enterprise Pulsar objects,
+                                                    # a .feather file or a directory of .feather files,
                                                     # or a directory containing .par and .tim files
-            "noise_data": "/path/to/noise.json",   # path to a JSON file containing white noise parameters
+            "noise_data": "/path/to/noise.json",   # path to a JSON file containing white noise parameters, or None
             "emp_dist":   "/path/to/emp_dist.pkl", # path to empirical distribution pickle, or None
         }
         ```
+
+        Feather files are read with ENTERPRISE's `FeatherPulsar`. If they carry a noise
+        dictionary in their metadata, its values fix the white noise and `noise_data` can be
+        `None`. A `noise_data` file overrides bundled values that share its parameter names.
+        This applies to `mode = "discovery"` as well.
 
         **Ceffyl mode** — provide the path to a directory containing pre-computed
         Bayesian periodograms in the format expected by [Ceffyl]:
